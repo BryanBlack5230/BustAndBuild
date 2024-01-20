@@ -15,6 +15,7 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void EnterState()
 	{
+		_context.Animator.SetTrigger(_context.ImmobilisedTriggerCached);
 		ChangeSize(1f);
 	}
 
@@ -25,6 +26,10 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void InitializeSubState(){}
 
+	public override void OnAttackEvent(){}
+
+	public override void OnCollisionEnter2D(Collision2D other){}
+
 	public override void UpdateState()
 	{
 		CheckSwitchStates();
@@ -34,7 +39,7 @@ public class EnemyGrabbedState : EnemyBaseState
 	{
 		_context.transform.localScale = new Vector2(_context.OriginalSize.x * targetSize, 
 													_context.OriginalSize.y * targetSize);
-		// StartCoroutine(LerpChange(targetSize));
+		// StartCoroutine(LerpChange(targetSize));//TODO
 
 		// IEnumerator LerpChange(float targetSize)
 		// {

@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 4312105381847910921}
-  targetOffset: 0
+  targetOffset: -1
 --- !u!1 &272733923379909211
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,7 +405,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3044702576097361201}
-  - component: {fileID: 215787534210417285}
   - component: {fileID: 2735780394412716958}
   - component: {fileID: 6302528602353656286}
   - component: {fileID: 4386608399177738072}
@@ -415,6 +414,7 @@ GameObject:
   - component: {fileID: 2314928516358110169}
   - component: {fileID: 3935869638467397003}
   - component: {fileID: 4661392379140389640}
+  - component: {fileID: 5895219882425859374}
   - component: {fileID: 5237423968443471738}
   m_Layer: 0
   m_Name: Enemy
@@ -439,24 +439,6 @@ Transform:
   - {fileID: 4713693888666817727}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &215787534210417285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2973248807100423282}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1af2e73494b0fa84493a65d42dbe65de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  attackCoolDown: 1
-  attackRange: 1
-  maxSpeed: 1
-  animator: {fileID: 5335013641155973476}
-  _throwPower: 0
 --- !u!114 &2735780394412716958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -695,6 +677,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5895219882425859374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2973248807100423282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7aa7a0e9f880444b718a9d664dda75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackCoolDown: 1
+  attackRange: 1
+  castle: {fileID: 0}
+  _throwPower: 0
 --- !u!114 &5237423968443471738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,7 +904,7 @@ MonoBehaviour:
   - {x: -0.0167489, y: 0.19353569, z: 0}
   m_ShapePathHash: 1127799050
   m_Mesh: {fileID: 0}
-  m_InstanceId: 47364
+  m_InstanceId: -1542
   m_LocalBounds:
     m_Center: {x: -0.011637986, y: 0.68840086, z: 0}
     m_Extent: {x: 0.3884101, y: 0.49486518, z: 0}

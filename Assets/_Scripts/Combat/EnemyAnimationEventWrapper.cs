@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class EnemyAnimationEventWrapper : MonoBehaviour
 {
-	private AIController _parent;
+	private EnemyStateMachine _parent;
 	private void Start() 
 	{
-		_parent = transform.parent.GetComponent<AIController>();
+		_parent = transform.parent.GetComponent<EnemyStateMachine>();
 	}
 	public void Attack()
 	{

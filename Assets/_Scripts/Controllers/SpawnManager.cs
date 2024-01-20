@@ -8,16 +8,18 @@ public class SpawnManager : MonoBehaviour
 {
 
 	[SerializeField] float spawnRate = 1f;
-	[SerializeField] AIController enemyPrefab;
+	[SerializeField] EnemyStateMachine enemyPrefab;
 	[SerializeField] GameObject enemyContainer;
 	[SerializeField] Health target;
 	[SerializeField] float beginWithAmount = 2f;
 	[SerializeField] bool stopSpawning = false;
-	private ObjectPool<AIController> _pool;
+	private ObjectPool<EnemyStateMachine> _pool;
+	private Vector2 _spawnPoint;
 
 	void Start()
 	{
-		_pool = new ObjectPool<AIController>(CreateEnemy, OnTakeEnemyFromPool, OnReturnEnemyToPool, 
+		_spawnPoint = enemyContainer.transform.parent.transform.position;
+		_pool = new ObjectPool<EnemyStateMachine>(CreateEnemy, OnTakeEnemyFromPool, OnReturnEnemyToPool, 
 			enemy => 
 			{
 				Destroy(enemy.gameObject);
@@ -33,35 +35,33 @@ public class SpawnManager : MonoBehaviour
 		_pool.Get();
 	}
 
-	private AIController CreateEnemy()
+	private EnemyStateMachine CreateEnemy()
 	{
 		var enemy = Instantiate(enemyPrefab);
 		enemy.SetPool(_pool);
 		enemy.transform.parent = enemyContainer.transform;
+		enemy.transform.position = RandomPosition();
 		return enemy;
 	}
 
-	private void OnTakeEnemyFromPool(AIController enemy)
+	private void OnTakeEnemyFromPool(EnemyStateMachine enemy)
 	{
 		enemy.gameObject.SetActive(true);
-		enemy.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);
-		enemy.SetTarget(target);
-		enemy.SetAnimator(enemy.transform.GetChild(0).gameObject.GetComponent<Animator>());
-		enemy.Revive();
+		enemy.transform.position = RandomPosition();
 	}
 
-	private void OnReturnEnemyToPool(AIController enemy)
+	private void OnReturnEnemyToPool(EnemyStateMachine enemy)
 	{
 		enemy.gameObject.SetActive(false);
-	}
-
-	private Vector3 RandomPosition()
-	{
-		return new Vector3(-11f, Random.Range(-4f, -1.56f), 0);
 	}
 
 	public void Reset()
 	{
 		_pool.Clear();
+	}
+
+	private Vector3 RandomPosition()
+	{
+		return new Vector3(-11f, Random.Range(-4f, -1.56f), 0);
 	}
 }

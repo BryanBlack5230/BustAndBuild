@@ -14,7 +14,7 @@ public class CursorManagement : MonoBehaviour
     [SerializeField] GameObject cursorPrefab;
     [SerializeField] bool showDummy = false;
 
-    public AIController selectedObject;
+    public EnemyStateMachine selectedObject;
     Vector2 offset;
     Vector2 mousePosition;
     public float maxSpeed = 10;
@@ -62,7 +62,7 @@ public class CursorManagement : MonoBehaviour
             mouseForce = (mousePosition - lastPosition) / Time.deltaTime;
             mouseForce = Vector2.ClampMagnitude(mouseForce, maxSpeed);// don't think that it's needed
             lastPosition = mousePosition;
-            selectedObject.GrabbedBehaviour();
+            selectedObject.IsGrabbed = true;
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -76,7 +76,7 @@ public class CursorManagement : MonoBehaviour
                 if (target == null) return;
                 //print("clicked on " + hit.transform.name);
 
-                selectedObject = target.transform.gameObject.GetComponent<AIController>();
+                selectedObject = target.transform.gameObject.GetComponent<EnemyStateMachine>();
                 offset = new Vector2(selectedObject.transform.position.x - mousePosition.x, selectedObject.transform.position.y - mousePosition.y);
             }
         }
@@ -86,7 +86,9 @@ public class CursorManagement : MonoBehaviour
             ResetCursor();
             if (selectedObject)
             {
-                selectedObject.Throw(mouseForce);
+                selectedObject.IsGrabbed = false;
+                selectedObject.IsFlung = true;
+                selectedObject.ThrowForce = mouseForce;
                 selectedObject = null;
             }
         }

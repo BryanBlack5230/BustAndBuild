@@ -11,6 +11,8 @@ public class EnemyAttackingState : EnemyBaseState
 	{
 		if (_context.IsGrabbed)
 			SwitchState(_factory.Grabbed());
+		else if (_context.IsDead)
+			SwitchState(_factory.Dead());
 		else if (!_context.IsNearTarget)
 			SwitchState(_factory.Walk());
 	}
@@ -20,7 +22,9 @@ public class EnemyAttackingState : EnemyBaseState
 	public override void ExitState()
 	{
 		_context.Animator.ResetTrigger(_context.AttackTriggerCached);
+		_context.Animator.StopPlayback();
 		_timeSinceLastAttack = 0;
+		_context.IsNearTarget = false;
 	}
 
 	public override void InitializeSubState(){}
@@ -44,9 +48,14 @@ public class EnemyAttackingState : EnemyBaseState
 		_timeSinceLastAttack = 0;
 	}
 
-	public void OnAttackEvent()
+	public override void OnAttackEvent()
 	{
 		_context.Target.TakeDamage(_context.AttackDamage);
 		_context.Audio.Play("attack");
+	}
+
+	public override void OnCollisionEnter2D(Collision2D other)
+	{
+		throw new System.NotImplementedException();
 	}
 }

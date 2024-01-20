@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public abstract class EnemyBaseState
 {
 	protected bool _isRootState = false;
@@ -16,6 +18,8 @@ public abstract class EnemyBaseState
 	public abstract void ExitState();
 	public abstract void CheckSwitchStates();
 	public abstract void InitializeSubState();
+	public abstract void OnAttackEvent();
+	public abstract void OnCollisionEnter2D(Collision2D other);
 	public void UpdateStates()
 	{
 		UpdateState();
@@ -39,5 +43,7 @@ public abstract class EnemyBaseState
 	{
 		_currentSubState = newSubState;
 		newSubState.SetSuperState(this);
+		// newSubState.EnterState();
 	}
+
 }

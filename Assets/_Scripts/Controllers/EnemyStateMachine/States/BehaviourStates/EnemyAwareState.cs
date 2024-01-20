@@ -17,8 +17,8 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 
 	public override void EnterState()
 	{
-		InitializeSubState();
 		SelectTarget();
+		InitializeSubState();
 	}
 
 	public override void ExitState()
@@ -27,6 +27,8 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 
 	public override void InitializeSubState()
 	{
+		_currentSubState?.ExitState();
+		
 		if (_context.IsDead)
 			SetSubState(_factory.Dead());
 		else if (_context.IsGrabbed)
@@ -37,11 +39,17 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 			SetSubState(_factory.Attack());
 		else
 			SetSubState(_factory.Walk());
+		
+		_currentSubState.EnterState();
 	}
+
+	public override void OnAttackEvent(){_currentSubState?.OnAttackEvent();}
+
+	public override void OnCollisionEnter2D(Collision2D other){ _currentSubState?.OnCollisionEnter2D(other);}
 
 	public void SelectTarget()
 	{
-		
+		_context.Target = _context.Castle;//TODO
 	}
 
 	public override void UpdateState()

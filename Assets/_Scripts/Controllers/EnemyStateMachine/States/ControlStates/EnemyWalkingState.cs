@@ -11,8 +11,12 @@ public class EnemyWalkingState : EnemyBaseState
 
 	public override void CheckSwitchStates()
 	{
-		if (_context.IsNearTarget)
-			SetSubState(_factory.Attack());
+		if (_context.IsGrabbed)
+			SwitchState(_factory.Grabbed());
+		else if (_context.IsDead)
+			SwitchState(_factory.Dead());
+		else if (_context.IsNearTarget)
+			SwitchState(_factory.Attack());
 	}
 
 	public override void EnterState()
@@ -27,6 +31,7 @@ public class EnemyWalkingState : EnemyBaseState
 
 	public override void UpdateState()
 	{
+		UpdateSizeAndSpeedByDepth();
 		_context.Mover.MoveTo(_targetPos, _currentSpeed);
 		if (CloseToTarget())
 			_context.IsNearTarget = true;
@@ -40,7 +45,7 @@ public class EnemyWalkingState : EnemyBaseState
 		_context.RB.isKinematic = true;
 		_context.RB.angularVelocity = 0f;
 		_context.RB.SetRotation(Quaternion.identity);
-		// transform.rotation = _originalRotation;
+		_context.Animator.SetTrigger(_context.WalkingTriggerCached);
 
 		_targetPos = GetTargetPos(_context.Target.transform);
 		_context.Mover.StartMoveAction(_targetPos, _currentSpeed);
@@ -65,4 +70,10 @@ public class EnemyWalkingState : EnemyBaseState
 
 		_currentSpeed = _context.Mover.MaxSpeed * depthModifier;
 	}
+
+	public override void OnCollisionEnter2D(Collision2D other)
+	{
+	}
+
+	public override void OnAttackEvent(){}
 }

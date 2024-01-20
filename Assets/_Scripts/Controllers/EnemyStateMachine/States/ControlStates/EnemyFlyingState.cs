@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using BB.Resources;
 
 public class EnemyFlyingState : EnemyBaseState
 {
@@ -12,12 +13,15 @@ public class EnemyFlyingState : EnemyBaseState
 	{
 		if (_context.IsGrabbed)
 			SwitchState(_factory.Grabbed());
+		else if (_context.IsDead)
+			SwitchState(_factory.Dead());
 		else if (!_isFlying)
 			SwitchState(_factory.Walk());
 	}
 
 	public override void EnterState()
 	{
+		_context.IsFlung = false;
 		_isFlying = true;
 		Throw(_context.ThrowForce);
 	}
@@ -35,7 +39,7 @@ public class EnemyFlyingState : EnemyBaseState
 
 		if (HasLanded())
 		{
-			// RemoveArrow();
+			// RemoveArrow();//TODO
 			GroundSlam();
 		}
 
@@ -51,7 +55,7 @@ public class EnemyFlyingState : EnemyBaseState
 	{
 		if (_context.RB.velocity.magnitude > 2f)
 		{
-			// SetArrow(_context.RB.velocity, 0.25f);
+			// SetArrow(_context.RB.velocity, 0.25f);//TODO
 		}
 		// else
 		// RemoveArrow();
@@ -100,4 +104,28 @@ public class EnemyFlyingState : EnemyBaseState
 							CoreHelper.groundBottomY, 
 							CoreHelper.groundTopY);
 	}
+
+	public override void OnCollisionEnter2D(Collision2D other) 
+	{
+		if(other.gameObject.CompareTag("Border"))
+		{
+			_context.Health.TakeDamage(_throwPower * 0.5f);
+			_throwPower = 1.3f * _throwPower;
+		} else if (other.gameObject.CompareTag("Enemy"))
+		{
+			if (_context.RB.velocity.magnitude > _context.CollisionDamageThreshold)
+			{
+				Health otherMonster = other.gameObject.GetComponent<Health>();
+				int damage = Mathf.RoundToInt(_throwPower * _context.MonsterCollisionDamageMultiplier);
+				_context.Health.TakeDamage(damage);
+				otherMonster.TakeDamage(damage);
+
+				// Apply impulse force to the other monster
+				Vector2 impulseForce = _context.RB.velocity.normalized * damage * 0.1f; // Adjust the multiplier as needed
+				otherMonster.GetComponent<AIController>().ApplyImpulse(impulseForce);
+			}
+		}
+	}
+
+	public override void OnAttackEvent(){}
 }
