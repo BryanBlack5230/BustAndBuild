@@ -61,6 +61,7 @@ public class TrapeziumGizmoDrawer : MonoBehaviour
 
 	public static void DrawString(string text, Vector3 worldPos, Color? textColor = null, Color? backColor = null)
 	{
+		#if UNITY_EDITOR
 		Handles.BeginGUI();
 		var restoreTextColor = GUI.color;
 		var restoreBackColor = GUI.backgroundColor;
@@ -86,5 +87,6 @@ public class TrapeziumGizmoDrawer : MonoBehaviour
 			GUI.backgroundColor = restoreBackColor;
 		}
 		Handles.EndGUI();
+		#endif
 	}
 }

@@ -40,8 +40,9 @@ public class CursorManagement : MonoBehaviour
 
     void Start()
     {
+        #if UNITY_EDITOR
         Cursor.SetCursor(PlayerSettings.defaultCursor, Vector2.zero, CursorMode.ForceSoftware);
-
+        #endif
         cursorObject = Instantiate(cursorPrefab, Vector3.zero, Quaternion.identity);
         defaultHandSprite = cursorObject.GetComponent<SpriteRenderer>().sprite;
     }
