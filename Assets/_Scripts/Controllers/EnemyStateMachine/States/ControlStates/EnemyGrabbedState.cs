@@ -15,6 +15,7 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void EnterState()
 	{
+		_context.GrabbedPosY = _context.transform.position.y;
 		_context.Animator.SetTrigger(_context.ImmobilisedTriggerCached);
 		ChangeSize(1f);
 	}

@@ -5,51 +5,29 @@ using UnityEngine.Pool;
 using BB.Resources;
 using BB.Movement;
 using BB.Stats;
+using System;
 
 public class EnemyStateMachine : MonoBehaviour
 {
-	EnemyBaseState _currentState;
-	EnemyStateFactory _states;
-	public EnemyBaseState currentState {get { return _currentState;} set {_currentState = value;}}
-	public bool IsNearTarget { get {return _isNearTarget;} set {_isNearTarget = value;}}
-	private Health _target;
 	[SerializeField] float attackCoolDown = 1f;
 	[SerializeField] private float attackRange = 0f;
 	[SerializeField] Health castle;
-	private ObjectPool<EnemyStateMachine> _pool;
-	private Health _health;
-	private Movement _movement;
-	private Rigidbody2D _rb;
-	private EnemyAudio _audio;
-	private Animator _animator;
-	private int _attackCashed = Animator.StringToHash("attack");
-	private int _stopAttackCashed = Animator.StringToHash("stopAttack");
-	private int _immobilizedCashed = Animator.StringToHash("immobilized");
-	private int _walkingCashed = Animator.StringToHash("walking");
-	// private Quaternion _originalRotation; can it be changet to Quaternion.identity;?
-	private float _posYBeforeGrabbed;
-	private Vector3 _originalSize;
-	private float _currentSpeed;
-	private float _timeSinceLastAttack = Mathf.Infinity;
-	private bool _isGrabbed = false;
-	private bool _isFlying = false;
-	public float _throwPower;
-	private int collisionDamageThreshold = 8;
-	private float monsterCollisionDamageMultiplier = 1.5f;
-    private bool _isAware;
-    private bool _isSuspicious;
-    private bool _isNearTarget;
-    private Vector2 _throwForce;
-    private BaseStats _stats;
-
-    public float AttackCooldown { get { return attackCoolDown;}}
+	[SerializeField] Color awareTopColor;
+	[SerializeField] Color awareBotColor;
+	[SerializeField] float awareBlendHeight;
+	[SerializeField] Color suspiciousTopColor;
+	[SerializeField] Color suspiciousBotColor;
+	[SerializeField] float suspiciousBlendHeight;
+	public EnemyBaseState currentState {get { return _currentState;} set {_currentState = value;}}
+	public bool IsNearTarget { get {return _isNearTarget;} set {_isNearTarget = value;}}
+	public float AttackCooldown { get { return attackCoolDown;}}
 	public Animator Animator {get {return _animator;}}
 	public int AttackTriggerCached {get {return _attackCashed;}}
 	public int ImmobilisedTriggerCached {get {return _immobilizedCashed;}}
 	public int WalkingTriggerCached {get {return _walkingCashed;}}
 	public bool IsGrabbed {get {return _isGrabbed;} set {_isGrabbed = value;}}
-	public bool IsAware {get {return _isAware;}}
-	public bool IsSuspicious {get {return _isSuspicious;}}
+	public bool IsAware {get {return _isAware;} set {_isAware = value;}}
+	public bool IsSuspicious {get {return _isSuspicious;} set {_isSuspicious = value;}}
 	public bool IsDead {get {return _health.IsDead();}}
 	public bool IsFlung {get {return _isFlying;} set {_isFlying = value;}}
 	public Rigidbody2D RB {get {return _rb;}}
@@ -65,7 +43,36 @@ public class EnemyStateMachine : MonoBehaviour
 	public float AttackRange {get {return attackRange;}}
 	public float CollisionDamageThreshold {get {return collisionDamageThreshold;}}
 	public float MonsterCollisionDamageMultiplier {get {return monsterCollisionDamageMultiplier;}}
-	public Health Castle {get {return castle;}}
+	public Health Castle {get {return castle;} set {castle = value;}}
+	public Color AwareTopColor {get {return awareTopColor;}}
+	public Color AwareBotColor {get {return awareBotColor;}}
+	public float AwareBlend {get {return awareBlendHeight;}}
+	public Color SuspiciousTopColor {get {return suspiciousTopColor;}}
+	public Color SuspiciousBotColor {get {return suspiciousBotColor;}}
+	public float Suspiciouslend {get {return suspiciousBlendHeight;}}
+	private EnemyBaseState _currentState;
+	private EnemyStateFactory _states;
+	private Health _target;
+	private ObjectPool<EnemyStateMachine> _pool;
+	private Health _health;
+	private Movement _movement;
+	private Rigidbody2D _rb;
+	private EnemyAudio _audio;
+	private BaseStats _stats;
+	private Animator _animator;
+	private int _attackCashed = Animator.StringToHash("attack");
+	private int _immobilizedCashed = Animator.StringToHash("immobilized");
+	private int _walkingCashed = Animator.StringToHash("walking");
+	private float _posYBeforeGrabbed;
+	private Vector3 _originalSize;
+	private bool _isGrabbed = false;
+	private bool _isFlying = false;
+	private bool _isAware;
+	private bool _isSuspicious;
+	private bool _isNearTarget;
+	private Vector2 _throwForce;
+	private int collisionDamageThreshold = 8;
+	private float monsterCollisionDamageMultiplier = 1.5f;
 
 	void Awake()
 	{
@@ -93,14 +100,18 @@ public class EnemyStateMachine : MonoBehaviour
 		_currentState.UpdateStates();
 	}
 
-	private Vector2 TargetPos(Transform target)
-	{
-		return target.CompareTag("Castle") ? CoreHelper.GetWallPos(transform.position.y) : target.position;
-	}
-
 	private void OnCollisionEnter2D(Collision2D other) 
 	{
 		_currentState.OnCollisionEnter2D(other);
+	}
+
+	private void OnTriggerStay2D(Collider2D other) 
+	{
+		if (other.TryGetComponent<EnemyStateMachine>(out EnemyStateMachine enemy))
+		{
+			if (enemy.IsGrabbed)
+				_isSuspicious = true;
+		}
 	}
 
 	public void OnAttackEvent()
@@ -123,6 +134,19 @@ public class EnemyStateMachine : MonoBehaviour
 	public void SetPosition(Vector2 position)
 	{
 		_rb.MovePosition(position);
+	}
+
+	public void ReturnToPool()
+	{
+		_currentState = _states.Dead();
+		_currentState.EnterState();
+	}
+
+	public void Revive()
+	{
+		_currentState?.ExitState();
+		_currentState = _states.Aware();
+		_currentState.EnterState();
 	}
 	
 }

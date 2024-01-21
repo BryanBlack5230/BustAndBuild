@@ -1,5 +1,5 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyDeadState : EnemyBaseState
@@ -9,15 +9,21 @@ public class EnemyDeadState : EnemyBaseState
 	public override void CheckSwitchStates()
 	{
 		if (!_context.IsDead)
-			SetSubState(_factory.Walk());
+			SwitchState(_factory.Aware());
 	}
+
+	public delegate void EnemyDeadEventHandler(Vector2 deathPoint, object sender, EventArgs e);
+    public static event EnemyDeadEventHandler EnemyDeadEvent;
 
 	public override void EnterState()
 	{
+		Vector2 deathPoint = _context.transform.position;
+		OnEnemyDead(deathPoint);
 		_context.Mover.Cancel();
 		_context.RB.isKinematic = true;
 		_context.transform.GetChild(0).gameObject.SetActive(false);
 		_context.Audio.Play("death");
+		ReturnToPool();
 		// StartCoroutine(PlayDeatAudio());//TODO
 		
 		IEnumerator PlayDeatAudio() 
@@ -31,8 +37,11 @@ public class EnemyDeadState : EnemyBaseState
 
 	public override void ExitState()
 	{
+		_context.IsAware = true;
+		_context.IsSuspicious = false;
 		_context.Health.Revive();
 		_context.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);//doubles with lines in SpawnManager
+		_context.GrabbedPosY = _context.transform.position.y;
 		_context.transform.GetChild(0).gameObject.SetActive(true);
 	}
 
@@ -57,6 +66,11 @@ public class EnemyDeadState : EnemyBaseState
 
 	private Vector3 RandomPosition()
 	{
-		return new Vector3(-11f, Random.Range(-4f, -1.56f), 0);
+		return new Vector3(-11f, UnityEngine.Random.Range(-4f, -1.56f), 0);
 	}
+
+	protected virtual void OnEnemyDead(Vector2 deathPoint)
+    {
+        EnemyDeadEvent?.Invoke(deathPoint, this, EventArgs.Empty);
+    }
 }

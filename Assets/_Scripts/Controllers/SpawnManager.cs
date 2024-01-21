@@ -39,6 +39,7 @@ public class SpawnManager : MonoBehaviour
 	{
 		var enemy = Instantiate(enemyPrefab);
 		enemy.SetPool(_pool);
+		enemy.Castle = target;
 		enemy.transform.parent = enemyContainer.transform;
 		enemy.transform.position = RandomPosition();
 		return enemy;
@@ -48,6 +49,7 @@ public class SpawnManager : MonoBehaviour
 	{
 		enemy.gameObject.SetActive(true);
 		enemy.transform.position = RandomPosition();
+		enemy.Revive();
 	}
 
 	private void OnReturnEnemyToPool(EnemyStateMachine enemy)

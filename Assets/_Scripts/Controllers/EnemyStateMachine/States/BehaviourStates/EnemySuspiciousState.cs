@@ -9,6 +9,9 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 	{
 		_isRootState = true;
 	}
+
+
+
 	public override void CheckSwitchStates()
 	{
 		if (_context.IsAware)
@@ -54,6 +57,18 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 
 	public override void UpdateState()
 	{
+		ChangeColor();
+		SelectTarget();
 		CheckSwitchStates();
+	}
+
+	public void ChangeColor()
+	{
+		var mat = _context.transform.GetChild(0)
+							.transform.GetChild(5).GetComponent<Renderer>().material;
+		
+		mat.SetColor("_ColorTop", _context.SuspiciousTopColor);
+		mat.SetColor("_ColorBot", _context.SuspiciousBotColor);
+		mat.SetFloat("_BlendHeight", _context.Suspiciouslend);
 	}
 }

@@ -58,7 +58,7 @@ namespace BB.Resources
 
 			isDead = true;
 			// GetComponent<Animator>().SetTrigger(cashedDeath);
-			GetComponent<ActionScheduler>().CancelCurrentAction();
+			GetComponent<ActionScheduler>()?.CancelCurrentAction();
 			// gameObject.GetComponent<AIController>().StopAllCoroutines();
 			// gameObject.GetComponent<AIController>().ReturnToPool();
 

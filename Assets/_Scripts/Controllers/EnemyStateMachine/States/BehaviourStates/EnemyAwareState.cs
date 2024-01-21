@@ -17,6 +17,7 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 
 	public override void EnterState()
 	{
+		ChangeColor();
 		SelectTarget();
 		InitializeSubState();
 	}
@@ -55,5 +56,15 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 	public override void UpdateState()
 	{
 		CheckSwitchStates();
+	}
+
+	public void ChangeColor()
+	{
+		var mat = _context.transform.GetChild(0)
+							.transform.GetChild(5).GetComponent<Renderer>().material;
+		
+		mat.SetColor("_ColorTop", _context.AwareTopColor);
+		mat.SetColor("_ColorBot", _context.AwareBotColor);
+		mat.SetFloat("_BlendHeight", _context.AwareBlend);
 	}
 }

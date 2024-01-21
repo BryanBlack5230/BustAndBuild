@@ -152,7 +152,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 8e3ecfdb901e9564b947247f5169dfd1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -172,7 +172,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -14
+  m_SortingOrder: 321
   m_Sprite: {fileID: -2046664126473247337, guid: 92f404117ba7e3241b87e4fa2af227b1, type: 3}
   m_Color: {r: 0.73333335, g: 1, b: 0.5647059, a: 1}
   m_FlipX: 0
@@ -324,7 +324,7 @@ Transform:
   m_GameObject: {fileID: 2126574829854633101}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.165, y: 0.705, z: 0}
+  m_LocalPosition: {x: 0.205, y: 0.723, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -395,7 +395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 4312105381847910921}
-  targetOffset: 0
+  targetOffset: 2
 --- !u!1 &2973248807100423282
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,6 +416,7 @@ GameObject:
   - component: {fileID: 4661392379140389640}
   - component: {fileID: 5895219882425859374}
   - component: {fileID: 5237423968443471738}
+  - component: {fileID: 9114588665429837971}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -692,7 +693,12 @@ MonoBehaviour:
   attackCoolDown: 1
   attackRange: 1
   castle: {fileID: 0}
-  _throwPower: 0
+  awareTopColor: {r: 0.73333335, g: 1, b: 0.5647059, a: 0}
+  awareBotColor: {r: 0.42745098, g: 0.6745098, b: 0.27450982, a: 0}
+  awareBlendHeight: 8.14
+  suspiciousTopColor: {r: 1, g: 0.9529412, b: 0.007843138, a: 0}
+  suspiciousBotColor: {r: 0.34901962, g: 0.54901963, b: 0.22352941, a: 0}
+  suspiciousBlendHeight: 6.43
 --- !u!114 &5237423968443471738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -708,6 +714,41 @@ MonoBehaviour:
   attackClip: {fileID: 8300000, guid: 8d51daff97e78ea45ae87388d969e726, type: 3}
   deathClip: {fileID: 8300000, guid: 35632a2a30fe16f479711440d1ba1a53, type: 3}
   deathClipMidfly: {fileID: 8300000, guid: 3d46d5c87736bd84ab59248ce965b4c3, type: 3}
+--- !u!58 &9114588665429837971
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2973248807100423282}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 1.56
 --- !u!1 &3738086846846727312
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,7 +778,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.01999998, y: 0.715, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4713693888666817727}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -806,7 +847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 4312105381847910921}
-  targetOffset: 0
+  targetOffset: 1
 --- !u!1 &4115379723714437764
 GameObject:
   m_ObjectHideFlags: 0
@@ -1130,7 +1171,7 @@ Transform:
   m_GameObject: {fileID: 8451586086936439829}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.165, y: 0.705, z: 0}
+  m_LocalPosition: {x: -0.18, y: 0.705, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1201,7 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 4312105381847910921}
-  targetOffset: 0
+  targetOffset: 2
 --- !u!1 &8656389996550083151
 GameObject:
   m_ObjectHideFlags: 0

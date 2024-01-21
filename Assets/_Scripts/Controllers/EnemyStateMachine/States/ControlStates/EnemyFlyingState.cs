@@ -122,7 +122,7 @@ public class EnemyFlyingState : EnemyBaseState
 
 				// Apply impulse force to the other monster
 				Vector2 impulseForce = _context.RB.velocity.normalized * damage * 0.1f; // Adjust the multiplier as needed
-				otherMonster.GetComponent<AIController>().ApplyImpulse(impulseForce);
+				otherMonster.GetComponent<EnemyStateMachine>().ApplyImpulse(impulseForce);
 			}
 		}
 	}
