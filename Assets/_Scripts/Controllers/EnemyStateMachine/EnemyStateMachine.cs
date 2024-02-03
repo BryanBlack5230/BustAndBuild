@@ -18,6 +18,7 @@ public class EnemyStateMachine : MonoBehaviour
 	[SerializeField] Color suspiciousTopColor;
 	[SerializeField] Color suspiciousBotColor;
 	[SerializeField] float suspiciousBlendHeight;
+	[SerializeField] string UID;
 	public EnemyBaseState currentState {get { return _currentState;} set {_currentState = value;}}
 	public bool IsNearTarget { get {return _isNearTarget;} set {_isNearTarget = value;}}
 	public float AttackCooldown { get { return attackCoolDown;}}
@@ -50,6 +51,8 @@ public class EnemyStateMachine : MonoBehaviour
 	public Color SuspiciousTopColor {get {return suspiciousTopColor;}}
 	public Color SuspiciousBotColor {get {return suspiciousBotColor;}}
 	public float Suspiciouslend {get {return suspiciousBlendHeight;}}
+	public string ID {get {return UID;}}
+	public IsometricObjectHandler IsometricHandler {get {return _ioHandle;}}
 	private EnemyBaseState _currentState;
 	private EnemyStateFactory _states;
 	private Health _target;
@@ -59,6 +62,7 @@ public class EnemyStateMachine : MonoBehaviour
 	private Rigidbody2D _rb;
 	private EnemyAudio _audio;
 	private BaseStats _stats;
+	private IsometricObjectHandler _ioHandle;
 	private Animator _animator;
 	private int _attackCashed = Animator.StringToHash("attack");
 	private int _immobilizedCashed = Animator.StringToHash("immobilized");
@@ -76,12 +80,15 @@ public class EnemyStateMachine : MonoBehaviour
 
 	void Awake()
 	{
+		// UID = System.Guid.NewGuid().ToString();
+		UID = gameObject.GetInstanceID().ToString();
 		_health = GetComponent<Health>();
 		_movement = GetComponent<Movement>();
 		_rb = GetComponent<Rigidbody2D>();
 		_audio = GetComponent<EnemyAudio>();
 		_stats = GetComponent<BaseStats>();
 		_animator = transform.GetChild(0).GetComponent<Animator>();
+		_ioHandle = GetComponent<IsometricObjectHandler>();
 
 		_states = new EnemyStateFactory(this);
 	}

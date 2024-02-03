@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyDeadState : EnemyBaseState
 {
-	public EnemyDeadState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory){}
+	public EnemyDeadState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName){}
 	public override void CheckSwitchStates()
 	{
 		if (!_context.IsDead)
@@ -17,6 +17,7 @@ public class EnemyDeadState : EnemyBaseState
 
 	public override void EnterState()
 	{
+		Debug.Log($"{_debugInfo};is now dead");
 		Vector2 deathPoint = _context.transform.position;
 		OnEnemyDead(deathPoint);
 		_context.Mover.Cancel();
@@ -43,6 +44,7 @@ public class EnemyDeadState : EnemyBaseState
 		_context.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);//doubles with lines in SpawnManager
 		_context.GrabbedPosY = _context.transform.position.y;
 		_context.transform.GetChild(0).gameObject.SetActive(true);
+		Debug.Log($"{_debugInfo};is now alive");
 	}
 
 	public override void InitializeSubState(){}

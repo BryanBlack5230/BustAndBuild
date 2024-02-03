@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 {
-	public EnemySuspiciousState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory)
+	public EnemySuspiciousState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName)
 	{
 		_isRootState = true;
 	}
@@ -15,23 +15,24 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 	public override void CheckSwitchStates()
 	{
 		if (_context.IsAware)
-			SwitchState(_factory.Aware());
+			SwitchState(_factory.Aware(), _currentSubState);
 	}
 
 	public override void EnterState()
 	{
 		SelectTarget();
-		InitializeSubState();
+		if (_currentSubState == null)
+			InitializeSubState();
 	}
 
 	public override void ExitState()
 	{
+		_context.IsSuspicious = false;
+		// _currentSubState?.ExitState();
 	}
 
 	public override void InitializeSubState()
 	{
-		_currentSubState?.ExitState();
-
 		if (_context.IsDead)
 			SetSubState(_factory.Dead());
 		else if (_context.IsGrabbed)
@@ -58,7 +59,6 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 	public override void UpdateState()
 	{
 		ChangeColor();
-		SelectTarget();
 		CheckSwitchStates();
 	}
 

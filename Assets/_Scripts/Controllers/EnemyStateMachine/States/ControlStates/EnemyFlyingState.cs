@@ -5,8 +5,8 @@ using BB.Resources;
 
 public class EnemyFlyingState : EnemyBaseState
 {
-	public EnemyFlyingState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory){}
+	public EnemyFlyingState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName){}
 	private float _throwPower;
 	private bool _isFlying;
 	public override void CheckSwitchStates()
@@ -35,6 +35,7 @@ public class EnemyFlyingState : EnemyBaseState
 
 	public override void UpdateState()
 	{
+		Debug.Log($"{_debugInfo}; flying with throwPower[{_throwPower}]");
 		UpdateDistortion();
 
 		if (HasLanded())
@@ -109,6 +110,7 @@ public class EnemyFlyingState : EnemyBaseState
 	{
 		if(other.gameObject.CompareTag("Border"))
 		{
+			Debug.Log($"{_debugInfo};took[{_throwPower * 0.5f}] damage from collision with [{other.gameObject.name}]");
 			_context.Health.TakeDamage(_throwPower * 0.5f);
 			_throwPower = 1.3f * _throwPower;
 		} else if (other.gameObject.CompareTag("Enemy"))
@@ -123,6 +125,7 @@ public class EnemyFlyingState : EnemyBaseState
 				// Apply impulse force to the other monster
 				Vector2 impulseForce = _context.RB.velocity.normalized * damage * 0.1f; // Adjust the multiplier as needed
 				otherMonster.GetComponent<EnemyStateMachine>().ApplyImpulse(impulseForce);
+				Debug.Log($"{_debugInfo};took[{_throwPower * _context.MonsterCollisionDamageMultiplier}] damage from collision with [{otherMonster.GetComponent<EnemyStateMachine>().ID}]");
 			}
 		}
 	}

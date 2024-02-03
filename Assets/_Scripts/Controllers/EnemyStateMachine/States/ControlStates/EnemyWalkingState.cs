@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyWalkingState : EnemyBaseState
 {
-	public EnemyWalkingState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory){}
+	public EnemyWalkingState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName){}
 	private Vector2 _targetPos;
 	private float _currentSpeed;
 
@@ -33,6 +33,8 @@ public class EnemyWalkingState : EnemyBaseState
 	{
 		UpdateSizeAndSpeedByDepth();
 		_context.Mover.MoveTo(_targetPos, _currentSpeed);
+		Debug.Log($"{_debugInfo};moving towards [{_context.Target.name}, {Vector3.Distance(_targetPos, _context.transform.position)}m] with [{_currentSpeed}/{_context.Mover.MaxSpeed}] speed");
+		if (_currentSpeed > _context.Mover.MaxSpeed) Debug.LogWarning($"{_debugInfo}; exceeding speed limit with [{_currentSpeed}/{_context.Mover.MaxSpeed}] speed");
 		if (CloseToTarget())
 			_context.IsNearTarget = true;
 

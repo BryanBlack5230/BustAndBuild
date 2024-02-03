@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BB.Resources;
@@ -28,6 +29,8 @@ public class SpawnManager : MonoBehaviour
 			30);
 		
 		InvokeRepeating(nameof(Spawn), 0.2f, spawnRate);
+
+		SpawnBatch();
 	}
 
 	private void Spawn()
@@ -38,6 +41,7 @@ public class SpawnManager : MonoBehaviour
 	private EnemyStateMachine CreateEnemy()
 	{
 		var enemy = Instantiate(enemyPrefab);
+		Debug.Log($"[{Timestamp()}];[{enemy.GetInstanceID().ToString()}];was born");
 		enemy.SetPool(_pool);
 		enemy.Castle = target;
 		enemy.transform.parent = enemyContainer.transform;
@@ -47,6 +51,7 @@ public class SpawnManager : MonoBehaviour
 
 	private void OnTakeEnemyFromPool(EnemyStateMachine enemy)
 	{
+		Debug.Log($"[{Timestamp()}];[{enemy.ID}];was revived");
 		enemy.gameObject.SetActive(true);
 		enemy.transform.position = RandomPosition();
 		enemy.Revive();
@@ -54,6 +59,7 @@ public class SpawnManager : MonoBehaviour
 
 	private void OnReturnEnemyToPool(EnemyStateMachine enemy)
 	{
+		Debug.Log($"[{Timestamp()}];[{enemy.ID}];has returned to it's pool");
 		enemy.gameObject.SetActive(false);
 	}
 
@@ -64,6 +70,29 @@ public class SpawnManager : MonoBehaviour
 
 	private Vector3 RandomPosition()
 	{
-		return new Vector3(-11f, Random.Range(-4f, -1.56f), 0);
+		return new Vector3(-11f, UnityEngine.Random.Range(-4f, -1.56f), 0);
+	}
+
+	private string Timestamp()
+	{
+		return DateTime.Now.ToString("HH:mm:ss.fff");
+	}
+
+	private void SpawnBatch()
+	{
+		for (int i = 0; i < beginWithAmount; i++)
+		{
+			Spawn();
+		}
+	}
+
+	private void OnEnable() 
+	{
+		GameStateManager.GameRestarted += SpawnBatch;
+	}
+
+	private void OnDisable() 
+	{
+		GameStateManager.GameRestarted -= SpawnBatch;
 	}
 }

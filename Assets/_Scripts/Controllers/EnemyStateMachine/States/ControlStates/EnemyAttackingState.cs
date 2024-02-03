@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyAttackingState : EnemyBaseState
 {
-	public EnemyAttackingState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory)	{}
+	public EnemyAttackingState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName)	{}
 	private float _timeSinceLastAttack = Mathf.Infinity;
 	public override void CheckSwitchStates()
 	{
@@ -17,7 +17,10 @@ public class EnemyAttackingState : EnemyBaseState
 			SwitchState(_factory.Walk());
 	}
 
-	public override void EnterState(){}
+	public override void EnterState()
+	{
+		_context.IsometricHandler.SetIsometricObjectUpdate(false);
+	}
 
 	public override void ExitState()
 	{
@@ -25,12 +28,14 @@ public class EnemyAttackingState : EnemyBaseState
 		_context.Animator.StopPlayback();
 		_timeSinceLastAttack = 0;
 		_context.IsNearTarget = false;
+		_context.IsometricHandler.SetIsometricObjectUpdate(true);
 	}
 
 	public override void InitializeSubState(){}
 
 	public override void UpdateState()
 	{
+		Debug.Log($"{_debugInfo};attacking [{_context.Target.name}], coolDown[{_timeSinceLastAttack}/{_context.AttackCooldown}]s");
 		_timeSinceLastAttack += Time.deltaTime;
 
 		if (_timeSinceLastAttack > _context.AttackCooldown)
@@ -56,6 +61,5 @@ public class EnemyAttackingState : EnemyBaseState
 
 	public override void OnCollisionEnter2D(Collision2D other)
 	{
-		throw new System.NotImplementedException();
 	}
 }

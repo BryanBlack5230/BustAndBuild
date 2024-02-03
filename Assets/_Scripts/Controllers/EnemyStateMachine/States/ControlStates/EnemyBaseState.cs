@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class EnemyBaseState
@@ -7,12 +8,16 @@ public abstract class EnemyBaseState
 	protected EnemyStateFactory _factory;
 	protected EnemyBaseState _currentSuperState;
 	protected EnemyBaseState _currentSubState;
+	protected string _debugInfo;
+	protected EnemyStates _stateName;
 
-	public EnemyBaseState(EnemyStateMachine currentContext, EnemyStateFactory factory)
+	public EnemyBaseState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
 	{
 		_context = currentContext;
 		_factory = factory;
+		_stateName = stateName;
 	}
+	
 	public abstract void EnterState();
 	public abstract void UpdateState();
 	public abstract void ExitState();
@@ -22,18 +27,25 @@ public abstract class EnemyBaseState
 	public abstract void OnCollisionEnter2D(Collision2D other);
 	public void UpdateStates()
 	{
+		UpdateDebugInfo();
+		Debug.Log($"{_debugInfo};updating {_stateName.ToString()}");
 		UpdateState();
 		if (_currentSubState != null)
 			_currentSubState.UpdateStates();
 	}
-	protected void SwitchState(EnemyBaseState newState)
+	protected void SwitchState(EnemyBaseState newState, EnemyBaseState subState = null)
 	{
+		Debug.Log($"{_debugInfo};switch state to [{newState}]");
 		ExitState();
-		newState.EnterState();
 		if (_isRootState)
+		{
 			_context.currentState = newState;
+			newState.SetSubState(subState);
+		}
 		else if (_currentSuperState != null)
 			_currentSuperState.SetSubState(newState);
+			
+		newState.EnterState();
 	}
 	protected void SetSuperState(EnemyBaseState newSuperState)
 	{
@@ -44,6 +56,14 @@ public abstract class EnemyBaseState
 		_currentSubState = newSubState;
 		newSubState.SetSuperState(this);
 		// newSubState.EnterState();
+	}
+
+	protected void UpdateDebugInfo()
+	{
+		string rootName = (_currentSuperState != null) ? _currentSuperState._stateName.ToString() : _stateName.ToString();
+		string subName = (_currentSubState != null) ? _currentSubState._stateName.ToString() : _stateName.ToString();
+		string timeStamp = DateTime.Now.ToString("HH:mm:ss.fff");
+		_debugInfo = $"[{timeStamp}];[{_context.ID}];[x:{_context.transform.position.x},y:{_context.transform.position.y}];[{rootName}];[{subName}]";
 	}
 
 }

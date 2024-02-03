@@ -11,6 +11,7 @@ namespace BB.Resources
 		public float maxHealth {get; private set;}
 		private int cashedDeath = Animator.StringToHash("die");
 		private bool isDead = false;
+		public bool Killable = true;
 
 		private void Start()
 		{
@@ -25,6 +26,8 @@ namespace BB.Resources
 
 		public void TakeDamage(GameObject instigator, float damage)
 		{
+			if (!Killable) return;
+
 			health = Mathf.Max(health - damage, 0);
 			if (health == 0)
 			{
@@ -35,6 +38,8 @@ namespace BB.Resources
 
 		public void TakeDamage(float damage)
 		{
+			if (!Killable) return;
+			
 			health = Mathf.Max(health - damage, 0);
 			if (health == 0)
 			{

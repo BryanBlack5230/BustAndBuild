@@ -2,12 +2,14 @@ using System;
 using BB.Resources;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameStateManager : MonoBehaviour
 {
 	[SerializeField] GameObject gameOverPopup;
 	[SerializeField] Health castle;
 	[SerializeField] GameObject enemyPool;
+	[SerializeField] TextMeshProUGUI gameSpeed;
 	private TextMeshProUGUI _menuTitle;
 	private bool _isPaused = false;
 
@@ -40,14 +42,17 @@ public class GameStateManager : MonoBehaviour
 		_isPaused = !_isPaused;
 		_menuTitle.text = "Game Paused";
 		gameOverPopup.SetActive(_isPaused);
-		Time.timeScale = (_isPaused) ? 0 : 1;
+		if (_isPaused)
+			SetTimeTo(0f);
+		else
+			SetTimeTo(1f);
 	}
 
 	public void Restart()
 	{
 		_isPaused = false;
 		gameOverPopup.SetActive(false);
-		Time.timeScale = 1;
+		SetTimeTo(1f);
 		castle.Revive();
 		
 		foreach (var enemy in enemyPool.GetComponentsInChildren<EnemyStateMachine>())
@@ -63,5 +68,16 @@ public class GameStateManager : MonoBehaviour
 		UnityEditor.EditorApplication.isPlaying = false;
 		#endif
 		Application.Quit();
+	}
+
+	public void SetTimeTo(float value)
+	{
+		gameSpeed.text = $"{value.ToString("0.0")}x";
+		Time.timeScale = value;
+	}
+
+	public void ChangeCastleInvulnerability(bool value)
+	{
+		castle.Killable = !value;
 	}
 }

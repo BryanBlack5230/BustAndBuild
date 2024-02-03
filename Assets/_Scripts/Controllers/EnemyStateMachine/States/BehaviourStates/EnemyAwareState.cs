@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 {
-	public EnemyAwareState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory)
+	public EnemyAwareState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName)
 	{
 		_isRootState = true;
 	}
 	public override void CheckSwitchStates()
 	{
 		if (_context.IsSuspicious)
-			SwitchState(_factory.Suspicious());
+			SwitchState(_factory.Suspicious(), _currentSubState);
 	}
 
 	public override void EnterState()
@@ -24,6 +24,7 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 
 	public override void ExitState()
 	{
+		_context.IsAware = false;
 	}
 
 	public override void InitializeSubState()

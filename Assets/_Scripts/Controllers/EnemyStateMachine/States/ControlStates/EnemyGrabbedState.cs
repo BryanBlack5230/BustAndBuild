@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyGrabbedState : EnemyBaseState
 {
-	public EnemyGrabbedState(EnemyStateMachine currentContext, EnemyStateFactory factory)
-	: base (currentContext, factory){}
+	public EnemyGrabbedState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
+	: base (currentContext, factory, stateName){}
 
 	public override void CheckSwitchStates()
 	{
@@ -15,6 +15,8 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void EnterState()
 	{
+		_context.RB.angularVelocity = 0f;
+		_context.RB.SetRotation(Quaternion.identity);
 		_context.GrabbedPosY = _context.transform.position.y;
 		_context.Animator.SetTrigger(_context.ImmobilisedTriggerCached);
 		ChangeSize(1f);
@@ -22,7 +24,7 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void ExitState()
 	{
-		ChangeSize(CoreHelper.GetDepthModifier(_context.transform.position.y));
+		// ChangeSize(CoreHelper.GetDepthModifier(_context.transform.position.y));
 	}
 
 	public override void InitializeSubState(){}
@@ -33,6 +35,7 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void UpdateState()
 	{
+		Debug.Log($"{_debugInfo}; i'm grabbed, halp");
 		CheckSwitchStates();
 	}
 
