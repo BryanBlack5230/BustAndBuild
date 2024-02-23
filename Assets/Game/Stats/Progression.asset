@@ -21,7 +21,7 @@ MonoBehaviour:
     - stat: 2
       levels:
       - 50
-      - 20
+      - 70
   - characterClass: 4
     health:
     - 1000

@@ -15,6 +15,7 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void EnterState()
 	{
+		_context.IsOnGround = false;
 		_context.RB.angularVelocity = 0f;
 		_context.RB.SetRotation(Quaternion.identity);
 		_context.GrabbedPosY = _context.transform.position.y;
@@ -31,7 +32,8 @@ public class EnemyGrabbedState : EnemyBaseState
 
 	public override void OnAttackEvent(){}
 
-	public override void OnCollisionEnter2D(Collision2D other){}
+	public override void OnBodyCollision(Collision2D other){}
+	public override void OnIncomingCollisionTrigger(Collider2D other){}
 
 	public override void UpdateState()
 	{

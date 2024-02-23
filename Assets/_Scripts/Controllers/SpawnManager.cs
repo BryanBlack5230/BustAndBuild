@@ -11,7 +11,6 @@ public class SpawnManager : MonoBehaviour
 	[SerializeField] float spawnRate = 1f;
 	[SerializeField] EnemyStateMachine enemyPrefab;
 	[SerializeField] GameObject enemyContainer;
-	[SerializeField] Health target;
 	[SerializeField] float beginWithAmount = 2f;
 	[SerializeField] bool stopSpawning = false;
 	private ObjectPool<EnemyStateMachine> _pool;
@@ -41,25 +40,25 @@ public class SpawnManager : MonoBehaviour
 	private EnemyStateMachine CreateEnemy()
 	{
 		var enemy = Instantiate(enemyPrefab);
-		Debug.Log($"[{Timestamp()}];[{enemy.GetInstanceID().ToString()}];was born");
+		Debug.Log($"[{CoreHelper.TimeNow()}];[{GetType().Name}];[{enemy.GetInstanceID().ToString()}];was born");
 		enemy.SetPool(_pool);
-		enemy.Castle = target;
+		enemy.Castle = ConstantTargets.CastleWall.GetComponent<Health>();
 		enemy.transform.parent = enemyContainer.transform;
-		enemy.transform.position = RandomPosition();
+		enemy.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);
 		return enemy;
 	}
 
 	private void OnTakeEnemyFromPool(EnemyStateMachine enemy)
 	{
-		Debug.Log($"[{Timestamp()}];[{enemy.ID}];was revived");
+		Debug.Log($"[{CoreHelper.TimeNow()}];[{GetType().Name}];[{enemy.ID}];was revived");
 		enemy.gameObject.SetActive(true);
-		enemy.transform.position = RandomPosition();
+		enemy.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);
 		enemy.Revive();
 	}
 
 	private void OnReturnEnemyToPool(EnemyStateMachine enemy)
 	{
-		Debug.Log($"[{Timestamp()}];[{enemy.ID}];has returned to it's pool");
+		Debug.Log($"[{CoreHelper.TimeNow()}];[{GetType().Name}];[{enemy.ID}];has returned to it's pool");
 		enemy.gameObject.SetActive(false);
 	}
 
@@ -70,12 +69,7 @@ public class SpawnManager : MonoBehaviour
 
 	private Vector3 RandomPosition()
 	{
-		return new Vector3(-11f, UnityEngine.Random.Range(-4f, -1.56f), 0);
-	}
-
-	private string Timestamp()
-	{
-		return DateTime.Now.ToString("HH:mm:ss.fff");
+		return new Vector3(ConstantTargets.Sea.position.x + UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-4f, -1.56f), 0);
 	}
 
 	private void SpawnBatch()

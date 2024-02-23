@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -74,6 +75,16 @@ public static class CoreHelper
         float intersectionX = _wallCoords.x + (_wallCoords.y - yCoord) 
 											* Mathf.Tan(_perspectiveAngle * Mathf.Deg2Rad);
         return new Vector2(intersectionX, yCoord);
+	}
+
+	public static Vector2 CursorPos()
+	{
+		return CoreHelper.camera.ScreenToWorldPoint(Input.mousePosition);
+	}
+
+	public static string TimeNow()
+	{
+		return DateTime.Now.ToString("HH:mm:ss.fff");
 	}
 	
 }

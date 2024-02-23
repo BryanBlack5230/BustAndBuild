@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274ef9803cdd748419f7d23ea1e86a15, type: 3}
+  m_Name: BasicMurlockAudio
+  m_EditorClassIdentifier: 
+  deathSounds:
+  - {fileID: 8300000, guid: 35632a2a30fe16f479711440d1ba1a53, type: 3}
+  - {fileID: 8300000, guid: 3d46d5c87736bd84ab59248ce965b4c3, type: 3}
+  hurtSounds:
+  - {fileID: 8300000, guid: 99766e2cbb400f84595f429e95c9636c, type: 3}
+  - {fileID: 8300000, guid: dc5877d4da7111a4580771c088244350, type: 3}
+  - {fileID: 8300000, guid: 7d1475bf96c6a974ba8bfff3c2d270e7, type: 3}
+  - {fileID: 8300000, guid: e0f1af8a835c0ca4197b4944f2e10abe, type: 3}
+  attackSounds:
+  - {fileID: 8300000, guid: 1736ab80e5bbaf84481322b38d01ab70, type: 3}

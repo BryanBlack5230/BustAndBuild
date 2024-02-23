@@ -2,10 +2,13 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class EnemyDeadState : EnemyBaseState
+public class EnemyDeadState : EnemyBaseState, IRootStateEnemy
 {
 	public EnemyDeadState(EnemyStateMachine currentContext, EnemyStateFactory factory, EnemyStates stateName)
-	: base (currentContext, factory, stateName){}
+	: base (currentContext, factory, stateName)
+	{
+		_isRootState = true;
+	}
 	public override void CheckSwitchStates()
 	{
 		if (!_context.IsDead)
@@ -13,27 +16,28 @@ public class EnemyDeadState : EnemyBaseState
 	}
 
 	public delegate void EnemyDeadEventHandler(Vector2 deathPoint, object sender, EventArgs e);
-    public static event EnemyDeadEventHandler EnemyDeadEvent;
+	public static event EnemyDeadEventHandler EnemyDeadEvent;
 
 	public override void EnterState()
 	{
-		Debug.Log($"{_debugInfo};is now dead");
-		Vector2 deathPoint = _context.transform.position;
-		OnEnemyDead(deathPoint);
+		if (!_context.IsReturningToPool)
+		{
+			Debug.Log($"{_debugInfo};is now dead");
+			Vector2 deathPoint = _context.transform.position;
+			SoundManager.Instance.PlaySound(_context.AudioList.GetClip(SoundType.Death));
+			OnEnemyDead(deathPoint);
+		} else
+		{
+			Debug.Log($"{_debugInfo};is returned to pool without dying");
+			_context.IsReturningToPool = false;
+		}
+		
+		
 		_context.Mover.Cancel();
 		_context.RB.isKinematic = true;
 		_context.transform.GetChild(0).gameObject.SetActive(false);
-		_context.Audio.Play("death");
-		ReturnToPool();
-		// StartCoroutine(PlayDeatAudio());//TODO
 		
-		IEnumerator PlayDeatAudio() 
-		{
-			while (_context.Audio.isPlaying){
-				yield return null;
-			}
-			ReturnToPool();
-		}
+		ReturnToPool();
 	}
 
 	public override void ExitState()
@@ -41,7 +45,7 @@ public class EnemyDeadState : EnemyBaseState
 		_context.IsAware = true;
 		_context.IsSuspicious = false;
 		_context.Health.Revive();
-		_context.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);//doubles with lines in SpawnManager
+		// _context.transform.SetPositionAndRotation(RandomPosition(), Quaternion.identity);//doubles with lines in SpawnManager
 		_context.GrabbedPosY = _context.transform.position.y;
 		_context.transform.GetChild(0).gameObject.SetActive(true);
 		Debug.Log($"{_debugInfo};is now alive");
@@ -51,7 +55,8 @@ public class EnemyDeadState : EnemyBaseState
 
 	public override void OnAttackEvent(){}
 
-	public override void OnCollisionEnter2D(Collision2D other){}
+	public override void OnBodyCollision(Collision2D other){}
+	public override void OnIncomingCollisionTrigger(Collider2D other){}
 
 	public override void UpdateState()
 	{
@@ -66,13 +71,11 @@ public class EnemyDeadState : EnemyBaseState
 			_context.Destroy();
 	}
 
-	private Vector3 RandomPosition()
+	protected virtual void OnEnemyDead(Vector2 deathPoint)
 	{
-		return new Vector3(-11f, UnityEngine.Random.Range(-4f, -1.56f), 0);
+		EnemyDeadEvent?.Invoke(deathPoint, this, EventArgs.Empty);
 	}
 
-	protected virtual void OnEnemyDead(Vector2 deathPoint)
-    {
-        EnemyDeadEvent?.Invoke(deathPoint, this, EventArgs.Empty);
-    }
+	public void ChangeColor(){}
+	public void SelectTarget(){}
 }

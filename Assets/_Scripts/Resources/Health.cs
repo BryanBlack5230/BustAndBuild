@@ -15,7 +15,14 @@ namespace BB.Resources
 
 		private void Start()
 		{
-			maxHealth = GetComponent<BaseStats>().GetHealth();
+			
+			if (TryGetComponent<BaseStats>(out var bs))
+				maxHealth = bs.GetHealth();
+			else
+			{
+				Debug.LogWarning($"{gameObject.name}; does not have BaseStats component");
+				maxHealth = health;
+			}
 			health = maxHealth;
 		}
 
@@ -32,7 +39,6 @@ namespace BB.Resources
 			if (health == 0)
 			{
 				Die();
-				//AwardExpirience(instigator);
 			}
 		}
 
@@ -62,11 +68,7 @@ namespace BB.Resources
 			if (isDead) return;
 
 			isDead = true;
-			// GetComponent<Animator>().SetTrigger(cashedDeath);
 			GetComponent<ActionScheduler>()?.CancelCurrentAction();
-			// gameObject.GetComponent<AIController>().StopAllCoroutines();
-			// gameObject.GetComponent<AIController>().ReturnToPool();
-
 		}
 
 		public void Revive()
@@ -74,13 +76,5 @@ namespace BB.Resources
 			isDead = false;
 			health = maxHealth;
 		}
-
-		// private void AwardExpirience(GameObject instigator)
-		// {
-		//     Experience experience = instigator.GetComponent<Experience>();
-		//     if (experience == null) return;
-
-		//     experience.GainExperience(GetComponent<BaseStats>().GetExperienceReward());
-		// }
 	}
 }

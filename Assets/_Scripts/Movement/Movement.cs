@@ -6,52 +6,34 @@ using BB.Core;
 
 namespace BB.Movement
 {
-    public class Movement : MonoBehaviour, IAction
-    {
-        [SerializeField] float maxSpeed = 6f;
-        Health health;
-        bool canMove = true;
+	public class Movement : MonoBehaviour, IAction
+	{
+		[SerializeField] float maxSpeed = 6f;
+		private bool _canMove = true;
+		private ActionScheduler _actionScheduller;
 
-        public float MaxSpeed {get {return maxSpeed;}}
+		public float MaxSpeed {get {return maxSpeed;}}
 
-        private void Start()
-        {
-            health = GetComponent<Health>();
-        }
+		public void StartMoveAction(Vector3 destination, float speedFraction)
+		{
+			_canMove = true;
+			if (_actionScheduller == null ) 
+				_actionScheduller = GetComponent<ActionScheduler>();
+			_actionScheduller.StartAction(this);
+			MoveTo(destination, speedFraction);
+		}
 
-        void Update()
-        {
-            //UpdateAnimator();
-        }
+		public void MoveTo(Vector3 target, float speedFraction)
+		{
+			if (!_canMove) return;
 
-        public void StartMoveAction(Vector3 destination, float speedFraction)
-        {
-            canMove = true;
-            GetComponent<ActionScheduler>().StartAction(this);
-            MoveTo(destination, speedFraction);
-        }
+			var step = Mathf.Clamp01(speedFraction) * maxSpeed * Time.deltaTime;
+			transform.position = Vector3.MoveTowards(transform.position, target, step);
+		}
 
-        public void MoveTo(Vector3 target, float speedFraction)
-        {
-            if (!canMove) return;
-
-            var step = Mathf.Clamp01(speedFraction) * maxSpeed * Time.deltaTime;
-            transform.position = Vector3.MoveTowards(transform.position, target, step);
-        }
-
-        private void UpdateAnimator()
-        {
-            // Vector3 velocity = navMeshAgent.velocity;
-            // Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-
-            // float speed = localVelocity.z;
-
-            // GetComponent<Animator>().SetFloat(cashedSpeed, speed);
-        }
-
-        public void Cancel()
-        {
-            canMove = false;
-        }
-    }
+		public void Cancel()
+		{
+			_canMove = false;
+		}
+	}
 }

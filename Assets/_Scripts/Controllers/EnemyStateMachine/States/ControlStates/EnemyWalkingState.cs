@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using UnityEngine;
 
 public class EnemyWalkingState : EnemyBaseState
@@ -8,6 +9,7 @@ public class EnemyWalkingState : EnemyBaseState
 	: base (currentContext, factory, stateName){}
 	private Vector2 _targetPos;
 	private float _currentSpeed;
+	private float _backwardModifyier = 0.8f;
 
 	public override void CheckSwitchStates()
 	{
@@ -22,6 +24,7 @@ public class EnemyWalkingState : EnemyBaseState
 	public override void EnterState()
 	{
 		((IRootStateEnemy)_currentSuperState).SelectTarget();
+		_context.IsOnGround = true;
 		StartWalking();
 	}
 
@@ -32,7 +35,18 @@ public class EnemyWalkingState : EnemyBaseState
 	public override void UpdateState()
 	{
 		UpdateSizeAndSpeedByDepth();
-		_context.Mover.MoveTo(_targetPos, _currentSpeed);
+		_targetPos = GetTargetPos(_context.Target.transform);
+		var dist = Vector3.Distance(_targetPos, _context.transform.position);
+		Vector2 moveToPos;
+		if (dist <= _context.AttackRange * 0.5f)
+		{
+			moveToPos = _targetPos - Vector2.right * _context.AttackRange * 0.5f;
+			_currentSpeed *= _backwardModifyier;
+		}
+		else
+			moveToPos = _targetPos;
+
+		_context.Mover.MoveTo(moveToPos, _currentSpeed);
 		Debug.Log($"{_debugInfo};moving towards [{_context.Target.name}, {Vector3.Distance(_targetPos, _context.transform.position)}m] with [{_currentSpeed}/{_context.Mover.MaxSpeed}] speed");
 		if (_currentSpeed > _context.Mover.MaxSpeed) Debug.LogWarning($"{_debugInfo}; exceeding speed limit with [{_currentSpeed}/{_context.Mover.MaxSpeed}] speed");
 		if (CloseToTarget())
@@ -60,7 +74,12 @@ public class EnemyWalkingState : EnemyBaseState
 
 	private bool CloseToTarget()
 	{
-		return Vector3.Distance(_targetPos, _context.transform.position) < _context.AttackRange;
+		var dist = Vector3.Distance(_targetPos, _context.transform.position);
+		float epsilon = 0.001f;
+		float plus = _context.AttackRange + epsilon;
+		float minus = _context.AttackRange * 0.5f - epsilon;
+		return (dist <= _context.AttackRange + epsilon) 
+			&& (dist >= _context.AttackRange * 0.5f - epsilon);
 	}
 
 	private void UpdateSizeAndSpeedByDepth()
@@ -68,14 +87,12 @@ public class EnemyWalkingState : EnemyBaseState
 		float depthModifier = CoreHelper.GetDepthModifier(_context.transform.position.y);
 
 		_context.transform.localScale = new Vector2(_context.OriginalSize.x * depthModifier,
-													_context.OriginalSize.y * depthModifier);
+													_context.OriginalSize.y * depthModifier * _context.StateSizeModifier);
 
-		_currentSpeed = _context.Mover.MaxSpeed * depthModifier;
+		_currentSpeed = _context.Mover.MaxSpeed * depthModifier * _context.StateSpeedModifier;
 	}
 
-	public override void OnCollisionEnter2D(Collision2D other)
-	{
-	}
-
+	public override void OnBodyCollision(Collision2D other){}
+	public override void OnIncomingCollisionTrigger(Collider2D other){}
 	public override void OnAttackEvent(){}
 }

@@ -20,6 +20,7 @@ public class EnemyAttackingState : EnemyBaseState
 	public override void EnterState()
 	{
 		_context.IsometricHandler.SetIsometricObjectUpdate(false);
+		_context.IsOnGround = true;
 	}
 
 	public override void ExitState()
@@ -35,15 +36,17 @@ public class EnemyAttackingState : EnemyBaseState
 
 	public override void UpdateState()
 	{
-		Debug.Log($"{_debugInfo};attacking [{_context.Target.name}], coolDown[{_timeSinceLastAttack}/{_context.AttackCooldown}]s");
+		float attackCoolDown = _context.AttackCooldown * _context.StateAttackSpeedCDModifier;
+		Debug.Log($"{_debugInfo};attacking [{_context.Target.name}], coolDown[{_timeSinceLastAttack}/{attackCoolDown}]s");
 		_timeSinceLastAttack += Time.deltaTime;
 
-		if (_timeSinceLastAttack > _context.AttackCooldown)
+		if (_timeSinceLastAttack > attackCoolDown)
 			Attack();
 		
 		if (_context.Target.IsDead())
 			((IRootStateEnemy)_currentSuperState).SelectTarget();
 		
+		CheckDistanceToTarget();
 		CheckSwitchStates();
 	}
 
@@ -56,10 +59,28 @@ public class EnemyAttackingState : EnemyBaseState
 	public override void OnAttackEvent()
 	{
 		_context.Target.TakeDamage(_context.AttackDamage);
-		_context.Audio.Play("attack");
+		var hitPos = CoreHelper.GetWallPos(_context.transform.position.y);
+		var hitParticles = Object.Instantiate(_context.WallHitParticles, hitPos, Quaternion.identity);
+		var ps = hitParticles.GetComponent<ParticleSystem>();
+		Object.Destroy(hitParticles, ps.main.duration);
+		SoundManager.Instance.PlaySound(_context.AudioList.GetClip(SoundType.Attack));
 	}
 
-	public override void OnCollisionEnter2D(Collision2D other)
+	private void CheckDistanceToTarget()
 	{
+		var dist = Vector3.Distance(GetTargetPos(_context.Target.transform), _context.transform.position);
+		float epsilon = 0.001f;
+		bool inRange = (dist <= _context.AttackRange + epsilon) 
+			&& (dist >= _context.AttackRange * 0.5f - epsilon);
+		if (!inRange)
+			_context.IsNearTarget = false;
 	}
+
+	private Vector2 GetTargetPos(Transform target)
+	{
+		return target.CompareTag("Castle") ? CoreHelper.GetWallPos(_context.transform.position.y) : target.position;
+	}
+
+	public override void OnBodyCollision(Collision2D other){}
+	public override void OnIncomingCollisionTrigger(Collider2D other){}
 }
