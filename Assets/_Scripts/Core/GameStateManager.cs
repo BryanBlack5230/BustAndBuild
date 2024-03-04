@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 public class GameStateManager : MonoBehaviour
 {
+	[SerializeField] Resources resources;
 	[SerializeField] GameObject gameOverPopup;
+	[SerializeField] GameObject gameTitle;
 	[SerializeField] Health castle;
 	[SerializeField] GameObject enemyPool;
 	[SerializeField] TextMeshProUGUI gameSpeed;
@@ -20,6 +22,12 @@ public class GameStateManager : MonoBehaviour
 	public static GameStateManager Instance;
 
 	public static event Action GameRestarted;
+	public static event Action OnBrazierDestroyed;
+	private void Awake() 
+	{
+		TimeController.DayStarted += HandleTitle;
+	}
+
 	void Start()
 	{
 		Instance = this;
@@ -57,6 +65,12 @@ public class GameStateManager : MonoBehaviour
 		_menuTitle.text = "Game Over";
 		gameOverPopup.SetActive(true);
 		Time.timeScale = 0;
+	}
+
+	public void BrazierDestroyed()
+	{
+		// GameOver();
+		OnBrazierDestroyed?.Invoke();
 	}
 
 	private void PauseGame()
@@ -114,5 +128,20 @@ public class GameStateManager : MonoBehaviour
 	{
 		Debug.Log($"[{CoreHelper.TimeNow()}];[{GetType().Name}];[castle invulnerability set to {value}]");
 		castle.Killable = !value;
+	}
+
+	private void HandleTitle()
+	{
+		gameTitle.transform.position = gameTitle.transform.position + Vector3.down * 5;
+	}
+
+	public bool UsePearls(int amount)
+	{
+		return resources.pearls.Take(amount);
+	}
+
+	private void OnDestroy() 
+	{
+		TimeController.DayStarted -= HandleTitle;
 	}
 }

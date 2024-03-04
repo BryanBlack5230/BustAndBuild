@@ -300,6 +300,12 @@ MonoBehaviour:
   awareTopColor: {r: 0.73333335, g: 1, b: 0.5647059, a: 0}
   awareBotColor: {r: 0.42745098, g: 0.6745098, b: 0.27450982, a: 0}
   awareBlendHeight: 8.14
+  scaredTopColor1: {r: 0.6156863, g: 0.59607846, b: 0.9529412, a: 0}
+  scaredBotColor1: {r: 0.48235294, g: 0, b: 1, a: 0}
+  scaredBlendHeight1: 3.45
+  scaredTopColor2: {r: 0.5686275, g: 0.6431373, b: 0.99215686, a: 0}
+  scaredBotColor2: {r: 0.48235294, g: 0, b: 1, a: 0}
+  scaredBlendHeight2: 5.56
   suspiciousTopColor: {r: 0, g: 0.16862746, b: 0.99215686, a: 0}
   suspiciousBotColor: {r: 0.6392157, g: 1, b: 0, a: 0}
   suspiciousBlendHeight: 2.39
@@ -645,7 +651,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7700041884635593020
 Transform:
   m_ObjectHideFlags: 0
@@ -1279,6 +1285,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8653719598885068355, guid: 92f404117ba7e3241b87e4fa2af227b1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1734084184468772110}
+    - targetCorrespondingSourceObject: {fileID: -8653719598885068355, guid: 92f404117ba7e3241b87e4fa2af227b1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5962592938379841264}
     - targetCorrespondingSourceObject: {fileID: -2529818590125594414, guid: 92f404117ba7e3241b87e4fa2af227b1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3921762803105588501}
@@ -1376,6 +1385,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d22b75b36cc374f94e486738fd4ad8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5962592938379841264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2368055289083991389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShadowGroup: 0
+  m_ComponentVersion: 1
+  m_HasRenderer: 0
+  m_UseRendererSilhouette: 1
+  m_CastsShadows: 1
+  m_SelfShadows: 0
+  m_ApplyToSortingLayers: d9b0a767000000008fbc05522385d8db950ebd7b
+  m_ShapePath:
+  - {x: -0.20327315, y: 0.23606572, z: 0}
+  - {x: -0.32192415, y: 0.38453808, z: 0}
+  - {x: -0.37349686, y: 0.56190205, z: 0}
+  - {x: -0.39310083, y: 0.7616682, z: 0}
+  - {x: -0.36821905, y: 0.9441355, z: 0}
+  - {x: -0.3073965, y: 1.0602511, z: 0}
+  - {x: -0.17469312, y: 1.1459554, z: 0}
+  - {x: -0.011578254, y: 1.1653079, z: 0}
+  - {x: 0.10177269, y: 1.1514847, z: 0}
+  - {x: 0.17827724, y: 1.0814716, z: 0}
+  - {x: 0.30378276, y: 0.95041245, z: 0}
+  - {x: 0.3541467, y: 0.83289635, z: 0}
+  - {x: 0.36086175, y: 0.6482282, z: 0}
+  - {x: 0.30042502, y: 0.56093067, z: 0}
+  - {x: 0.2735644, y: 0.36954734, z: 0}
+  - {x: 0.19633943, y: 0.22517037, z: 0}
+  - {x: 0.0066174534, y: 0.20677638, z: 0}
+  m_ShapePathHash: 1090674252
+  m_Mesh: {fileID: 0}
+  m_InstanceId: -48412
+  m_LocalBounds:
+    m_Center: {x: -0.01611954, y: 0.68604213, z: 0}
+    m_Extent: {x: 0.3769813, y: 0.47926575, z: 0}
 --- !u!1 &2777324475269539351 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -9101278383748623625, guid: 92f404117ba7e3241b87e4fa2af227b1, type: 3}

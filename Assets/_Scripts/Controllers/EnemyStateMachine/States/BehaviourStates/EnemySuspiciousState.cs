@@ -69,6 +69,12 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 
 	public void SelectTarget()
 	{
+		if (ConstantTargets.Brazier.GetComponent<Health>().IsDead())
+		{
+			_context.Target = ConstantTargets.Sea.GetComponent<Health>();
+			return;
+		}
+		
 		if (_context.transform.position.x > CoreHelper.GetWallPos(_context.transform.position.y).x + 1f || _context.Castle.IsDead())
 			_context.Target = ConstantTargets.Brazier.GetComponent<Health>();
 		else

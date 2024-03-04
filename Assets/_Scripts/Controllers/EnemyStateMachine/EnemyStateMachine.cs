@@ -7,6 +7,7 @@ using BB.Movement;
 using BB.Stats;
 using System;
 using TMPro;
+using BB.Combat;
 
 public class EnemyStateMachine : MonoBehaviour
 {
@@ -41,18 +42,18 @@ public class EnemyStateMachine : MonoBehaviour
 	public int AttackTriggerCached {get {return _attackCashed;}}
 	public int ImmobilisedTriggerCached {get {return _immobilizedCashed;}}
 	public int WalkingTriggerCached {get {return _walkingCashed;}}
-	public bool IsGrabbed {get {return _isGrabbed;} set {_isGrabbed = value;}}
+	public bool IsGrabbed {get {return _grabbable.IsGrabbed;} set {_grabbable.IsGrabbed = value;}}
 	public bool IsAware {get {return _isAware;} set {_isAware = value;}}
 	public bool IsSuspicious {get {return _isSuspicious;} set {_isSuspicious = value;}}
 	public bool IsDead {get {return _health.IsDead();}}
-	public bool IsFlung {get {return _isFlying;} set {_isFlying = value;}}
+	public bool IsFlung {get {return _grabbable.IsFlung;} set {_grabbable.IsFlung = value;}}
 	public Rigidbody2D RB {get {return _rb;}}
 	public Movement Mover {get {return _movement;}}
 	public Health Target {get {return _target;} set {_target = value;}}
 	public Vector2 OriginalSize {get {return _originalSize;} set {_originalSize = value;}}
 	public Health Health {get {return _health;} set {_health = value;}}
 	public float GrabbedPosY {get {return _posYBeforeGrabbed;} set {_posYBeforeGrabbed = value;}}
-	public Vector2 ThrowForce {get {return _throwForce;} set {_throwForce = value;}}
+	public Vector2 ThrowForce {get {return _grabbable.ThrowForce;} set {_grabbable.ThrowForce = value;}}
 	public float AttackDamage {get {return _stats.GetAttackDamage();}}
 	public MobAudio AudioList {get {return audioList;}}
 	public ObjectPool<EnemyStateMachine> Pool {get {return _pool;}}
@@ -94,13 +95,13 @@ public class EnemyStateMachine : MonoBehaviour
 	private int _walkingCashed = Animator.StringToHash("walking");
 	private float _posYBeforeGrabbed;
 	private Vector3 _originalSize;
-	private bool _isGrabbed = false, _isFlying = false, _isAware, _isSuspicious, _isNearTarget;
-	private Vector2 _throwForce;
+	private bool _isAware, _isSuspicious, _isNearTarget;
 	private int collisionDamageThreshold = 8;
 	private float monsterCollisionDamageMultiplier = 1.5f;
 	private Transform _debugText;
 	private TextMeshProUGUI _rootStateText, _subStateText;
 	private Transform _gfx;
+	private Grabbable _grabbable;
 
 	void Awake()
 	{
@@ -119,6 +120,8 @@ public class EnemyStateMachine : MonoBehaviour
 		_gfx =  transform.GetChild(0).transform;
 		Transform body = _gfx.GetChild(11).transform;
 		_bodyCollider = body.GetComponent<Collider2D>();
+		_grabbable = body.GetComponent<Grabbable>();
+		_grabbable.OnSetPosition += SetPosition;
 
 		Pupils.left = _gfx.GetChild(2).transform;
 		Pupils.right = _gfx.GetChild(3).transform;
@@ -126,9 +129,10 @@ public class EnemyStateMachine : MonoBehaviour
 		Eyes.right = _gfx.GetChild(5).transform;
 
 		_states = new EnemyStateFactory(this);
+
 	}
 
-	private void Start() 
+    private void Start() 
 	{
 		_originalSize = transform.localScale;
 		_posYBeforeGrabbed = transform.position.y;
@@ -144,7 +148,8 @@ public class EnemyStateMachine : MonoBehaviour
 		_currentState.UpdateStates();
 		SetDebugText();
 	}
-	private void SetDebugText()
+
+    private void SetDebugText()
 	{
 		_rootStateText.text = $"[{RootState}]";
 		_subStateText.text = $"[{SubState}]";
@@ -226,8 +231,24 @@ public class EnemyStateMachine : MonoBehaviour
 		IsFlung = true;
 		_posYBeforeGrabbed = transform.position.y;
 		Animator.SetTrigger(_immobilizedCashed);
-		_throwForce = throwForce;
+		_grabbable.ThrowForce = throwForce;
 		_currentState.SwitchSubState(_states.Flung());
 	}
-	
+
+	private void OnEnable() {
+		GameStateManager.OnBrazierDestroyed += OnBrazierDestroyed;
+	}
+
+	private void OnDisable() {
+		GameStateManager.OnBrazierDestroyed -= OnBrazierDestroyed;
+	}
+
+	private void OnDestroy() {
+		_grabbable.OnSetPosition -= SetPosition;
+	}
+
+    private void OnBrazierDestroyed()
+    {
+		_target = ConstantTargets.Sea.GetComponent<Health>();
+    }
 }

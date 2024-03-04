@@ -23,9 +23,22 @@ namespace BB.Resources
 			_pearlCount = 0;
 		}
 
+		public bool Take(int amount)
+		{
+			if (_pearlCount - amount < 0) return false;
+
+			_pearlCount -= amount;
+			return true;
+		}
+
+		public void Add(int amount)
+		{
+			_pearlCount += amount;
+		}
+
 		private void HandleEnemyDeath(Vector2 deathPoint, object sender, EventArgs e)
 		{
-			_pearlCount += 100;
+			Add(100);
 		}
 
 		void Update()
