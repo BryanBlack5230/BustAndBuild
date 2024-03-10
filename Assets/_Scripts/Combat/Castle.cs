@@ -14,6 +14,8 @@ public class Castle : MonoBehaviour
 	public void Repair(int repairAmount)
 	{
 		if (GameStateManager.Instance.UsePearls(repairAmount * 5))
+		{
 			_health.Heal(repairAmount);
+		}
 	}
 }

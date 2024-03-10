@@ -8,13 +8,16 @@ using UnityEngine.Pool;
 public class SpawnManager : MonoBehaviour
 {
 
-	[SerializeField] float spawnRate = 1f;
+	[SerializeField] float minSpawnRate = 0.5f;
+	[SerializeField] float maxSpawnRate = 3f;
+	[SerializeField] int minEnemiesPerSpawn = 1;
+	[SerializeField] int maxEnemiesPerSpawn = 5;
 	[SerializeField] EnemyStateMachine enemyPrefab;
 	[SerializeField] GameObject enemyContainer;
 	[SerializeField] float beginWithAmount = 2f;
-	[SerializeField] bool stopSpawning = false;
 	private ObjectPool<EnemyStateMachine> _pool;
 	private Vector2 _spawnPoint;
+	private Coroutine _spawnCoroutine;
 
 	void Start()
 	{
@@ -27,9 +30,9 @@ public class SpawnManager : MonoBehaviour
 			false, 
 			30);
 		
-		InvokeRepeating(nameof(Spawn), 0.2f, spawnRate);
+		// InvokeRepeating(nameof(Spawn), 0.2f, spawnRate);
 
-		SpawnBatch();
+		// SpawnBatch();
 	}
 
 	private void Spawn()
@@ -80,13 +83,51 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
+	public void StartSpawning()
+	{
+		if (_spawnCoroutine == null)
+			_spawnCoroutine = StartCoroutine(SpawnCoroutine());
+	}
+
+	public void StopSpawning()
+	{
+		if (_spawnCoroutine != null)
+		{
+			StopCoroutine(_spawnCoroutine);
+			_spawnCoroutine = null;
+		}
+	}
+
+	public void ChangeSpawnRate(float minSpawn, float maxSpawn, int minEnemies, int maxEnemies)
+	{
+		minSpawnRate = minSpawn;
+		maxSpawnRate = maxSpawn;
+		minEnemiesPerSpawn = minEnemies;
+		maxEnemiesPerSpawn = maxEnemies;
+	}
+
+	private IEnumerator SpawnCoroutine()
+	{
+		while (true)
+		{
+			float randomSpawnRate = UnityEngine.Random.Range(minSpawnRate, maxSpawnRate);
+			yield return new WaitForSeconds(randomSpawnRate);
+
+			int enemyCount = UnityEngine.Random.Range(minEnemiesPerSpawn, maxEnemiesPerSpawn + 1);
+			for (int i = 0; i < enemyCount; i++)
+			{
+				Spawn();
+			}
+		}
+	}
+
 	private void OnEnable() 
 	{
-		GameStateManager.GameRestarted += SpawnBatch;
+		GameStateManager.GameRestarted += StopSpawning;
 	}
 
 	private void OnDisable() 
 	{
-		GameStateManager.GameRestarted -= SpawnBatch;
+		GameStateManager.GameRestarted -= StopSpawning;
 	}
 }

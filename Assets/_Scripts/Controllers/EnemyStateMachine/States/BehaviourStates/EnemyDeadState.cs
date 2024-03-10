@@ -15,7 +15,7 @@ public class EnemyDeadState : EnemyBaseState, IRootStateEnemy
 			SwitchState(_factory.Aware());
 	}
 
-	public delegate void EnemyDeadEventHandler(Vector2 deathPoint, object sender, EventArgs e);
+	public delegate void EnemyDeadEventHandler(Vector2 deathPoint, Vector2 inertia, float grabbedPosY, object sender, EventArgs e);
 	public static event EnemyDeadEventHandler EnemyDeadEvent;
 
 	public override void EnterState()
@@ -73,7 +73,7 @@ public class EnemyDeadState : EnemyBaseState, IRootStateEnemy
 
 	protected virtual void OnEnemyDead(Vector2 deathPoint)
 	{
-		EnemyDeadEvent?.Invoke(deathPoint, this, EventArgs.Empty);
+		EnemyDeadEvent?.Invoke(deathPoint, _context.RB.velocity, _context.GrabbedPosY, this, EventArgs.Empty);
 	}
 
 	public void ChangeColor(){}

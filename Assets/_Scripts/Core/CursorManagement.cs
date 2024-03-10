@@ -55,7 +55,8 @@ public class CursorManagement : MonoBehaviour
 		mousePosition = CoreHelper.CursorPos();
 		cursorObject.transform.position = mousePosition;
 		cursorObject.SetActive(showDummy);
-		// CheckColliders();
+		CheckColliders();
+
 		if (selectedObject)
 			GetForceAndPos();
 		if (Input.GetMouseButtonDown(0))
@@ -137,7 +138,7 @@ public class CursorManagement : MonoBehaviour
 	private void Drop()
 	{
 		selectedObject.IsGrabbed = false;
-		selectedObject.IsFlung = true;
+		selectedObject.ThrowObject(selectedObject.ThrowForce);
 		selectedObject.OnReleaseObject -= OnReleaseObjectCallback;
 		selectedObject = null;
 		if (selectedEnemy)
@@ -149,7 +150,9 @@ public class CursorManagement : MonoBehaviour
 		Collider2D[] hits = Physics2D.OverlapPointAll(mousePosition);
 		foreach (var hit in hits)
 		{
-			Debug.Log("Found " + hit.transform.name);
+			if (hit.CompareTag("Collectable"))
+				hit.transform.GetComponent<CollectiblePearl>().Collect();
+			// Debug.Log("Found " + hit.transform.name);
 		}
 	}
 

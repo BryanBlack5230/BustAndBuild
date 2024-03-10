@@ -73,6 +73,7 @@ public class EnemyStateMachine : MonoBehaviour
 	public GameObject DustExplosionParticles {get {return dustExplosionParticles;}}
 	public GameObject WallHitParticles {get {return wallHitParticles;}}
 	public Collider2D BodyCollider {get {return _bodyCollider;}}
+	public SpriteRenderer Shadow {get {return _shadow;}}
 	public IsometricObjectHandler IsometricHandler {get {return _ioHandle;}}
 	[HideInInspector] public float StateSizeModifier, StateSpeedModifier, StateAttackSpeedCDModifier;
 	[HideInInspector] public Eyes Pupils, Eyes;
@@ -101,6 +102,7 @@ public class EnemyStateMachine : MonoBehaviour
 	private Transform _debugText;
 	private TextMeshProUGUI _rootStateText, _subStateText;
 	private Transform _gfx;
+	private SpriteRenderer _shadow;
 	private Grabbable _grabbable;
 
 	void Awake()
@@ -119,6 +121,7 @@ public class EnemyStateMachine : MonoBehaviour
 
 		_gfx =  transform.GetChild(0).transform;
 		Transform body = _gfx.GetChild(11).transform;
+		_shadow = _gfx.GetChild(0).GetComponent<SpriteRenderer>();
 		_bodyCollider = body.GetComponent<Collider2D>();
 		_grabbable = body.GetComponent<Grabbable>();
 		_grabbable.OnSetPosition += SetPosition;

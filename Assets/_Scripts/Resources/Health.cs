@@ -79,6 +79,7 @@ namespace BB.Resources
 
 		public void Heal(int healAmount)
 		{
+			isDead = false;
 			health = Mathf.Clamp(health + healAmount, 0, maxHealth);
 		}
 	}

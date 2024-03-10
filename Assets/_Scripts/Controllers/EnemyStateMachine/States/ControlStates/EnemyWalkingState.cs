@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using UnityEngine;
+using DG.Tweening;
 
 public class EnemyWalkingState : EnemyBaseState
 {
@@ -25,6 +26,7 @@ public class EnemyWalkingState : EnemyBaseState
 	{
 		((IRootStateEnemy)_currentSuperState).SelectTarget();
 		_context.IsOnGround = true;
+		_context.Shadow.DOFade(0.71f, 0.5f);
 		StartWalking();
 	}
 

@@ -6,16 +6,13 @@ namespace BB.Resources
 {
 	public class Pearls : MonoBehaviour
 	{
-		[SerializeField] GameObject pearlPrefab;
+		[SerializeField] CollectiblePearlManager collectiblePearlManager;
 		private int _pearlCount;
 		private TextMeshProUGUI _pearlCountText;
 		void Start()
 		{
 			_pearlCount = 0;
 			_pearlCountText = transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-
-			EnemyDeadState.EnemyDeadEvent += HandleEnemyDeath;
-			GameStateManager.GameRestarted += ResetScore;
 		}
 
 		private void ResetScore()
@@ -36,9 +33,14 @@ namespace BB.Resources
 			_pearlCount += amount;
 		}
 
-		private void HandleEnemyDeath(Vector2 deathPoint, object sender, EventArgs e)
+		private void Collected()
 		{
-			Add(100);
+			Add(10);
+		}
+
+		private void HandleEnemyDeath(Vector2 deathPoint, Vector2 inertia, float landPosY, object sender, EventArgs e)
+		{
+			collectiblePearlManager.SpawnPearls(UnityEngine.Random.Range(9, 11), inertia, deathPoint, landPosY);
 		}
 
 		void Update()
@@ -46,9 +48,18 @@ namespace BB.Resources
 			_pearlCountText.text = $"x{_pearlCount}";
 		}
 
-		private void OnDestroy()
+		private void OnEnable() 
+		{
+			EnemyDeadState.EnemyDeadEvent += HandleEnemyDeath;
+			GameStateManager.GameRestarted += ResetScore;
+			collectiblePearlManager.OnCollected += Collected;
+		}
+
+		private void OnDisable()
 		{
 			EnemyDeadState.EnemyDeadEvent -= HandleEnemyDeath;
+			GameStateManager.GameRestarted += ResetScore;
+			collectiblePearlManager.OnCollected -= Collected;
 		}
 	}
 }

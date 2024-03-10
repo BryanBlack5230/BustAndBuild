@@ -12,6 +12,7 @@ namespace BB.Combat
 		public float GrabbedPosY {get; set;}
 
 		public event Action<Vector2> OnSetPosition;
+		public event Action<Vector2> OnThrow;
 		public event Action OnReleaseObject;
 		public void SetPosition(Vector2 newPos)
 		{
@@ -21,6 +22,13 @@ namespace BB.Combat
 		public void ReleaseObject()
 		{
 			OnReleaseObject?.Invoke();
+		}
+
+		public void ThrowObject(Vector2 throwForce)
+		{
+			IsGrabbed = false;
+			IsFlung = true;
+			OnThrow?.Invoke(throwForce);
 		}
 	}
 }

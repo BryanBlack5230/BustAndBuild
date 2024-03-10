@@ -34,11 +34,22 @@ public class TimeController : MonoBehaviour
 		_starRenderer = stars.GetComponent<Renderer>();
 
 		GameStateManager.OnBrazierDestroyed += OnBrazierDestroyed;
+		GameStateManager.GameRestarted += Reset;
 	}
 
 	private void OnDestroy() 
 	{
 		GameStateManager.OnBrazierDestroyed -= OnBrazierDestroyed;
+		GameStateManager.GameRestarted -= Reset;
+	}
+
+	private void Reset()
+	{
+		_dayInProgress = false;
+		stars.Play();
+		StopAllCoroutines();
+		_currentTime += TimeSpan.FromMinutes(_minutesInDay - _currentTime.TotalMinutes % _minutesInDay);
+		globalLight.color = sunLight.colorKeys[0].color;
 	}
 
 	public void StartDay()
@@ -75,7 +86,7 @@ public class TimeController : MonoBehaviour
 
 	private void OnBrazierDestroyed()
 	{
-		float beforeEvening = 0.89f;
+		float beforeEvening = 0.95f;
 		if (dayPercent < beforeEvening || !Mathf.Approximately(dayPercent, 0))
 		{
 			_currentTime += TimeSpan.FromMinutes(beforeEvening * _minutesInDay - _currentTime.TotalMinutes % _minutesInDay);

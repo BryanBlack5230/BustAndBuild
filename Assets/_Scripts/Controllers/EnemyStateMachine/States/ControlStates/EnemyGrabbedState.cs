@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class EnemyGrabbedState : EnemyBaseState
 {
@@ -20,6 +21,7 @@ public class EnemyGrabbedState : EnemyBaseState
 		_context.RB.SetRotation(Quaternion.identity);
 		_context.GrabbedPosY = _context.transform.position.y;
 		_context.Animator.SetTrigger(_context.ImmobilisedTriggerCached);
+		_context.Shadow.DOFade(0f, 0.5f);
 		ChangeSize(1f);
 	}
 

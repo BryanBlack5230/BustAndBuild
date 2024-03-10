@@ -15,6 +15,7 @@ public class BrazierController : MonoBehaviour
 	[SerializeField] GameObject brazierLight;
 	[SerializeField] GameObject brazierBase;
 	[SerializeField] GameObject brazierDestroyed;
+	[SerializeField] Transform brazierSocket;
 	private Health _health;
 	private bool _isDead;
 	private bool _isActive;
@@ -22,13 +23,12 @@ public class BrazierController : MonoBehaviour
 	private Light2D _sphereInnerLight;
 	private Vector2 _sphereInSocketPos;
 	private Collider2D _brazierCollider;
+	private bool _gameStarted;
 	private void Awake() 
 	{
-		GameStateManager.GameRestarted += Reset;
-		TimeController.DayEnded += DayEnded;
-		TimeController.DayStarted += DayStarted;
-		_sphereInSocketPos = sphere.transform.position;
-		sphere.transform.position = _sphereInSocketPos + Vector2.left * 5;
+		
+		_sphereInSocketPos = brazierSocket.position;
+		// sphere.transform.position = _sphereInSocketPos + Vector2.left * 5;
 		_brazierCollider = GetComponent<Collider2D>();
 	}
 	private void Start() 
@@ -37,6 +37,7 @@ public class BrazierController : MonoBehaviour
 		_sphereLight = sphere.transform.GetChild(0).GetComponent<Light2D>();
 		_sphereInnerLight = _sphereLight.transform.GetChild(0).GetComponent<Light2D>();
 		Reset();
+		_gameStarted = true;
 	}
 	private void Update() 
 	{
@@ -58,8 +59,14 @@ public class BrazierController : MonoBehaviour
 		}
 	}
 
+	private void OnEnable() 
+	{
+		GameStateManager.GameRestarted += Reset;
+		TimeController.DayEnded += DayEnded;
+		TimeController.DayStarted += DayStarted;
+	}
 
-	private void OnDestroy() 
+	private void OnDisable() 
 	{
 		GameStateManager.GameRestarted -= Reset;
 		TimeController.DayEnded -= DayEnded;
@@ -103,11 +110,15 @@ public class BrazierController : MonoBehaviour
 	private void Reset()
 	{
 		_health.Revive();
+		_isActive = false;
 		_isDead = false;
+		if (_gameStarted) // && !sphere.GetComponent<Renderer>().isVisible
+			sphere.transform.position = (Vector2)brazierSocket.position + Vector2.left * 5f;
 
 		brazierBase.SetActive(true);
 		brazierLight.SetActive(true);
 		brazierDestroyed.SetActive(false);
+		_brazierCollider.enabled = true;
 		SphereInactive();
 	}
 
@@ -133,7 +144,7 @@ public class BrazierController : MonoBehaviour
 		if (other.name == "Sphere")
 		{
 			sphere.GetComponent<Grabbable>().ReleaseObject();
-			sphere.StopMovement();
+			sphere.CallLanded();
 			
 			SphereActive();
 			_isActive = true;
