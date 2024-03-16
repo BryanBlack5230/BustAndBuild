@@ -94,27 +94,6 @@ ScriptedImporter:
     spritePosition: {x: 0, y: 0}
   mosaicSpriteImportData: []
   rigSpriteImportData:
-  - name: BaseDestroyed
-    originalName: 
-    pivot: {x: 0.5, y: 0.5}
-    alignment: 0
-    border: {x: 0, y: 0, z: 0, w: 0}
-    rect:
-      serializedVersion: 2
-      x: 4
-      y: 4
-      width: 498
-      height: 501
-    spriteID: 9e568b5e294f9e440ae573b6a658024e
-    spriteBone: []
-    spriteOutline: []
-    vertices: []
-    spritePhysicsOutline: []
-    indices: 
-    edges: []
-    tessellationDetail: 0
-    uvTransform: {x: 4, y: 4}
-    spritePosition: {x: 10, y: 2}
   - name: Sphere
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -122,7 +101,7 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 867
+      x: 361
       y: 4
       width: 79
       height: 76
@@ -134,8 +113,71 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 867, y: 4}
+    uvTransform: {x: 361, y: 4}
     spritePosition: {x: 205, y: 164}
+  - name: Bar
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 361
+      y: 88
+      width: 77
+      height: 24
+    spriteID: 32bfca8362370f346997ccab837e6eb5
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 361, y: 88}
+    spritePosition: {x: 206, y: 248}
+  - name: Moon
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 361
+      y: 120
+      width: 31
+      height: 34
+    spriteID: 29010f36b2207604d8074e2cdd7b8a9c
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 361, y: 120}
+    spritePosition: {x: 288, y: 224}
+  - name: Sun
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 448
+      y: 4
+      width: 38
+      height: 38
+    spriteID: 33ec6256afa7c734a921e7bf120b56c7
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 448, y: 4}
+    spritePosition: {x: 158, y: 222}
   - name: Light
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -164,7 +206,7 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 510
+      x: 4
       y: 4
       width: 349
       height: 501
@@ -176,7 +218,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 510, y: 4}
+    uvTransform: {x: 4, y: 4}
     spritePosition: {x: 47, y: 4}
   characterData:
     bones: []
@@ -220,15 +262,65 @@ ScriptedImporter:
     layerID: 15
     mosaicPosition: {x: 4, y: 4}
     flatten: 0
-    isImported: 1
-    isVisible: 1
+    isImported: 0
+    isVisible: 0
   - name: Sphere
     spriteName: Sphere
     isGroup: 0
     parentIndex: -1
     spriteID: 4b9ecb45df9243d4e8157bbfc186e265
     layerID: 11
-    mosaicPosition: {x: 867, y: 4}
+    mosaicPosition: {x: 361, y: 4}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: Gradient Fill 1
+    spriteName: 
+    isGroup: 0
+    parentIndex: -1
+    spriteID: b591f1ef015d27845955ff20de27606e
+    layerID: 22
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
+  - name: Bar copy
+    spriteName: 
+    isGroup: 0
+    parentIndex: -1
+    spriteID: ad16ee90483636f40ac782bf31ba32e1
+    layerID: 20
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
+  - name: Bar
+    spriteName: Bar
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 32bfca8362370f346997ccab837e6eb5
+    layerID: 19
+    mosaicPosition: {x: 361, y: 88}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: Moon
+    spriteName: Moon
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 29010f36b2207604d8074e2cdd7b8a9c
+    layerID: 18
+    mosaicPosition: {x: 361, y: 120}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: Sun
+    spriteName: Sun
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 33ec6256afa7c734a921e7bf120b56c7
+    layerID: 17
+    mosaicPosition: {x: 448, y: 4}
     flatten: 0
     isImported: 1
     isVisible: 1
@@ -248,7 +340,7 @@ ScriptedImporter:
     parentIndex: -1
     spriteID: 2750570f0026b294c8217d85a276d532
     layerID: 9
-    mosaicPosition: {x: 510, y: 4}
+    mosaicPosition: {x: 4, y: 4}
     flatten: 0
     isImported: 1
     isVisible: 1

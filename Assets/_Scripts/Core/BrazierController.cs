@@ -4,6 +4,7 @@ using UnityEngine;
 using BB.Resources;
 using UnityEngine.Rendering.Universal;
 using BB.Combat;
+using DG.Tweening;
 
 public class BrazierController : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class BrazierController : MonoBehaviour
 	private Vector2 _sphereInSocketPos;
 	private Collider2D _brazierCollider;
 	private bool _gameStarted;
+	private Tween _sphereFlicker;
 	private void Awake() 
 	{
 		
@@ -38,11 +40,10 @@ public class BrazierController : MonoBehaviour
 		_sphereInnerLight = _sphereLight.transform.GetChild(0).GetComponent<Light2D>();
 		Reset();
 		_gameStarted = true;
+		_sphereFlicker = SpereInnerLightFlicker();
 	}
 	private void Update() 
 	{
-		SpereInnerLightFlicker();
-
 		if (_isActive && (Vector2)sphere.transform.position != _sphereInSocketPos)
 			sphere.transform.SetPositionAndRotation(_sphereInSocketPos, Quaternion.identity);
 
@@ -99,12 +100,19 @@ public class BrazierController : MonoBehaviour
 		_brazierCollider.enabled = true;
 	}
 
-	private void SpereInnerLightFlicker()
+	private Tween SpereInnerLightFlicker()
 	{
-		float flickerAlpha = Random.Range(0.81f, 1f);
-		Color color = _sphereInnerLight.color;
-		color.a = flickerAlpha;
-		_sphereInnerLight.color = color;
+		return DOTween.To(() => _sphereInnerLight.color.a, alpha => {
+			Color color = _sphereInnerLight.color;
+			color.a = alpha;
+			_sphereInnerLight.color = color;
+		}, 1f, 0.3f)
+		.SetEase(Ease.InOutQuad)
+		.SetLoops(-1, LoopType.Yoyo);
+		// float flickerAlpha = Random.Range(0.81f, 1f);
+		// Color color = _sphereInnerLight.color;
+		// color.a = flickerAlpha;
+		// _sphereInnerLight.color = color;
 	}
 
 	private void Reset()
@@ -129,6 +137,8 @@ public class BrazierController : MonoBehaviour
 		sphere.GetComponent<Grabbable>().enabled = false;
 		sphere.GetComponent<Collider2D>().enabled = false;
 		sphere.transform.SetPositionAndRotation(_sphereInSocketPos, Quaternion.identity);
+
+		_sphereFlicker?.Play();
 	}
 
 	private void SphereInactive()
@@ -137,6 +147,8 @@ public class BrazierController : MonoBehaviour
 		_sphereLight.color = inactiveLightColor;
 		sphere.GetComponent<Grabbable>().enabled = true;
 		sphere.GetComponent<Collider2D>().enabled = true;
+
+		_sphereFlicker?.Pause();
 	}
 
 	private void OnTriggerEnter2D(Collider2D other)

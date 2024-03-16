@@ -11,6 +11,7 @@ public class OnBoarding : MonoBehaviour
 	[SerializeField] private Sphere _sphere;
 	[SerializeField] private Color _sphereColor;
 	[SerializeField] private Light2D _brazierLight;
+	[SerializeField] private GameObject _brazierIndicators;
 	[SerializeField] private Transform _hintText;
 	[SerializeField] private float _timeTillHint;
 	[SerializeField] private float _maxDistToBrazier;
@@ -29,9 +30,11 @@ public class OnBoarding : MonoBehaviour
 	private bool _fHintShown;
 	private bool _sHintShown;
 	private bool _tHintShown;
+	private Vector2 _sphereStartPos;
 	private void Awake() 
 	{
 		_globalLight.color = _globalLightGradient.colorKeys[0].color;
+		_sphereStartPos = _sphere.transform.position;
 
 		_firstHint = _hintText.GetChild(0).GetComponent<TextMeshProUGUI>();
 		_secondHint = _hintText.GetChild(1).GetComponent<TextMeshProUGUI>();
@@ -41,11 +44,12 @@ public class OnBoarding : MonoBehaviour
 		_secondHint.gameObject.SetActive(false);
 		_thirdHint.gameObject.SetActive(false);
 		
+		_brazierIndicators.SetActive(false);
 	}
 
 	private void Start() 
 	{
-		Pulsate();
+		_spherePulse = StartPulsating(_sphere.transform.GetChild(0).GetComponent<Light2D>(), 0.2f, 0.3f, _pulseDuration);
 	}
 
 	private void Update() 
@@ -53,6 +57,9 @@ public class OnBoarding : MonoBehaviour
 		if (_finished) return;
 
 		_timeElapsed += Time.deltaTime;
+
+		if (_brazierPulse == null && _sphereStartPos != (Vector2)_sphere.transform.position)
+			_brazierPulse = StartPulsating(_brazierLight, 0.2f, 0.3f, _pulseDuration);
 		
 		if(!_fHintShown && _timeElapsed > _timeTillHint)
 		{
@@ -88,12 +95,6 @@ public class OnBoarding : MonoBehaviour
 		{
 			_globalLight.color = _globalLightGradient.Evaluate(1 - dist / _maxDistToBrazier);
 		}
-	}
-
-	private void Pulsate()
-	{
-		_spherePulse = StartPulsating(_sphere.transform.GetChild(0).GetComponent<Light2D>(), 0.2f, 0.3f, _pulseDuration);
-		_brazierPulse = StartPulsating(_brazierLight, 0.2f, 0.3f, _pulseDuration);
 	}
 
 	public Tween StartPulsating(Light2D light2D, float minAlpha, float maxAlpha, float pulseDuration)
@@ -160,6 +161,8 @@ public class OnBoarding : MonoBehaviour
 	{
 		StopPulsating(_spherePulse);
 		StopPulsating(_brazierPulse);
+
+		_brazierIndicators.SetActive(true);
 
 		_firstHint.DOFade(0f, 1f);
 		_secondHint.DOFade(0f, 1f);
