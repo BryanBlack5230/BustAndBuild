@@ -19,18 +19,7 @@ public class EnemyStateMachine : MonoBehaviour
 	[SerializeField] GameObject deathParticles;
 	[SerializeField] GameObject dustExplosionParticles;
 	[SerializeField] GameObject wallHitParticles;
-	[SerializeField] Color awareTopColor;
-	[SerializeField] Color awareBotColor;
-	[SerializeField] float awareBlendHeight;
-	[SerializeField] Color scaredTopColor1;
-	[SerializeField] Color scaredBotColor1;
-	[SerializeField] float scaredBlendHeight1;
-	[SerializeField] Color scaredTopColor2;
-	[SerializeField] Color scaredBotColor2;
-	[SerializeField] float scaredBlendHeight2;
-	[SerializeField] Color suspiciousTopColor;
-	[SerializeField] Color suspiciousBotColor;
-	[SerializeField] float suspiciousBlendHeight;
+	[SerializeField] ColorScheme colorScheme;
 	[SerializeField] string UID;
 	[SerializeField] public string RootState;
 	[SerializeField] public string SubState;
@@ -61,12 +50,7 @@ public class EnemyStateMachine : MonoBehaviour
 	public float CollisionDamageThreshold {get {return collisionDamageThreshold;}}
 	public float MonsterCollisionDamageMultiplier {get {return monsterCollisionDamageMultiplier;}}
 	public Health Castle {get {return castle;} set {castle = value;}}
-	public Color AwareTopColor {get {return awareTopColor;}}
-	public Color AwareBotColor {get {return awareBotColor;}}
-	public float AwareBlend {get {return awareBlendHeight;}}
-	public Color SuspiciousTopColor {get {return suspiciousTopColor;}}
-	public Color SuspiciousBotColor {get {return suspiciousBotColor;}}
-	public float Suspiciouslend {get {return suspiciousBlendHeight;}}
+	public ColorScheme ColorScheme {get {return colorScheme;}}
 	public string ID {get {return UID;}}
 	public GameObject HitParticles {get {return hitParticles;}}
 	public GameObject DeathParticles {get {return deathParticles;}}
@@ -75,6 +59,7 @@ public class EnemyStateMachine : MonoBehaviour
 	public Collider2D BodyCollider {get {return _bodyCollider;}}
 	public SpriteRenderer Shadow {get {return _shadow;}}
 	public IsometricObjectHandler IsometricHandler {get {return _ioHandle;}}
+	public SecondOrderImitation SecondOrderAnimation {get {return _secondOrderImitation;}}
 	[HideInInspector] public float StateSizeModifier, StateSpeedModifier, StateAttackSpeedCDModifier;
 	[HideInInspector] public Eyes Pupils, Eyes;
 	[HideInInspector] public bool IsReturningToPool, IsOnGround;
@@ -104,6 +89,7 @@ public class EnemyStateMachine : MonoBehaviour
 	private Transform _gfx;
 	private SpriteRenderer _shadow;
 	private Grabbable _grabbable;
+	private SecondOrderImitation _secondOrderImitation;
 
 	void Awake()
 	{
@@ -112,30 +98,34 @@ public class EnemyStateMachine : MonoBehaviour
 		_movement = GetComponent<Movement>();
 		_rb = GetComponent<Rigidbody2D>();
 		_stats = GetComponent<BaseStats>();
-		_animator = transform.GetChild(0).GetComponent<Animator>();
+		// _animator = transform.GetChild(0).GetComponent<Animator>();
 		_ioHandle = GetComponent<IsometricObjectHandler>();
-		_debugText = transform.GetChild(1).transform;
+
+		_gfx =  transform.GetChild(0);
+		Transform vfx =  transform.GetChild(1);
+		_debugText = transform.GetChild(2);
+
 		_debugText.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"[{UID}]";
 		_rootStateText = _debugText.GetChild(1).GetComponent<TextMeshProUGUI>();
 		_subStateText = _debugText.GetChild(2).GetComponent<TextMeshProUGUI>();
 
-		_gfx =  transform.GetChild(0).transform;
-		Transform body = _gfx.GetChild(11).transform;
-		_shadow = _gfx.GetChild(0).GetComponent<SpriteRenderer>();
+		_shadow = vfx.GetChild(0).GetComponent<SpriteRenderer>();
+
+		Transform body = _gfx.GetChild(4);
 		_bodyCollider = body.GetComponent<Collider2D>();
 		_grabbable = body.GetComponent<Grabbable>();
-		_grabbable.OnSetPosition += SetPosition;
-
-		Pupils.left = _gfx.GetChild(2).transform;
-		Pupils.right = _gfx.GetChild(3).transform;
-		Eyes.left = _gfx.GetChild(4).transform;
-		Eyes.right = _gfx.GetChild(5).transform;
+		_secondOrderImitation = body.GetChild(1).GetComponent<SecondOrderImitation>();
+		Transform face = body.GetChild(2);
+		
+		Pupils.left = face.GetChild(0);
+		Pupils.right = face.GetChild(1);
+		Eyes.left = face.GetChild(2);
+		Eyes.right = face.GetChild(3);
 
 		_states = new EnemyStateFactory(this);
-
 	}
 
-    private void Start() 
+	private void Start() 
 	{
 		_originalSize = transform.localScale;
 		_posYBeforeGrabbed = transform.position.y;
@@ -152,7 +142,7 @@ public class EnemyStateMachine : MonoBehaviour
 		SetDebugText();
 	}
 
-    private void SetDebugText()
+	private void SetDebugText()
 	{
 		_rootStateText.text = $"[{RootState}]";
 		_subStateText.text = $"[{SubState}]";
@@ -240,18 +230,16 @@ public class EnemyStateMachine : MonoBehaviour
 
 	private void OnEnable() {
 		GameStateManager.OnBrazierDestroyed += OnBrazierDestroyed;
+		_grabbable.OnSetPosition += SetPosition;
 	}
 
 	private void OnDisable() {
 		GameStateManager.OnBrazierDestroyed -= OnBrazierDestroyed;
-	}
-
-	private void OnDestroy() {
 		_grabbable.OnSetPosition -= SetPosition;
 	}
 
-    private void OnBrazierDestroyed()
-    {
+	private void OnBrazierDestroyed()
+	{
 		_target = ConstantTargets.Sea.GetComponent<Health>();
-    }
+	}
 }

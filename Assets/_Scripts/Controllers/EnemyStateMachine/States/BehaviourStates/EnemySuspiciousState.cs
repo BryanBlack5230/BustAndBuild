@@ -90,18 +90,19 @@ public class EnemySuspiciousState : EnemyBaseState, IRootStateEnemy
 
 	public void ChangeColor()
 	{
-		var mat = _context.transform.GetChild(0)
-							.transform.GetChild(11).GetComponent<Renderer>().material;
+		var mat = _context.transform.GetChild(0) // GFX
+					.GetChild(1) // Body
+					.GetComponent<Renderer>().material;
 		
 		if (mat == null)
 			Debug.LogError($"{_debugInfo};[material is not set]");
 
-		mat.SetColor("_ColorTop", _context.SuspiciousTopColor);
-		mat.SetColor("_ColorBot", _context.SuspiciousBotColor);
-		mat.SetFloat("_BlendHeight", _context.Suspiciouslend);
+		mat.SetColor("_ColorTop", _context.ColorScheme.suspicious.topColor);
+		mat.SetColor("_ColorBot", _context.ColorScheme.suspicious.botColor);
+		mat.SetFloat("_BlendHeight", _context.ColorScheme.suspicious.blendHeight);
 
-		_context.ColorStart = _context.SuspiciousTopColor;
-		_context.ColorEnd = _context.SuspiciousBotColor;
+		_context.ColorStart = _context.ColorScheme.suspicious.topColor;
+		_context.ColorEnd = _context.ColorScheme.suspicious.botColor;
 	}
 
 	private void ChangePupilSize(float size)

@@ -22,7 +22,8 @@ public class EnemyFlyingState : EnemyBaseState
 
 	public override void EnterState()
 	{
-		_trail = _context.transform.GetChild(0).transform.GetChild(1).gameObject.GetComponent<TrailRenderer>();
+		_trail = _context.transform.GetChild(1)//VFX
+				.transform.GetChild(1).GetComponent<TrailRenderer>();
 		_context.IsFlung = false;
 		_isFlying = true;
 		_context.IsOnGround = false;

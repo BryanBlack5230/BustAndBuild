@@ -297,6 +297,7 @@ MonoBehaviour:
   deathParticles: {fileID: 4241258448697504677, guid: 7770cf43ef16e7440b240029d09599c0, type: 3}
   dustExplosionParticles: {fileID: 6437522351888795291, guid: 76e1ea37bf87ec74cbe70545f153a9d1, type: 3}
   wallHitParticles: {fileID: 6068447340251354219, guid: cf2c357f5fe2dac4c84a620785097039, type: 3}
+  colorScheme: {fileID: 11400000, guid: 2d6b0bce97a5f14478df1465432c7652, type: 2}
   awareTopColor: {r: 0.73333335, g: 1, b: 0.5647059, a: 0}
   awareBotColor: {r: 0.42745098, g: 0.6745098, b: 0.27450982, a: 0}
   awareBlendHeight: 8.14

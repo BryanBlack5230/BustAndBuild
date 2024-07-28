@@ -8,7 +8,9 @@ public class BodyCollisionWrapper : MonoBehaviour
 	private void OnCollisionEnter2D(Collision2D other) 
 	{
 		if (_parent == null)
-			_parent = transform.parent.transform.parent.GetComponent<EnemyStateMachine>();
+			_parent = transform.parent//GFX
+						.transform.parent//Enemy
+						.GetComponent<EnemyStateMachine>();
 
 		if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("Border"))
 			_parent.OnBodyCollision(other);

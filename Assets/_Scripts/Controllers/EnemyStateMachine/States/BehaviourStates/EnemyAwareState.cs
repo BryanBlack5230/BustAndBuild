@@ -85,18 +85,19 @@ public class EnemyAwareState : EnemyBaseState, IRootStateEnemy
 
 	public void ChangeColor()
 	{
-		var mat = _context.transform.GetChild(0)
-							.transform.GetChild(11).GetComponent<Renderer>().material;
+		var mat = _context.transform.GetChild(0) // GFX
+					.GetChild(1) // Body
+					.GetComponent<Renderer>().material;
 		
 		if (mat == null)
 			Debug.LogError($"{_debugInfo};[material is not set]");
 		
-		mat.SetColor("_ColorTop", _context.AwareTopColor);
-		mat.SetColor("_ColorBot", _context.AwareBotColor);
-		mat.SetFloat("_BlendHeight", _context.AwareBlend);
+		mat.SetColor("_ColorTop", _context.ColorScheme.aware.topColor);
+		mat.SetColor("_ColorBot", _context.ColorScheme.aware.botColor);
+		mat.SetFloat("_BlendHeight", _context.ColorScheme.aware.blendHeight);
 
-		_context.ColorStart = _context.AwareTopColor;
-		_context.ColorEnd = _context.AwareBotColor;
+		_context.ColorStart = _context.ColorScheme.aware.topColor;
+		_context.ColorEnd = _context.ColorScheme.aware.botColor;
 	}
 
 	private void GetEyeShape()

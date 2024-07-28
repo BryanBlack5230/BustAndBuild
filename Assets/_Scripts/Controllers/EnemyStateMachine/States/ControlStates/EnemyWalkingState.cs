@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class EnemyWalkingState : EnemyBaseState
 {
@@ -11,6 +12,7 @@ public class EnemyWalkingState : EnemyBaseState
 	private Vector2 _targetPos;
 	private float _currentSpeed;
 	private float _backwardModifyier = 0.8f;
+	private float _currentYPos;
 
 	public override void CheckSwitchStates()
 	{
@@ -27,6 +29,9 @@ public class EnemyWalkingState : EnemyBaseState
 		((IRootStateEnemy)_currentSuperState).SelectTarget();
 		_context.IsOnGround = true;
 		_context.Shadow.DOFade(0.71f, 0.5f);
+		_currentYPos = _context.transform.position.y;
+		UpdateSizeAndSpeedByDepth();
+		_context.SecondOrderAnimation.UpdateBoneToAnchorDistance();
 		StartWalking();
 	}
 
@@ -36,13 +41,18 @@ public class EnemyWalkingState : EnemyBaseState
 
 	public override void UpdateState()
 	{
-		UpdateSizeAndSpeedByDepth();
+		if (DepthChanged())
+		{
+			UpdateSizeAndSpeedByDepth();
+			_context.SecondOrderAnimation.UpdateBoneToAnchorDistance();
+		}
+
 		_targetPos = GetTargetPos(_context.Target.transform);
 		var dist = Vector3.Distance(_targetPos, _context.transform.position);
 		Vector2 moveToPos;
 		if (dist <= _context.AttackRange * 0.5f)
 		{
-			moveToPos = _targetPos - Vector2.right * _context.AttackRange * 0.5f;
+			moveToPos = _targetPos - _context.AttackRange * 0.5f * Vector2.right;
 			_currentSpeed *= _backwardModifyier;
 		}
 		else
@@ -57,13 +67,21 @@ public class EnemyWalkingState : EnemyBaseState
 		CheckSwitchStates();
 	}
 
-	private void StartWalking()
+    private bool DepthChanged()
+    {
+		if (_currentYPos == _context.transform.position.y) return false;
+
+		_currentYPos = _context.transform.position.y;
+		return true;
+    }
+
+    private void StartWalking()
 	{
 		_context.RB.velocity = Vector2.zero;
 		_context.RB.isKinematic = true;
 		_context.RB.angularVelocity = 0f;
 		_context.RB.SetRotation(Quaternion.identity);
-		_context.Animator.SetTrigger(_context.WalkingTriggerCached);
+		// _context.Animator.SetTrigger(_context.WalkingTriggerCached);
 
 		_targetPos = GetTargetPos(_context.Target.transform);
 		_context.Mover.StartMoveAction(_targetPos, _currentSpeed);
@@ -92,6 +110,20 @@ public class EnemyWalkingState : EnemyBaseState
 													_context.OriginalSize.y * depthModifier * _context.StateSizeModifier);
 
 		_currentSpeed = _context.Mover.MaxSpeed * depthModifier * _context.StateSpeedModifier;
+	}
+
+	private void WalkingAnimation()
+	{
+		float bobbingHeight = 0.2f;
+		float bobbingSpeed = 1f;
+		Sequence _subStateSequence = DOTween.Sequence();
+        float maxYScale = 1f;
+        float minYScale = 1f * (1 - bobbingHeight);
+
+        // _subStateSequence
+        //     .Append(body.DOScaleY(minYScale, bobbingSpeed).SetEase(Ease.InOutQuad))
+        //     .Append(body.DOScaleY(maxYScale, bobbingSpeed).SetEase(Ease.InOutQuad))
+        //     .SetLoops(-1, LoopType.Yoyo);
 	}
 
 	public override void OnBodyCollision(Collision2D other){}

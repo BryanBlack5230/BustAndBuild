@@ -25,8 +25,8 @@ public class EnemyAttackingState : EnemyBaseState
 
 	public override void ExitState()
 	{
-		_context.Animator.ResetTrigger(_context.AttackTriggerCached);
-		_context.Animator.StopPlayback();
+		// _context.Animator.ResetTrigger(_context.AttackTriggerCached);
+		// _context.Animator.StopPlayback();
 		_timeSinceLastAttack = 0;
 		_context.IsNearTarget = false;
 		_context.IsometricHandler.SetIsometricObjectUpdate(true);
@@ -52,7 +52,7 @@ public class EnemyAttackingState : EnemyBaseState
 
 	private void Attack()
 	{
-		_context.Animator.SetTrigger(_context.AttackTriggerCached);
+		// _context.Animator.SetTrigger(_context.AttackTriggerCached);
 		_timeSinceLastAttack = 0;
 	}
 
