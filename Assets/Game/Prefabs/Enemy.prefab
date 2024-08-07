@@ -298,18 +298,6 @@ MonoBehaviour:
   dustExplosionParticles: {fileID: 6437522351888795291, guid: 76e1ea37bf87ec74cbe70545f153a9d1, type: 3}
   wallHitParticles: {fileID: 6068447340251354219, guid: cf2c357f5fe2dac4c84a620785097039, type: 3}
   colorScheme: {fileID: 11400000, guid: 2d6b0bce97a5f14478df1465432c7652, type: 2}
-  awareTopColor: {r: 0.73333335, g: 1, b: 0.5647059, a: 0}
-  awareBotColor: {r: 0.42745098, g: 0.6745098, b: 0.27450982, a: 0}
-  awareBlendHeight: 8.14
-  scaredTopColor1: {r: 0.6156863, g: 0.59607846, b: 0.9529412, a: 0}
-  scaredBotColor1: {r: 0.48235294, g: 0, b: 1, a: 0}
-  scaredBlendHeight1: 3.45
-  scaredTopColor2: {r: 0.5686275, g: 0.6431373, b: 0.99215686, a: 0}
-  scaredBotColor2: {r: 0.48235294, g: 0, b: 1, a: 0}
-  scaredBlendHeight2: 5.56
-  suspiciousTopColor: {r: 0, g: 0.16862746, b: 0.99215686, a: 0}
-  suspiciousBotColor: {r: 0.6392157, g: 1, b: 0, a: 0}
-  suspiciousBlendHeight: 2.39
   UID: 
   RootState: 
   SubState: 
@@ -850,7 +838,7 @@ TrailRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: 0
+      m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 3
@@ -1425,7 +1413,7 @@ MonoBehaviour:
   - {x: 0.0066174534, y: 0.20677638, z: 0}
   m_ShapePathHash: 1090674252
   m_Mesh: {fileID: 0}
-  m_InstanceId: 149784
+  m_InstanceId: 46856
   m_LocalBounds:
     m_Center: {x: -0.01611954, y: 0.68604213, z: 0}
     m_Extent: {x: 0.3769813, y: 0.47926575, z: 0}

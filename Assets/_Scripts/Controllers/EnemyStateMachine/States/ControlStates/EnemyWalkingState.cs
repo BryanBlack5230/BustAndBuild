@@ -31,7 +31,6 @@ public class EnemyWalkingState : EnemyBaseState
 		_context.Shadow.DOFade(0.71f, 0.5f);
 		_currentYPos = _context.transform.position.y;
 		UpdateSizeAndSpeedByDepth();
-		_context.SecondOrderAnimation.UpdateBoneToAnchorDistance();
 		StartWalking();
 	}
 
@@ -44,7 +43,6 @@ public class EnemyWalkingState : EnemyBaseState
 		if (DepthChanged())
 		{
 			UpdateSizeAndSpeedByDepth();
-			_context.SecondOrderAnimation.UpdateBoneToAnchorDistance();
 		}
 
 		_targetPos = GetTargetPos(_context.Target.transform);

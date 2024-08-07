@@ -23,7 +23,6 @@ public class EnemyGrabbedState : EnemyBaseState
 		// _context.Animator.SetTrigger(_context.ImmobilisedTriggerCached);
 		_context.Shadow.DOFade(0f, 0.5f);
 		ChangeSize(1f);
-		_context.SecondOrderAnimation.UpdateBoneToAnchorDistance();
 	}
 
 	public override void ExitState()

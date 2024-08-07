@@ -59,7 +59,6 @@ public class EnemyStateMachine : MonoBehaviour
 	public Collider2D BodyCollider {get {return _bodyCollider;}}
 	public SpriteRenderer Shadow {get {return _shadow;}}
 	public IsometricObjectHandler IsometricHandler {get {return _ioHandle;}}
-	public SecondOrderImitation SecondOrderAnimation {get {return _secondOrderImitation;}}
 	[HideInInspector] public float StateSizeModifier, StateSpeedModifier, StateAttackSpeedCDModifier;
 	[HideInInspector] public Eyes Pupils, Eyes;
 	[HideInInspector] public bool IsReturningToPool, IsOnGround;
@@ -89,7 +88,6 @@ public class EnemyStateMachine : MonoBehaviour
 	private Transform _gfx;
 	private SpriteRenderer _shadow;
 	private Grabbable _grabbable;
-	private SecondOrderImitation _secondOrderImitation;
 
 	void Awake()
 	{
@@ -114,7 +112,6 @@ public class EnemyStateMachine : MonoBehaviour
 		Transform body = _gfx.GetChild(4);
 		_bodyCollider = body.GetComponent<Collider2D>();
 		_grabbable = body.GetComponent<Grabbable>();
-		_secondOrderImitation = body.GetChild(1).GetComponent<SecondOrderImitation>();
 		Transform face = body.GetChild(2);
 		
 		Pupils.left = face.GetChild(0);
