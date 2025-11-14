@@ -3,11 +3,7 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-  - Border
-  - Enemy
-  - Castle
-  - Collectable
+  tags: []
   layers:
   - Default
   - TransparentFX
@@ -15,7 +11,7 @@ TagManager:
   - 
   - Water
   - UI
-  - ScreenBorder
+  - Unit
   - 
   - 
   - 
@@ -39,21 +35,18 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - Background
+  - NonShow3D
   m_SortingLayers:
   - name: Background
-    uniqueID: 1739043033
+    uniqueID: 1755410669
     locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
   - name: Foreground
-    uniqueID: 1376107663
-    locked: 0
-  - name: DistortionLines
-    uniqueID: 3688400163
+    uniqueID: 3928914571
     locked: 0
   - name: Cursor
-    uniqueID: 2075987605
+    uniqueID: 210825259
     locked: 0

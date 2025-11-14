@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "415edfec-e15e-4665-8c45-d80389ed1532",
+            "actions": [
+                {
+                    "name": "Interract",
+                    "type": "Button",
+                    "id": "8a0ad32e-27b1-46e3-9500-b1fa99133f23",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f0e03038-ff62-4191-b726-1242f9d26d03",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Hold(pressPoint=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4c32f045-3af8-4ce7-86d7-15b92e23ff5a",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Hold(pressPoint=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
