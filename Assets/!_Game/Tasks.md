@@ -10,13 +10,13 @@
 |        |              | All scenes must run simultaneously, but frustum cull visual and some logic                                                                         |
 |        | Camera types |                                                                                                                                                    |
 |        |              | Map scene - set up camera position for bird's eye view, slightly tilted isometric                                                                  |
-|        |              | Battleground scene - orthogonal 2.5d                                                                                                               |
+|   ✅     |              | Battleground scene - orthogonal 2.5d                                                                                                               |
 |        |              | City scene - isometric set up                                                                                                                      |
 |        | Controls     |                                                                                                                                                    |
-|        |              | Detect a click on ground or unit                                                                                                                   |
-|        |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
-|        |              | If ground - move camera, if object - move object                                                                                                   |
-|        |              | On release, call event to pass the values to object\camera movement                                                                                |
+|   Ⓔ     |              | Detect a click on ground or unit                                                                                                                   |
+|   Ⓔ     |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
+|   Ⓔ     |              | If ground - move camera, if object - move object                                                                                                   |
+|   Ⓔ     |              | On release, call event to pass the values to object\camera movement                                                                                |
 |        |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
 |        |              | Zoom In/Out transition event                                                                                                                       |
 |        | Physics      |                                                                                                                                                    |
@@ -36,13 +36,13 @@
 | Status | Task          | Subtask                                                                                                                                          |
 | ------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 |        | Base unit AI  |                                                                                                                                                  |
-|        |               | Has a faction                                                                                                                                    |
-|        |               | Can walk (walks to Target till desired range)                                                                                                    |
+|   ✅     |               | Has a faction                                                                                                                                    |
+|    ✅    |               | Can walk (walks to Target till desired range)                                                                                                    |
 |        |               | Has performable Action and cooldown, for now only one type of Action - attack                                                                    |
 |        |               | Has Target (if no target, receives default Target based on faction)                                                                              |
 |        |               | Looks for nearby targets                                                                                                                         |
 |        |               | Has Health                                                                                                                                       |
-|        |               | If grabbed, all other logic is stopped                                                                                                           |
+|    Ⓔ    |               | If grabbed, all other logic is stopped                                                                                                           |
 |        | Health system |                                                                                                                                                  |
 |        |               | Has max health                                                                                                                                   |
 |        |               | Health can be restored                                                                                                                           |
