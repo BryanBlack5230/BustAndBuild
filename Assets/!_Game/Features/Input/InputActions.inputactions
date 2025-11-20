@@ -7,13 +7,31 @@
             "id": "415edfec-e15e-4665-8c45-d80389ed1532",
             "actions": [
                 {
-                    "name": "Interract",
+                    "name": "Interact",
                     "type": "Button",
                     "id": "8a0ad32e-27b1-46e3-9500-b1fa99133f23",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "PowerHit",
+                    "type": "Button",
+                    "id": "933551b4-cc23-4a49-a45f-901977f91100",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MousePosition",
+                    "type": "Value",
+                    "id": "3c4c0076-e573-4ecb-ac74-32417f3670d6",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -21,10 +39,10 @@
                     "name": "",
                     "id": "f0e03038-ff62-4191-b726-1242f9d26d03",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "Hold(pressPoint=0.2)",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Interract",
+                    "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -32,10 +50,21 @@
                     "name": "",
                     "id": "4c32f045-3af8-4ce7-86d7-15b92e23ff5a",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "Hold(pressPoint=0.2)",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Interract",
+                    "action": "PowerHit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a5fa060-a4a1-457a-ba38-89f4558adf80",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MousePosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

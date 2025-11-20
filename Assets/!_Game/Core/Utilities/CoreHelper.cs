@@ -10,7 +10,7 @@ namespace GameEngine.Utils
         {
             get
             {
-                if (_mainCamera == null) _mainCamera = Camera.main;
+                if (_mainCamera == null) _mainCamera = Camera.main; // don't forget to tag a camera with MainCamera tag
                 return _mainCamera;
             }
         }

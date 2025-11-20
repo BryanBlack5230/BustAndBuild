@@ -19,7 +19,7 @@ namespace GameEngine.AI
 
         private void Update()
         {
-            return;
+            // return;
             if (_target == null) return;
             
             // if (!Input.GetMouseButtonDown(1)) return;

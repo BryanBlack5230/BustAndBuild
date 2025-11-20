@@ -10,6 +10,7 @@ public class BattleGroundSceneInstaller : MonoBehaviour, IInstaller
     public void InstallBindings(ContainerBuilder builder)
     {
         builder.AddInterfacesAndSelf(_dayNightCycle);
+        builder.AddSingleton(new InputManager(), typeof(InputManager));
         
         builder.AddSingleton(_gameLoopManager, typeof(GameLoopManager));
         builder.AddSingleton(_gameManagerUIController, typeof(GameManagerUIController));
