@@ -14,4 +14,6 @@ public class GameDataSetter : MonoBehaviour
 public static class GameData
 {
     public static readonly LayerMask UnitLayerMask = 6;
+    public static readonly LayerMask GroundLayerMask = 7;
+    public static readonly LayerMask GrabbableLayerMask = 8;
 }

@@ -13,9 +13,9 @@
 |   ✅     |              | Battleground scene - orthogonal 2.5d                                                                                                               |
 |        |              | City scene - isometric set up                                                                                                                      |
 |        | Controls     |                                                                                                                                                    |
-|   Ⓔ     |              | Detect a click on ground or unit                                                                                                                   |
+|   ✅     |              | Detect a click on ground or unit                                                                                                                   |
 |   Ⓔ     |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
-|   Ⓔ     |              | If ground - move camera, if object - move object                                                                                                   |
+|   Ⓔ✅     |              | If ground - move camera, if object - move object                                                                                                   |
 |   Ⓔ     |              | On release, call event to pass the values to object\camera movement                                                                                |
 |        |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
 |        |              | Zoom In/Out transition event                                                                                                                       |
@@ -42,7 +42,7 @@
 |        |               | Has Target (if no target, receives default Target based on faction)                                                                              |
 |        |               | Looks for nearby targets                                                                                                                         |
 |        |               | Has Health                                                                                                                                       |
-|    Ⓔ    |               | If grabbed, all other logic is stopped                                                                                                           |
+|    ✅    |               | If grabbed, all other logic is stopped                                                                                                           |
 |        | Health system |                                                                                                                                                  |
 |        |               | Has max health                                                                                                                                   |
 |        |               | Health can be restored                                                                                                                           |

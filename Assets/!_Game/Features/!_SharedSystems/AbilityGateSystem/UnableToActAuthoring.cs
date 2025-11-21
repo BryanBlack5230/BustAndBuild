@@ -9,7 +9,7 @@ public class UnableToActAuthoring: MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, new UnableToAct());
-            SetComponentEnabled<UnableToAct>(entity, true);
+            SetComponentEnabled<UnableToAct>(entity, false);
         }
     }
 }

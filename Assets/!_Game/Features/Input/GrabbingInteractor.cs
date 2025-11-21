@@ -1,4 +1,6 @@
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -10,6 +12,10 @@ namespace Game.Feature.Input
         private Entity _grabbedEntity;
         private EntityManager _entityManager;
 
+        private PhysicsMass _originalMass;
+        // private PhysicsGravityFactor _originalGravity;
+        private PhysicsVelocity _originalVelocity;
+        
         public GrabbingInteractor(MousePositionProvider mousePositionProvider)
         {
             _mousePositionProvider = mousePositionProvider;
@@ -18,18 +24,52 @@ namespace Game.Feature.Input
             Debug.Log("Grabbing Interactor created");
         }
 
-        public void Grab(Entity grabbedEntity) => _grabbedEntity = grabbedEntity;
+        public void Grab(Entity grabbedEntity)
+        {
+            _grabbedEntity = grabbedEntity;
+            _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, true);
+            
+            DisablePhysics(_grabbedEntity);
+        }
     
-        public void Release() => _grabbedEntity = Entity.Null;
+        public void Release()
+        {
+            if (_grabbedEntity == Entity.Null) return;
+            
+            RestorePhysics(_grabbedEntity);
+            _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, false);
+            _grabbedEntity = Entity.Null;
+        }
 
         public void OnUpdate(float deltaTime)
         {
             if (_grabbedEntity == Entity.Null) return;
         
             var localTransform = _entityManager.GetComponentData<LocalTransform>(_grabbedEntity);
-            var mousePosition = _mousePositionProvider.worldMousePosition(localTransform.Position);
-            localTransform.Position = mousePosition;
+            localTransform.Position = _mousePositionProvider.worldMousePosition(localTransform.Position);
             _entityManager.SetComponentData(_grabbedEntity, localTransform);
+        }
+        
+        private void DisablePhysics(Entity entity)
+        {
+            _originalVelocity = _entityManager.GetComponentData<PhysicsVelocity>(entity);
+            _originalMass     = _entityManager.GetComponentData<PhysicsMass>(entity);
+            // _originalGravity  = _entityManager.GetComponentData<PhysicsGravityFactor>(entity);
+
+            var frozenMass = _originalMass;
+            frozenMass.InverseMass = 0;
+            frozenMass.InverseInertia = float3.zero;
+
+            _entityManager.SetComponentData(entity, new PhysicsVelocity());
+            _entityManager.SetComponentData(entity, frozenMass);
+            // _entityManager.SetComponentData(entity, new PhysicsGravityFactor { Value = 0 });
+        }
+
+        private void RestorePhysics(Entity entity)
+        {
+            _entityManager.SetComponentData(entity, _originalVelocity);
+            _entityManager.SetComponentData(entity, _originalMass);
+            // _entityManager.SetComponentData(entity, _originalGravity);
         }
     }
 }

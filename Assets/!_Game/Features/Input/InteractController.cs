@@ -67,6 +67,10 @@ namespace Game.Feature.Input
                 {
                     _grabbingInteractor.Grab(raycastHit.Entity);
                 }
+                else
+                {
+                    // camera movement implementation
+                }
             }
         }
 
@@ -77,7 +81,7 @@ namespace Game.Feature.Input
             _collisionFilter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = 1u << GameData.UnitLayerMask,
+                CollidesWith = (1u << GameData.GrabbableLayerMask) | (1u << GameData.GroundLayerMask),
                 GroupIndex = 0,
             };
         }
