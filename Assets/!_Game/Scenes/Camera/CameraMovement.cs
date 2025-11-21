@@ -1,7 +1,8 @@
 using DG.Tweening;
+using Game.Feature.Input;
 using UnityEngine;
 
-namespace GameEngine.Inputs
+namespace Game.Feature.Camera
 {
     public class CameraMovement
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameEngine.Inputs
+namespace Game.Feature.Input
 {
     public class CursorManager
     {

@@ -24,9 +24,6 @@ namespace GameEngine.Utils
             return _waitDictionary[time];
         }
         
-        public static Vector2 CursorPos() => MainCamera.ScreenToWorldPoint(Input.mousePosition);
-        public static Unity.Mathematics.float2 CursorPos2DECS() => (Vector2)MainCamera.ScreenToWorldPoint(Input.mousePosition);
-        public static Unity.Mathematics.float3 CursorPosECS() => MainCamera.ScreenToWorldPoint(Input.mousePosition);
         public static string TimeNow() => System.DateTime.Now.ToString("HH:mm:ss.fff");
     }
 }

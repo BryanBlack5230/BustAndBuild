@@ -38,7 +38,8 @@ public partial struct FindTargetSystem : ISystem
                  in SystemAPI.Query<
                      RefRO<LocalTransform>, 
                      RefRW<FindTarget>,
-                     RefRW<Target>>())
+                     RefRW<Target>>()
+                     .WithDisabled<UnableToAct>())
         {
             if (!IsTimeToCheck(ref state, findTarget)) continue;
             CheckUnitsInRange(ref state, ref distanceHitList, collisionWorld, localTransform, findTarget, target);

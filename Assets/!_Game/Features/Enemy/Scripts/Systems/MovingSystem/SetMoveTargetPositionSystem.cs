@@ -9,7 +9,7 @@ namespace GameEngine.AI
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (unitMover, target) in SystemAPI.Query<RefRW<UnitMover>, RefRO<Target>>().WithDisabled<Grabbed>())
+            foreach (var (unitMover, target) in SystemAPI.Query<RefRW<UnitMover>, RefRO<Target>>().WithDisabled<UnableToAct>())
             {
                 if (target.ValueRO.targetEntity == Entity.Null) continue;
                 

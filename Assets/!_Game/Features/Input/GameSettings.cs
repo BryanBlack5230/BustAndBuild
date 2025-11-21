@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameEngine.Inputs
+namespace Game.Feature.Input
 {
     [CreateAssetMenu(fileName = "GameSettings", menuName = "Game/GameSettings")]
     public class GameSettings : ScriptableObject

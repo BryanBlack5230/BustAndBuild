@@ -1,19 +1,22 @@
 using System;
 
-public class InputManager: IDisposable
+namespace Game.Feature.Input
 {
-    private readonly InputActions _inputActions;
-    public InputActions Actions => _inputActions;
-
-    public InputManager()
+    public class InputManager: IDisposable
     {
-        _inputActions = new InputActions();
-        _inputActions.Enable();
-    }
+        private readonly InputActions _inputActions;
+        public InputActions Actions => _inputActions;
 
-    public void Dispose()
-    {
-        _inputActions.Disable();
-        _inputActions?.Dispose();
+        public InputManager()
+        {
+            _inputActions = new InputActions();
+            _inputActions.Enable();
+        }
+
+        public void Dispose()
+        {
+            _inputActions.Disable();
+            _inputActions?.Dispose();
+        }
     }
 }

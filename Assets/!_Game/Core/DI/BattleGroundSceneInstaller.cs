@@ -1,3 +1,4 @@
+using Game.Feature.Input;
 using GameManagement;
 using Reflex.Core;
 using UnityEngine;
@@ -11,6 +12,9 @@ public class BattleGroundSceneInstaller : MonoBehaviour, IInstaller
     {
         builder.AddInterfacesAndSelf(_dayNightCycle);
         builder.AddSingleton(new InputManager(), typeof(InputManager));
+        builder.AddSingleton(typeof(MousePositionProvider), typeof(MousePositionProvider));
+        // builder.AddInterfacesAndSelf<GrabbingInteractor>();
+        builder.AddSingleton(typeof(GrabbingInteractor), typeof(GrabbingInteractor), typeof(IGameListener));
         
         builder.AddSingleton(_gameLoopManager, typeof(GameLoopManager));
         builder.AddSingleton(_gameManagerUIController, typeof(GameManagerUIController));

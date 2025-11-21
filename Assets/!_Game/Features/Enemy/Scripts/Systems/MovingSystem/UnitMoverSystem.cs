@@ -36,7 +36,8 @@ namespace GameEngine.AI
                      in SystemAPI.Query<
                          RefRW<LocalTransform>,
                          RefRO<UnitMover>,
-                         RefRW<PhysicsVelocity>>())
+                         RefRW<PhysicsVelocity>>()
+                         .WithDisabled<UnableToAct>())
             {
                 var moveDirection = unitMover.ValueRO.targetPosition - localTransform.ValueRO.Position;
                 if (math.lengthsq(moveDirection) < _reachedTargetDistanceSq)
@@ -55,6 +56,7 @@ namespace GameEngine.AI
     }
     
     [BurstCompile]
+    [WithDisabled(typeof(UnableToAct))]
     public partial struct UnitMoverJob : IJobEntity
     {
         public float reachedTargetDistanceSq;
