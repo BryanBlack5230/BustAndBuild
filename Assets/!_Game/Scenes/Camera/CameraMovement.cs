@@ -13,11 +13,11 @@ namespace Game.Feature.Camera
         private Tween _moveTween;
         private Tween _verticalTween;
 
-        public CameraMovement(Transform cameraTransform, GameSettings settings)
+        public CameraMovement(Transform cameraTransform, GameDataSetter gameData)
         {
             _cameraTransform = cameraTransform;
             _defaultPosition = cameraTransform.position;
-            _settings = settings;
+            _settings = gameData.gameSettings;
         }
 
         public void MoveHorizontally(float direction)

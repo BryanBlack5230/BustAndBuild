@@ -9,6 +9,12 @@ namespace Game.Feature.Input
         public Texture2D openHandCursor;
         public Texture2D holdingObjectCursor;
         public Texture2D holdingGroundCursor;
+        
+        public Sprite openHandSprite;
+        public Sprite holdingObjectSprite;
+        public Sprite holdingGroundSprite;
+        
+        public Transform cursorDummyPrefab;
 
         [Header("Camera Movement Settings")]
         public float moveSpeed = 5f;

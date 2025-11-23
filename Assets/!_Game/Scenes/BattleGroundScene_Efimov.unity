@@ -949,6 +949,7 @@ MonoBehaviour:
   _gameLoopManager: {fileID: 1181312369}
   _gameManagerUIController: {fileID: 254201107}
   _dayNightCycle: {fileID: 92269433}
+  _gameDataSetter: {fileID: 1613355547}
 --- !u!114 &345921083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1448,9 +1449,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe318e383fedf9f47a9205381e0bf333, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2635,6 +2633,7 @@ MonoBehaviour:
   _unitLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  gameSettings: {fileID: 11400000, guid: d797c76d72bfaa44b8fadf05c9dc27ff, type: 2}
 --- !u!1 &1695122839
 GameObject:
   m_ObjectHideFlags: 0

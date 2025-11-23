@@ -6,6 +6,7 @@ namespace Game.Feature.Input
     public class MousePositionProvider
     {
         public Vector2 mousePosition => _inputActions.Gameplay.MousePosition.ReadValue<Vector2>();
+        public Vector3 mouseScreenToWorld => CoreHelper.MainCamera.ScreenToWorldPoint(mousePosition);
 
         public Vector3 worldMousePosition(Vector3 objectPosition)
         {

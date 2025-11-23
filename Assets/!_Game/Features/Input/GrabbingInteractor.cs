@@ -9,6 +9,7 @@ namespace Game.Feature.Input
     public class GrabbingInteractor: IGameUpdateListener
     {
         private readonly MousePositionProvider _mousePositionProvider;
+        private readonly CursorMovementCalculations _cursorMovementCalculations;
         private Entity _grabbedEntity;
         private EntityManager _entityManager;
 
@@ -16,12 +17,12 @@ namespace Game.Feature.Input
         // private PhysicsGravityFactor _originalGravity;
         private PhysicsVelocity _originalVelocity;
         
-        public GrabbingInteractor(MousePositionProvider mousePositionProvider)
+        public GrabbingInteractor(MousePositionProvider mousePositionProvider, CursorMovementCalculations cursorMovementCalculations)
         {
             _mousePositionProvider = mousePositionProvider;
+            _cursorMovementCalculations = cursorMovementCalculations;
         
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            Debug.Log("Grabbing Interactor created");
         }
 
         public void Grab(Entity grabbedEntity)
@@ -38,6 +39,7 @@ namespace Game.Feature.Input
             
             RestorePhysics(_grabbedEntity);
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, false);
+            //TODO pass _cursorMovementCalculations.force to entity
             _grabbedEntity = Entity.Null;
         }
 

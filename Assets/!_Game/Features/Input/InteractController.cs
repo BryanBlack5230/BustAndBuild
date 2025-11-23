@@ -44,6 +44,7 @@ namespace Game.Feature.Input
 
         private void OnCanceled(InputAction.CallbackContext obj)
         {
+            EventManager.Input.Release.Invoke();
             _grabbingInteractor.Release();
         }
 
@@ -65,10 +66,12 @@ namespace Game.Feature.Input
             {
                 if (_entityManager.HasComponent<Grabbed>(raycastHit.Entity))
                 {
+                    EventManager.Input.ObjectGrabbed.Invoke();
                     _grabbingInteractor.Grab(raycastHit.Entity);
                 }
                 else
                 {
+                    EventManager.Input.GroundGrabbed.Invoke();
                     // camera movement implementation
                 }
             }
@@ -76,7 +79,7 @@ namespace Game.Feature.Input
 
         private void CreateCollisionFilter()
         {
-            // var unitLayerIndex = Mathf.RoundToInt(Mathf.Log(GameData.UnitLayerMask.value, 2));
+            // var unitLayerIndex = Mathf.RoundToInt(Mathf.Log(_layerMask, 2));
 
             _collisionFilter = new CollisionFilter
             {
