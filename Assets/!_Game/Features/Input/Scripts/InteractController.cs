@@ -1,12 +1,13 @@
+using System;
+using Game.Core.Events;
 using Reflex.Attributes;
 using Unity.Entities;
 using Unity.Physics;
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
 {
-    public class InteractController : MonoBehaviour
+    public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IDisposable
     {
         // [SerializeField] private LayerMask _layerMask;
         private EntityManager _entityManager;
@@ -24,11 +25,15 @@ namespace Game.Feature.Input
             Register();
         }
 
-        private void Awake()
+        public void OnStartGame()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             CreateCollisionFilter();
         }
+
+        public void OnPause() => Unregister();
+        public void OnResume() => Register();
+        public void Dispose() => Unregister();
 
         private void Register()
         {
@@ -36,7 +41,7 @@ namespace Game.Feature.Input
             _inputActions.Gameplay.Interact.canceled += OnCanceled;
         }
 
-        private void OnDestroy()
+        private void Unregister()
         {
             _inputActions.Gameplay.Interact.performed -= OnClick;
             _inputActions.Gameplay.Interact.canceled -= OnCanceled;
@@ -44,7 +49,7 @@ namespace Game.Feature.Input
 
         private void OnCanceled(InputAction.CallbackContext obj)
         {
-            EventManager.Input.Release.Invoke();
+            EventManager.Input.Release?.Invoke();
             _grabbingInteractor.Release();
         }
 
@@ -66,12 +71,12 @@ namespace Game.Feature.Input
             {
                 if (_entityManager.HasComponent<Grabbed>(raycastHit.Entity))
                 {
-                    EventManager.Input.ObjectGrabbed.Invoke();
+                    EventManager.Input.ObjectGrabbed?.Invoke();
                     _grabbingInteractor.Grab(raycastHit.Entity);
                 }
                 else
                 {
-                    EventManager.Input.GroundGrabbed.Invoke();
+                    EventManager.Input.GroundGrabbed?.Invoke(false);
                     // camera movement implementation
                 }
             }

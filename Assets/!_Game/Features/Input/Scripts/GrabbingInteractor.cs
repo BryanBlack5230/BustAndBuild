@@ -39,7 +39,7 @@ namespace Game.Feature.Input
             
             RestorePhysics(_grabbedEntity);
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, false);
-            //TODO pass _cursorMovementCalculations.force to entity
+            Debug.Log($"Entity {_grabbedEntity} was launched with force {_cursorMovementCalculations.velocity.magnitude} in direction {_cursorMovementCalculations.velocity.normalized}");
             _grabbedEntity = Entity.Null;
         }
 

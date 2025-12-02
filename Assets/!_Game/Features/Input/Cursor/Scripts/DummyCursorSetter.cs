@@ -1,4 +1,5 @@
 using System;
+using Game.Core.Events;
 using UnityEngine;
 
 namespace Game.Feature.Input
@@ -46,7 +47,10 @@ namespace Game.Feature.Input
 
         private void SetHoldingObjectCursor() => _dummyCursorRenderer.sprite = _holdingObjectSprite;
 
-        private void SetHoldingGroundCursor() => _dummyCursorRenderer.sprite = _holdingGroundSprite;
+        private void SetHoldingGroundCursor(bool actuallyHolding)
+        {
+            if (actuallyHolding) _dummyCursorRenderer.sprite = _holdingGroundSprite;
+        }
 
         public void Dispose()
         {

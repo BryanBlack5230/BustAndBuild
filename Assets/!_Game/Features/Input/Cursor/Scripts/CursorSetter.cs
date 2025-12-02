@@ -2,6 +2,7 @@
 using UnityEditor;
 #endif
 using System;
+using Game.Core.Events;
 using UnityEngine;
 
 namespace Game.Feature.Input
@@ -35,7 +36,10 @@ namespace Game.Feature.Input
 
         private void SetHoldingObjectCursor() => Cursor.SetCursor(_holdingObjectCursor, Vector2.zero, CursorMode.ForceSoftware);
 
-        private void SetHoldingGroundCursor() => Cursor.SetCursor(_holdingGroundCursor, Vector2.zero, CursorMode.ForceSoftware);
+        private void SetHoldingGroundCursor(bool actuallyHolding)
+        {
+            if (actuallyHolding) Cursor.SetCursor(_holdingGroundCursor, Vector2.zero, CursorMode.ForceSoftware);
+        }
 
         public void Dispose()
         {
