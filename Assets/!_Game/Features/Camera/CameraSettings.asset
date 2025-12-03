@@ -12,9 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd59928052b4618a9a124c31524d151, type: 3}
   m_Name: CameraSettings
   m_EditorClassIdentifier: Assembly-CSharp::CameraSettings
-  borderOvershootStrength: 1
-  moveSpeed: 5
-  hoverDuration: 0.45
+  moveSpeed: 0.1
   returnDuration: 1
   returnCurve:
     serializedVersion: 2
@@ -56,7 +54,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -64,22 +62,13 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.49583435
-      value: 0.49761906
-      inSlope: -2.5428257
-      outSlope: -2.5428257
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.16806895
-      outWeight: 0.18181649
-    - serializedVersion: 3
       time: 1
-      value: 0
-      inSlope: 0.0802005
-      outSlope: 0.0802005
+      value: 1
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.47107536
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

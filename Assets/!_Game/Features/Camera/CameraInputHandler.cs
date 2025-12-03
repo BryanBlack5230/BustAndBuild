@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Core.Events;
 using GameManagement;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace Game.Feature.Camera
                     await UniTask.Yield(PlayerLoopTiming.Update, token);
                 }
 
-                DragStarted?.Invoke();
+                EventManager.Input.GroundGrabbed?.Invoke(true);
             }
             catch { }
         }

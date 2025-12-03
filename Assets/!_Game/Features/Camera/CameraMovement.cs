@@ -1,8 +1,8 @@
-using UnityEngine;
+using System;
 using Cinemachine;
 using Game.Core.Events;
 using Game.Feature.Input;
-using Reflex.Attributes;
+using UnityEngine;
 
 namespace Game.Feature.Camera
 {
@@ -27,19 +27,18 @@ namespace Game.Feature.Camera
         }
     }
 
-    public class CameraMovement : MonoBehaviour
+    public class CameraMovement : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
     {
-        private CinemachineTransposer _transposer;
-        private CameraInputHandler _input;
-        private CameraDragHandler _drag;
-        private CameraBorderHandler _border;
+        private readonly CinemachineTransposer _transposer;
+        private readonly CameraInputHandler _input;
+        private readonly CameraDragHandler _drag;
+        private readonly CameraBorderHandler _border;
 
-        private MousePositionProvider _mouse;
+        private readonly MousePositionProvider _mouse;
         
         private bool _isDragging;
 
-        [Inject]
-        private void Construct(MousePositionProvider mouse, SceneData sceneData)
+        public CameraMovement(MousePositionProvider mouse, SceneData sceneData)
         {
             _mouse = mouse;
             _input = new CameraInputHandler(sceneData.cameraSettings.timeToHold);
@@ -50,6 +49,8 @@ namespace Game.Feature.Camera
             _transposer = sceneData.sceneCamera.GetCinemachineComponent<CinemachineTransposer>();
             _drag = new CameraDragHandler(_transposer, sceneData.cameraSettings);
             _border = new CameraBorderHandler(_transposer, rangeX, rangeY, sceneData.cameraSettings);
+            
+            Register();
         }
 
         private void Register()
@@ -79,12 +80,13 @@ namespace Game.Feature.Camera
 
         private void OnDragStarted()
         {
+            
             _isDragging = true;
             _border.CancelReturn();
             _drag.StartDrag(_mouse.mousePosition);
         }
 
-        private void Update()
+        public void OnUpdate(float deltaTime)
         {
             if (!_isDragging) return;
 
@@ -94,12 +96,20 @@ namespace Game.Feature.Camera
             _drag.ApplyMovement(movement);
         }
 
-        private void OnEnable()
+        public void OnResume()
         {
             Register();
         }
 
-        private void OnDisable()
+        public void OnPause()
+        {
+            Release();
+
+            _input.Dispose();
+            _border.Dispose();
+        }
+
+        public void Dispose()
         {
             Release();
 

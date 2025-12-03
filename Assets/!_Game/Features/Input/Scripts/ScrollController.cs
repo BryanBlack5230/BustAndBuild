@@ -1,6 +1,5 @@
 using System;
 using Game.Core.Events;
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
@@ -11,7 +10,6 @@ namespace Game.Feature.Input
         
         public ScrollController(InputManager inputManager)
         {
-            Debug.Log("Constructing Scroll Controller");
             _inputActions = inputManager.Actions;
             Register();
         }
@@ -30,13 +28,11 @@ namespace Game.Feature.Input
 
         private void OnScrollUp(InputAction.CallbackContext obj)
         {
-            Debug.Log("Scroll up called");
             EventManager.Input.SceneChangeRequest?.Invoke(true);
         }
 
         private void OnScrollDown(InputAction.CallbackContext obj)
         {
-            Debug.Log("Scroll down called");
             EventManager.Input.SceneChangeRequest?.Invoke(false);
         }
     }
