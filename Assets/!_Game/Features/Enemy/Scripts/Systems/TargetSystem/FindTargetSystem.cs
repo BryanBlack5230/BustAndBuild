@@ -1,8 +1,10 @@
+using Game.Configs;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Transforms;
+using UnityEngine;
 
 
 [BurstCompile]
@@ -17,7 +19,7 @@ public partial struct FindTargetSystem : ISystem
         _collisionFilter = new CollisionFilter
         {
             BelongsTo = ~0u,
-            CollidesWith = 1u << GameData.UnitLayerMask,
+            CollidesWith = (uint)LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Unit),
             GroupIndex = 0,
         };
     }

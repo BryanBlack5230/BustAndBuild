@@ -1,37 +1,48 @@
 using System;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Game.Configs;
 using Game.Core.Events;
+using GameEngine.Utils;
 using UnityEngine;
+using Resources = UnityEngine.Resources;
 
 namespace Game.Feature.Input
 {
     /// <summary>
     /// A helper class to show cursor while recording videos in editor, should not be present in build version 
     /// </summary>
-    public class DummyCursorSetter : IGameUpdateListener, IDisposable
+    public class DummyCursorSetter : IGameUpdateListener, IDisposable, ILoadUnit
     {
         private readonly MousePositionProvider _mousePositionProvider;
         private const float Z_POSITION = -13f; // close to camera so that the dummy is the same size as actual cursor
 
-        private readonly Sprite _openHandSprite;
-        private readonly Sprite _holdingObjectSprite;
-        private readonly Sprite _holdingGroundSprite;
+        private Transform _cursorPrefab;
+        private Transform _dummyCursorTransform;
+        private SpriteRenderer _dummyCursorRenderer;
+        private Dictionary<string, Sprite> _textures;
 
-        private readonly Transform _dummyCursorTransform;
-        private readonly SpriteRenderer _dummyCursorRenderer;
-        public DummyCursorSetter(MousePositionProvider mousePositionProvider, GameDataSetter gameData)
+        public DummyCursorSetter(MousePositionProvider mousePositionProvider)
         {
-            var settings = gameData.gameSettings;
             _mousePositionProvider = mousePositionProvider;
-            _dummyCursorTransform = GameObject.Instantiate(gameData.gameSettings.cursorDummyPrefab, Vector3.zero, Quaternion.identity);
-            
-            _openHandSprite = settings.openHandSprite;
-            _holdingObjectSprite = settings.holdingObjectSprite;
-            _holdingGroundSprite = settings.holdingGroundSprite;
-            
-            _dummyCursorRenderer = _dummyCursorTransform.GetComponent<SpriteRenderer>();
-            _dummyCursorRenderer.sprite = _openHandSprite;
-
             Subscribe();
+        }
+
+        UniTask ILoadUnit.Load()
+        {
+            var cursorsToLoad = RuntimeConstants.Cursors.All;
+            _textures = new Dictionary<string, Sprite>(cursorsToLoad.Length);
+
+            foreach (var cursorToLoad in cursorsToLoad)
+            {
+                _textures.Add(cursorToLoad, Resources.Load($"Cursors/Sprites/{cursorToLoad}") as Sprite);
+            }
+            
+            _cursorPrefab = Resources.Load($"Cursors/{RuntimeConstants.Cursors.Dummy}") as Transform;
+            _dummyCursorTransform = GameObject.Instantiate(_cursorPrefab, Vector3.zero, Quaternion.identity);
+           
+            _dummyCursorRenderer = _dummyCursorTransform.GetComponent<SpriteRenderer>();
+            return UniTask.CompletedTask;
         }
 
         public void OnUpdate(float deltaTime) => _dummyCursorTransform.position = _mousePositionProvider.worldMousePosition(Z_POSITION);
@@ -43,13 +54,13 @@ namespace Game.Feature.Input
             EventManager.Input.Release += SetOpenHandCursor;
         }
 
-        private void SetOpenHandCursor() => _dummyCursorRenderer.sprite = _openHandSprite;
+        private void SetOpenHandCursor() => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.Open];
 
-        private void SetHoldingObjectCursor() => _dummyCursorRenderer.sprite = _holdingObjectSprite;
+        private void SetHoldingObjectCursor() => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.ObjectHold];
 
         private void SetHoldingGroundCursor(bool actuallyHolding)
         {
-            if (actuallyHolding) _dummyCursorRenderer.sprite = _holdingGroundSprite;
+            if (actuallyHolding) _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.GroundHold];
         }
 
         public void Dispose()

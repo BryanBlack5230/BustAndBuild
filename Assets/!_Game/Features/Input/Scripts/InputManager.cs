@@ -4,19 +4,19 @@ namespace Game.Feature.Input
 {
     public class InputManager: IDisposable
     {
-        private readonly InputActions _inputActions;
-        public InputActions Actions => _inputActions;
+        public InputActions Actions { get; }
 
         public InputManager()
         {
-            _inputActions = new InputActions();
-            _inputActions.Enable();
+            Actions = new InputActions();
+            // _inputActions.UI.Enable();
+            Actions.Gameplay.MousePosition.Enable();
         }
 
         public void Dispose()
         {
-            _inputActions.Disable();
-            _inputActions?.Dispose();
+            Actions.Disable();
+            Actions?.Dispose();
         }
     }
 }

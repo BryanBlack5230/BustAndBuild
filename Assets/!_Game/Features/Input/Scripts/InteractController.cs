@@ -1,34 +1,34 @@
 using System;
+using Game.Configs;
 using Game.Core.Events;
-using Reflex.Attributes;
 using Unity.Entities;
 using Unity.Physics;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
 {
-    public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IDisposable
+    public class InteractController : IGamePauseListener, IGameResumeListener, IDisposable
     {
-        // [SerializeField] private LayerMask _layerMask;
+        private readonly InputActions _inputActions;
+        private readonly GrabbingInteractor _grabbingInteractor;
+        private readonly MousePositionProvider _mousePositionProvider;
+        
         private EntityManager _entityManager;
         private CollisionFilter _collisionFilter;
-        private InputActions _inputActions;
-        private GrabbingInteractor _grabbingInteractor;
-        private MousePositionProvider _mousePositionProvider;
 
-        [Inject]
-        private void Construct(InputManager inputManager, GrabbingInteractor grabbingInteractor, MousePositionProvider mousePositionProvider)
+        public InteractController(InputManager inputManager, GrabbingInteractor grabbingInteractor, MousePositionProvider mousePositionProvider)
         {
             _mousePositionProvider = mousePositionProvider;
             _grabbingInteractor = grabbingInteractor;
             _inputActions = inputManager.Actions;
-            Register();
         }
 
-        public void OnStartGame()
+        public void Initialize()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             CreateCollisionFilter();
+            Register();
         }
 
         public void OnPause() => Unregister();
@@ -37,12 +37,14 @@ namespace Game.Feature.Input
 
         private void Register()
         {
+            _inputActions.Gameplay.Interact.Enable();
             _inputActions.Gameplay.Interact.performed += OnClick;
             _inputActions.Gameplay.Interact.canceled += OnCanceled;
         }
 
         private void Unregister()
         {
+            _inputActions.Gameplay.Interact.Disable();
             _inputActions.Gameplay.Interact.performed -= OnClick;
             _inputActions.Gameplay.Interact.canceled -= OnCanceled;
         }
@@ -84,12 +86,10 @@ namespace Game.Feature.Input
 
         private void CreateCollisionFilter()
         {
-            // var unitLayerIndex = Mathf.RoundToInt(Mathf.Log(_layerMask, 2));
-
             _collisionFilter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = (1u << GameData.GrabbableLayerMask) | (1u << GameData.GroundLayerMask),
+                CollidesWith = (uint)(LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable) | LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground)),
                 GroupIndex = 0,
             };
         }

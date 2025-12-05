@@ -1,4 +1,5 @@
 using Cinemachine;
+using Game.Configs;
 using UnityEngine;
 
 namespace Game.Feature.Camera
@@ -6,14 +7,14 @@ namespace Game.Feature.Camera
     public class CameraDragHandler
     {
         private readonly CinemachineTransposer _transposer;
-        private readonly CameraSettings _settings;
+        private readonly CameraConfig _config;
 
         private Vector3 _lastPos;
 
-        public CameraDragHandler(CinemachineTransposer transposer, CameraSettings settings)
+        public CameraDragHandler(CinemachineTransposer transposer, CameraConfig config)
         {
             _transposer = transposer;
-            _settings = settings;
+            _config = config;
         }
         
         public void StartDrag(Vector3 mousePos)
@@ -24,7 +25,7 @@ namespace Game.Feature.Camera
         public Vector2 GetRawMovement(Vector3 mousePos)
         {
             var delta = mousePos - _lastPos;
-            var movement = -new Vector2(delta.x, delta.y) * _settings.moveSpeed;
+            var movement = -new Vector2(delta.x, delta.y) * _config.moveSpeed;
             _lastPos = mousePos;
             
             return movement;

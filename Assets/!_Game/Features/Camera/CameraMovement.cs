@@ -1,8 +1,8 @@
 using System;
 using Cinemachine;
+using Game.Configs;
 using Game.Core.Events;
 using Game.Feature.Input;
-using UnityEngine;
 
 namespace Game.Feature.Camera
 {
@@ -38,18 +38,22 @@ namespace Game.Feature.Camera
         
         private bool _isDragging;
 
-        public CameraMovement(MousePositionProvider mouse, SceneData sceneData)
+        public CameraMovement(MousePositionProvider mouse, BattleSceneData battleSceneData, ConfigContainer configContainer)
         {
             _mouse = mouse;
-            _input = new CameraInputHandler(sceneData.cameraSettings.timeToHold);
+            var config = configContainer.Battle.CameraConfig;
+            _input = new CameraInputHandler(config.timeToHold);
 
-            var rangeX = new BorderRange(sceneData.sceneBoundaryLeft.position.x, sceneData.sceneBoundaryRight.position.x);
-            var rangeY = new BorderRange(sceneData.sceneBoundaryBottom.position.y, sceneData.sceneBoundaryTop.position.y);
+            var rangeX = new BorderRange(battleSceneData.sceneBoundaryLeft.position.x, battleSceneData.sceneBoundaryRight.position.x);
+            var rangeY = new BorderRange(battleSceneData.sceneBoundaryBottom.position.y, battleSceneData.sceneBoundaryTop.position.y);
 
-            _transposer = sceneData.sceneCamera.GetCinemachineComponent<CinemachineTransposer>();
-            _drag = new CameraDragHandler(_transposer, sceneData.cameraSettings);
-            _border = new CameraBorderHandler(_transposer, rangeX, rangeY, sceneData.cameraSettings);
-            
+            _transposer = battleSceneData.sceneCamera.GetCinemachineComponent<CinemachineTransposer>();
+            _drag = new CameraDragHandler(_transposer, config);
+            _border = new CameraBorderHandler(_transposer, rangeX, rangeY, config);
+        }
+
+        public void Initialize()
+        {
             Register();
         }
 
@@ -62,13 +66,16 @@ namespace Game.Feature.Camera
             _input.DragEnded += OnDragEnded;
         }
 
-        private void Release()
+        private void Unregister()
         {
             EventManager.Input.GroundGrabbed -= _input.HandleGrabEvent;
             EventManager.Input.Release -= _input.HandleRelease;
             
             _input.DragStarted -= OnDragStarted;
             _input.DragEnded -= OnDragEnded;
+            
+            _input.Dispose();
+            _border.Dispose();
         }
 
         private void OnDragEnded()
@@ -80,7 +87,6 @@ namespace Game.Feature.Camera
 
         private void OnDragStarted()
         {
-            
             _isDragging = true;
             _border.CancelReturn();
             _drag.StartDrag(_mouse.mousePosition);
@@ -103,18 +109,12 @@ namespace Game.Feature.Camera
 
         public void OnPause()
         {
-            Release();
-
-            _input.Dispose();
-            _border.Dispose();
+            Unregister();
         }
 
         public void Dispose()
         {
-            Release();
-
-            _input.Dispose();
-            _border.Dispose();
+            Unregister();
         }
     }
 }

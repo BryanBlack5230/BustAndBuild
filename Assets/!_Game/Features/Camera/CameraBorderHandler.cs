@@ -1,6 +1,7 @@
 using System.Threading;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
+using Game.Configs;
 using UnityEngine;
 
 namespace Game.Feature.Camera
@@ -9,15 +10,15 @@ namespace Game.Feature.Camera
     {
         private readonly CinemachineTransposer _transposer;
         private readonly BorderRange _rangeX, _rangeY;
-        private readonly CameraSettings _settings;
+        private readonly CameraConfig _config;
         
         private CancellationTokenSource _returnCts;
 
-        public CameraBorderHandler(CinemachineTransposer transposer, BorderRange rangeX, BorderRange rangeY, CameraSettings settings)
+        public CameraBorderHandler(CinemachineTransposer transposer, BorderRange rangeX, BorderRange rangeY, CameraConfig config)
         {
             _rangeX = rangeX;
             _rangeY = rangeY;
-            _settings = settings;
+            _config = config;
             _transposer = transposer;
         }
         
@@ -57,8 +58,8 @@ namespace Game.Feature.Camera
                 (pos < r.Min && movement > 0f) ||
                 (pos > r.Max && movement < 0f); 
 
-            var t = Mathf.Clamp01(dist / _settings.maxOutsideDistance);
-            var resistance = _settings.borderPushCurve.Evaluate(t);
+            var t = Mathf.Clamp01(dist / _config.maxOutsideDistance);
+            var resistance = _config.borderPushCurve.Evaluate(t);
 
             return Mathf.Lerp(1f, isReturning ? 2f : 0f, resistance);
         }
@@ -81,12 +82,12 @@ namespace Game.Feature.Camera
             );
 
             var duration = 0f;
-            while (duration < _settings.returnDuration)
+            while (duration < _config.returnDuration)
             {
                 duration += Time.deltaTime;
-                var t = Mathf.Clamp01(duration / _settings.returnDuration);
+                var t = Mathf.Clamp01(duration / _config.returnDuration);
 
-                var curve = _settings.returnCurve.Evaluate(t);
+                var curve = _config.returnCurve.Evaluate(t);
                 _transposer.m_FollowOffset = Vector3.LerpUnclamped(start, target, curve);
 
                 token.ThrowIfCancellationRequested();

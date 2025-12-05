@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7913112739452273870}
   - component: {fileID: 5432615791484500236}
   m_Layer: 0
-  m_Name: CursorDummy
+  m_Name: DummyPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

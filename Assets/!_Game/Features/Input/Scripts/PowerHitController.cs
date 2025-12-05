@@ -1,4 +1,5 @@
-using Reflex.Attributes;
+using System;
+using Game.Configs;
 using Unity.Entities;
 using Unity.Physics;
 using UnityEngine;
@@ -6,40 +7,44 @@ using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
 {
-    public class PowerHitController : MonoBehaviour
+    public class PowerHitController : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
     {
-        private InputActions _inputActions;
-        private MousePositionProvider _mousePositionProvider;
+        private readonly InputActions _inputActions;
+        private readonly PowerHitConfig _powerHitSettings;
+        private readonly MousePositionProvider _mousePositionProvider;
+
         private CollisionFilter _collisionFilter;
         private EntityManager _entityManager;
-        private PowerHitSettings _powerHitSettings;
-        
+
         private bool _isActive;
         private float _activeDuration;
 
-        [Inject]
-        private void Construct(InputManager inputManager, MousePositionProvider mousePositionProvider, GameDataSetter gameData)
+        public PowerHitController(InputManager inputManager, MousePositionProvider mousePositionProvider, ConfigContainer configContainer)
         {
             _mousePositionProvider = mousePositionProvider;
             _inputActions = inputManager.Actions;
-            _powerHitSettings = gameData.powerHitSettings;
-            Register();
+            _powerHitSettings = configContainer.Battle.PowerHitConfig;
         }
-        
-        private void Awake()
+
+        public void Initialize()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             CreateCollisionFilter();
+            Register();
         }
 
         private void Register()
         {
+            _inputActions.Gameplay.PowerHit.Enable();
+            
             _inputActions.Gameplay.PowerHit.performed += OnClick;
             _inputActions.Gameplay.PowerHit.canceled += OnCanceled;
         }
 
-        private void OnDestroy()
+        private void Unregister()
         {
+            _inputActions.Gameplay.PowerHit.Disable();
+            
             _inputActions.Gameplay.PowerHit.performed -= OnClick;
             _inputActions.Gameplay.PowerHit.canceled -= OnCanceled;
         }
@@ -63,11 +68,11 @@ namespace Game.Feature.Input
             _isActive = true;
         }
 
-        private void Update()
+        public void OnUpdate(float deltaTime)
         {
             if (!_isActive) return;
             
-            _activeDuration += Time.deltaTime;
+            _activeDuration += deltaTime;
             if (_activeDuration >= _powerHitSettings.duration) Cancel();
             if (!_isActive) return;
             
@@ -77,14 +82,27 @@ namespace Game.Feature.Input
 
         private void CreateCollisionFilter()
         {
-            // var unitLayerIndex = Mathf.RoundToInt(Mathf.Log(_layerMask, 2));
-
             _collisionFilter = new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = 1u << GameData.GrabbableLayerMask,
+                CollidesWith = (uint)LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable),
                 GroupIndex = 0,
             };
+        }
+
+        public void OnPause()
+        {
+            Unregister();
+        }
+
+        public void OnResume()
+        {
+            Register();
+        }
+
+        public void Dispose()
+        {
+            Unregister();
         }
     }
 }
