@@ -1,6 +1,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using PrimeTween;
 using TMPro;
 using UnityEngine;
 
@@ -48,8 +48,9 @@ namespace GameManagement
 
                     _countdownText.text = i.ToString();
 
+                    Tween.StopAll(_countdownText);
                     _countdownText.color = _startColor;
-                    _countdownText.DOColor(_endColor, 1f).SetEase(Ease.InOutSine);
+                    Tween.Color(_countdownText, _endColor, 1f, Ease.InOutSine);
 
                     await UniTask.Delay(1000, cancellationToken: _cts.Token);
                 }
