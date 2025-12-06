@@ -52,10 +52,11 @@ namespace Game.Feature.Camera
             _border = new CameraBorderHandler(_transposer, rangeX, rangeY, config);
         }
 
-        public void Initialize()
-        {
-            Register();
-        }
+        public void Initialize() => Register();
+
+        public void OnResume() => Register();
+        public void OnPause() => Unregister();
+        public void Dispose() => Unregister();
 
         private void Register()
         {
@@ -100,21 +101,6 @@ namespace Game.Feature.Camera
             var movement = _border.ApplyResistanceIfNeeded(rawMovement);
             
             _drag.ApplyMovement(movement);
-        }
-
-        public void OnResume()
-        {
-            Register();
-        }
-
-        public void OnPause()
-        {
-            Unregister();
-        }
-
-        public void Dispose()
-        {
-            Unregister();
         }
     }
 }

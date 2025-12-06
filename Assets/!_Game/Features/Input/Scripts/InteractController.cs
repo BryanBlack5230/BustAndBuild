@@ -1,6 +1,7 @@
 using System;
 using Game.Configs;
 using Game.Core.Events;
+using GameEngine.Utils.Logging;
 using Unity.Entities;
 using Unity.Physics;
 using UnityEngine;
@@ -8,7 +9,7 @@ using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
 {
-    public class InteractController : IGamePauseListener, IGameResumeListener, IDisposable
+    public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IDisposable
     {
         private readonly InputActions _inputActions;
         private readonly GrabbingInteractor _grabbingInteractor;
@@ -27,10 +28,10 @@ namespace Game.Feature.Input
         public void Initialize()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            CreateCollisionFilter();
-            Register();
+            _collisionFilter = CreateCollisionFilter();
         }
 
+        public void OnStartGame() => Register();
         public void OnPause() => Unregister();
         public void OnResume() => Register();
         public void Dispose() => Unregister();
@@ -84,12 +85,12 @@ namespace Game.Feature.Input
             }
         }
 
-        private void CreateCollisionFilter()
+        private CollisionFilter CreateCollisionFilter()
         {
-            _collisionFilter = new CollisionFilter
+            return new CollisionFilter
             {
                 BelongsTo = ~0u,
-                CollidesWith = (uint)(LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable) | LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground)),
+                CollidesWith = (1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable) | 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground)),
                 GroupIndex = 0,
             };
         }

@@ -1,5 +1,6 @@
 using System;
 using Game.Configs;
+using GameEngine.Utils.Logging;
 using Unity.Entities;
 using Unity.Physics;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.InputSystem;
 
 namespace Game.Feature.Input
 {
-    public class PowerHitController : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
+    public class PowerHitController : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
     {
         private readonly InputActions _inputActions;
         private readonly PowerHitConfig _powerHitSettings;
@@ -29,9 +30,13 @@ namespace Game.Feature.Input
         public void Initialize()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            CreateCollisionFilter();
-            Register();
+            _collisionFilter = CreateCollisionFilter();
         }
+        
+        public void OnStartGame() => Register();
+        public void OnPause() => Unregister();
+        public void OnResume() => Register();
+        public void Dispose() => Unregister();
 
         private void Register()
         {
@@ -57,14 +62,14 @@ namespace Game.Feature.Input
 
         private void Cancel()
         {
-            Debug.Log("PowerHitController: OnCanceled");
+            Log.Battle.D("PowerHitController: OnCanceled");
             _isActive = false;
             _activeDuration = 0f;
         }
 
         private void OnClick(InputAction.CallbackContext context)
         {
-            Debug.Log("PowerHitController: OnClick");
+            Log.Battle.D("PowerHitController: OnClick");
             _isActive = true;
         }
 
@@ -76,33 +81,18 @@ namespace Game.Feature.Input
             if (_activeDuration >= _powerHitSettings.duration) Cancel();
             if (!_isActive) return;
             
-            Debug.Log("PowerHitController: Active");
+            Log.Battle.D("PowerHitController: Active");
             //Not implemented yet
         }
 
-        private void CreateCollisionFilter()
+        private CollisionFilter CreateCollisionFilter()
         {
-            _collisionFilter = new CollisionFilter
+            return new CollisionFilter
             {
                 BelongsTo = ~0u,
                 CollidesWith = (uint)LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable),
                 GroupIndex = 0,
             };
-        }
-
-        public void OnPause()
-        {
-            Unregister();
-        }
-
-        public void OnResume()
-        {
-            Register();
-        }
-
-        public void Dispose()
-        {
-            Unregister();
         }
     }
 }

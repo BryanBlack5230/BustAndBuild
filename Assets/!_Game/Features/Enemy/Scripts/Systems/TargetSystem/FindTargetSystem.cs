@@ -19,7 +19,7 @@ public partial struct FindTargetSystem : ISystem
         _collisionFilter = new CollisionFilter
         {
             BelongsTo = ~0u,
-            CollidesWith = (uint)LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Unit),
+            CollidesWith = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Unit),
             GroupIndex = 0,
         };
     }
