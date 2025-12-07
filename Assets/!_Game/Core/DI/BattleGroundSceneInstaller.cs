@@ -11,19 +11,10 @@ public class BattleGroundSceneInstaller : MonoBehaviour, IInstaller
     
     public void InstallBindings(ContainerBuilder builder)
     {
-        builder.OnContainerBuilt += PreGameManagementForceResolve;
         builder.AddSingleton(battleSceneData, typeof(BattleSceneData));
         InstallInputs(builder);
 
         builder.AddSingleton(_battleGroundSceneFlow, typeof(BattleGroundSceneFlow));
-
-        return;
-        void PreGameManagementForceResolve(Container container)
-        {
-            builder.OnContainerBuilt -= PreGameManagementForceResolve;
-
-            // container.Resolve<CameraMovement>();
-        }
     }
 
     private void InstallInputs(ContainerBuilder builder)

@@ -17,9 +17,9 @@ public class BootstrapFlow : MonoBehaviour
     [Inject]
     public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer)
     {
-        _bootSceneContainer = container;
         SceneScope.OnSceneContainerBuilding += OverrideParent;
-        
+        _bootSceneContainer = container;
+
         _loadingService = loadingService;
         _cursorSetter = cursorSetter;
         _configContainer = configContainer;
@@ -32,11 +32,14 @@ public class BootstrapFlow : MonoBehaviour
         await _loadingService.BeginLoading(_cursorSetter);
 
         //after everything got loaded, start the scene
+
         SceneManager.LoadSceneAsync(RuntimeConstants.Scenes.World, LoadSceneMode.Additive)
-            .completed += operation =>
-        {
-            SceneScope.OnSceneContainerBuilding -= OverrideParent;
-        };
+            .completed += OnNextSceneLoaded;
+    }
+    
+    private void OnNextSceneLoaded(AsyncOperation _)
+    {
+        SceneScope.OnSceneContainerBuilding -= OverrideParent;
     }
     
     private void OverrideParent(Scene scene, ContainerBuilder builder)

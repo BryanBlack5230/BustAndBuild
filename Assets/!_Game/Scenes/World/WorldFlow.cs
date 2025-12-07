@@ -22,9 +22,9 @@ public class WorldFlow : MonoBehaviour
     [Inject]
     private void Construct(Container container, GameLoopManager gameLoopManager, LoadingService loadingService, ScrollController scrollController, IEnumerable<IGameListener> listeners)
     {
-        _worldSceneContainer = container;
         SceneScope.OnSceneContainerBuilding += OverrideParent;
-        
+        _worldSceneContainer = container;
+
         _gameLoopManager = gameLoopManager;
         _loadingService = loadingService;
         _scrollController = scrollController;
@@ -43,10 +43,7 @@ public class WorldFlow : MonoBehaviour
         }
 
         SceneManager.LoadSceneAsync(RuntimeConstants.Scenes.Battle, LoadSceneMode.Additive)
-            .completed += operation =>
-        {
-            SceneScope.OnSceneContainerBuilding -= OverrideParent;
-        };;
+            .completed += OnNextSceneLoaded;
     }
 
     private void OnDestroy()
@@ -58,6 +55,11 @@ public class WorldFlow : MonoBehaviour
         }
         
         Log.World.D("WorldFlow.Destroyed()");
+    }
+    
+    private void OnNextSceneLoaded(AsyncOperation _)
+    {
+        SceneScope.OnSceneContainerBuilding -= OverrideParent;
     }
     
     private void OverrideParent(Scene scene, ContainerBuilder builder)

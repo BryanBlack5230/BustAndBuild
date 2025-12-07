@@ -1,5 +1,5 @@
+using System;
 using Reflex.Core;
-using Reflex.Enums;
 
 public static class ReflexExtensions
 {
@@ -19,5 +19,17 @@ public static class ReflexExtensions
         
         builder.AddSingleton(instance, type);
         builder.AddSingleton(instance, interfaces);
+    }
+    
+    public static ContainerBuilder NonLazy<T>(this ContainerBuilder builder)
+    {
+        builder.OnContainerBuilt += OnBuilderContainerBuilt; 
+        return builder;
+
+        void OnBuilderContainerBuilt(Container container)
+        {
+            builder.OnContainerBuilt -= OnBuilderContainerBuilt; 
+            container.Single<T>();
+        }
     }
 }

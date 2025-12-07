@@ -17,16 +17,16 @@ public class BootstrapInstaller : MonoBehaviour, IInstaller
     {
         builder.AddSingleton(_gameLoopManager, typeof(GameLoopManager));
         builder.AddSingleton(_gameManagerUIController, typeof(GameManagerUIController));
-        builder.AddSingleton(typeof(GameManager), typeof(GameManager));
+        builder.AddSingleton(typeof(GameManager), typeof(GameManager)).NonLazy<GameManager>();
 
-        builder.OnContainerBuilt += PostGameManagementForceResolve;
+        // builder.OnContainerBuilt += PostGameManagementForceResolve;
 
-        return;
-        void PostGameManagementForceResolve(Container container)
-        {
-            builder.OnContainerBuilt -= PostGameManagementForceResolve;
+        // return;
+        // void PostGameManagementForceResolve(Container container)
+        // {
+            // builder.OnContainerBuilt -= PostGameManagementForceResolve;
 
-            container.Resolve<GameManager>();
-        }
+            // container.Resolve<GameManager>();
+        // }
     }
 }
