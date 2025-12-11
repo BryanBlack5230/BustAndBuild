@@ -6,19 +6,19 @@
 | Status | Task         | Subtask                                                                                                                                            |
 | ------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 |        | Scenes       |                                                                                                                                                    |
-|        |              | Create a greybox island with probuilder                                                                                                            |
+|    ✅   |              | Create a greybox island with probuilder                                                                                                            |
 |        |              | All scenes must run simultaneously, but frustum cull visual and some logic                                                                         |
 |        | Camera types |                                                                                                                                                    |
-|        |              | Map scene - set up camera position for bird's eye view, slightly tilted isometric                                                                  |
-|   ✅     |              | Battleground scene - orthogonal 2.5d                                                                                                               |
-|        |              | City scene - isometric set up                                                                                                                      |
+|   ✅    |              | Map scene - set up camera position for bird's eye view, slightly tilted isometric                                                                  |
+|   ✅    |              | Battleground scene - orthogonal 2.5d                                                                                                               |
+|   ✅    |              | City scene - isometric set up                                                                                                                      |
 |        | Controls     |                                                                                                                                                    |
-|   ✅     |              | Detect a click on ground or unit                                                                                                                   |
-|   ✅     |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
-|   ✅     |              | If ground - move camera, if object - move object                                                                                                   |
-|   ✅     |              | On release, call event to pass the values to object\camera movement                                                                                |
-|        |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
-|        |              | Zoom In/Out transition event                                                                                                                       |
+|   ✅    |              | Detect a click on ground or unit                                                                                                                   |
+|   ✅    |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
+|   ✅    |              | If ground - move camera, if object - move object                                                                                                   |
+|   ✅    |              | On release, call event to pass the values to object\camera movement                                                                                |
+|   ✅     |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
+|   ✅     |              | Zoom In/Out transition event                                                                                                                       |
 |        | Physics      |                                                                                                                                                    |
 |        |              | Objects on the ground are still, if not affected by other forces (or moving themselves)                                                            |
 |        |              | Objects in the air fall down due to gravity, they have settable weight                                                                             |
@@ -36,13 +36,13 @@
 | Status | Task          | Subtask                                                                                                                                          |
 | ------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 |        | Base unit AI  |                                                                                                                                                  |
-|   ✅     |               | Has a faction                                                                                                                                    |
-|    ✅    |               | Can walk (walks to Target till desired range)                                                                                                    |
+|   ✅    |               | Has a faction                                                                                                                                    |
+|   ✅    |               | Can walk (walks to Target till desired range)                                                                                                    |
 |        |               | Has performable Action and cooldown, for now only one type of Action - attack                                                                    |
 |        |               | Has Target (if no target, receives default Target based on faction)                                                                              |
-|    ✅    |               | Looks for nearby targets                                                                                                                         |
+|   ✅   |               | Looks for nearby targets                                                                                                                         |
 |        |               | Has Health                                                                                                                                       |
-|    ✅    |               | If grabbed, all other logic is stopped                                                                                                           |
+|   ✅   |               | If grabbed, all other logic is stopped                                                                                                           |
 |        | Health system |                                                                                                                                                  |
 |        |               | Has max health                                                                                                                                   |
 |        |               | Health can be restored                                                                                                                           |
@@ -71,7 +71,7 @@
 |        |               | Has health                                                                                                                                       |
 |        |               | On zero health stops daylight event                                                                                                              |
 |        | Daylight      |                                                                                                                                                  |
-|    ✅    |               | Starts daylight cycle                                                                                                                            |
+|   ✅   |               | Starts daylight cycle                                                                                                                            |
 |        |               | If event is finished earlier, cycle is forcefully completed                                                                                      |
 |        |               | Daylight starts enemy waves                                                                                                                      |
 |        | Resources     |                                                                                                                                                  |

@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/!_Game/Scenes/2.World.unity
     guid: 2a7d52e58e9cff043ae71400f2bb5948
   - enabled: 1
-    path: Assets/!_Game/Scenes/3.BattleGroundScene_Efimov.unity
+    path: Assets/!_Game/Scenes/3.BattleGroundScene.unity
     guid: ee40a19755505764da0d7e8161037a8c
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
