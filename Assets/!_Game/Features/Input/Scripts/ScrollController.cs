@@ -38,12 +38,12 @@ namespace Game.Feature.Input
 
         private void OnScrollUp(InputAction.CallbackContext obj)
         {
-            EventManager.Input.SceneChangeRequest?.Invoke(true);
+            EventManager.Input.SceneChangeRequest?.Invoke(false);
         }
 
         private void OnScrollDown(InputAction.CallbackContext obj)
         {
-            EventManager.Input.SceneChangeRequest?.Invoke(false);
+            EventManager.Input.SceneChangeRequest?.Invoke(true);
         }
     }
 }

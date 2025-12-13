@@ -14,7 +14,7 @@ namespace Game.Core.Events
             public static Action<bool> GroundGrabbed; //true - actually grabbed, false - start grabbing
             public static Action Release;
 
-            public static Action<bool> SceneChangeRequest; // true - up, false - down
+            public static Action<bool> SceneChangeRequest; // false - up, true - down
         }
     }
     

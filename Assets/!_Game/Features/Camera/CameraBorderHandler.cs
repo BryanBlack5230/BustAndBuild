@@ -26,6 +26,7 @@ namespace Game.Feature.Camera
         {
             _returnCts?.Cancel();
             _returnCts?.Dispose();
+            _returnCts = null;
         }
 
         public void CancelReturn()

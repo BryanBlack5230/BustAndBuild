@@ -25,6 +25,7 @@ namespace Game.Feature.Camera
         {
             _holdCts?.Cancel();
             _holdCts?.Dispose();
+            _holdCts = null;
         }
 
         public void HandleGrabEvent(bool alreadyHolding)
