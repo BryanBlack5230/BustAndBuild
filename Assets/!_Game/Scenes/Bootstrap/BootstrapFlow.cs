@@ -2,6 +2,7 @@ using Game.Configs;
 using Game.Feature.Input;
 using GameEngine.Utils;
 using GameEngine.Utils.Logging;
+using GameManagement;
 using Reflex.Attributes;
 using Reflex.Core;
 using UnityEngine;
@@ -13,11 +14,13 @@ public class BootstrapFlow : MonoBehaviour
     private CursorSetter _cursorSetter;
     private Container _bootSceneContainer;
     private ConfigContainer _configContainer;
+    private DotsGameLoopBridge _dotsGameLoopBridge;
 
     [Inject]
-    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer)
+    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge)
     {
         SceneScope.OnSceneContainerBuilding += OverrideParent;
+        _dotsGameLoopBridge = dotsGameLoopBridge;
         _bootSceneContainer = container;
 
         _loadingService = loadingService;
@@ -28,6 +31,8 @@ public class BootstrapFlow : MonoBehaviour
     private async void Start()
     {
         Log.Boot.D("BootstrapFlow.Start()");
+        _dotsGameLoopBridge.Initialize();
+        
         await _loadingService.BeginLoading(_configContainer);
         await _loadingService.BeginLoading(_cursorSetter);
 
@@ -37,13 +42,6 @@ public class BootstrapFlow : MonoBehaviour
             .completed += OnNextSceneLoaded;
     }
     
-    private void OnNextSceneLoaded(AsyncOperation _)
-    {
-        SceneScope.OnSceneContainerBuilding -= OverrideParent;
-    }
-    
-    private void OverrideParent(Scene scene, ContainerBuilder builder)
-    {
-        builder.SetParent(_bootSceneContainer);
-    }
+    private void OnNextSceneLoaded(AsyncOperation _) => SceneScope.OnSceneContainerBuilding -= OverrideParent;
+    private void OverrideParent(Scene scene, ContainerBuilder builder) => builder.SetParent(_bootSceneContainer);
 }

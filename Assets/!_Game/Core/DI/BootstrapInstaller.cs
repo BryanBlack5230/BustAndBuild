@@ -1,3 +1,4 @@
+using System;
 using GameManagement;
 using Reflex.Core;
 using UnityEngine;
@@ -17,16 +18,7 @@ public class BootstrapInstaller : MonoBehaviour, IInstaller
     {
         builder.AddSingleton(_gameLoopManager, typeof(GameLoopManager));
         builder.AddSingleton(_gameManagerUIController, typeof(GameManagerUIController));
+        builder.AddSingleton(typeof(DotsGameLoopBridge), typeof(DotsGameLoopBridge), typeof(IGameListener), typeof(IDisposable));
         builder.AddSingleton(typeof(GameManager), typeof(GameManager)).NonLazy<GameManager>();
-
-        // builder.OnContainerBuilt += PostGameManagementForceResolve;
-
-        // return;
-        // void PostGameManagementForceResolve(Container container)
-        // {
-            // builder.OnContainerBuilt -= PostGameManagementForceResolve;
-
-            // container.Resolve<GameManager>();
-        // }
     }
 }

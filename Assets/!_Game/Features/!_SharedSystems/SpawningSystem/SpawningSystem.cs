@@ -1,3 +1,4 @@
+using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -7,6 +8,7 @@ using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
 [BurstCompile]
+[UpdateInGroup(typeof(GameLoopSystemGroup))]
 public partial struct SpawningSystem : ISystem
 {
     [BurstCompile]

@@ -1,3 +1,4 @@
+using GameManagement;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -6,6 +7,7 @@ using Unity.Transforms;
 
 namespace GameEngine.AI
 {
+    [UpdateInGroup(typeof(GameLoopSystemGroup))]
     partial struct UnitMoverSystem : ISystem
     {
         private float _reachedTargetDistanceSq;

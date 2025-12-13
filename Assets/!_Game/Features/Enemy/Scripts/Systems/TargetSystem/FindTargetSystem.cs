@@ -1,4 +1,5 @@
 using Game.Configs;
+using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -8,6 +9,7 @@ using UnityEngine;
 
 
 [BurstCompile]
+[UpdateInGroup(typeof(GameLoopSystemGroup))]
 public partial struct FindTargetSystem : ISystem
 {
     private CollisionFilter _collisionFilter;
