@@ -13,18 +13,18 @@ public class BattleGroundSceneFlow : MonoBehaviour
     private LoadingService _loadingService;
     private InteractController _interactController;
     private PowerHitController _powerHitController;
-    private CameraMovement _cameraMovement;
+    private BattleCameraMovement _battleCameraMovement;
     private IEnumerable<IGameListener> _listeners;
     private GameLoopManager _gameLoopManager;
 
     [Inject]
-    public void Construct(GameLoopManager gameLoopManager, LoadingService loadingService, InteractController interactController, PowerHitController powerHitController, CameraMovement cameraMovement, IEnumerable<IGameListener> listeners)
+    public void Construct(GameLoopManager gameLoopManager, LoadingService loadingService, InteractController interactController, PowerHitController powerHitController, BattleCameraMovement battleCameraMovement, IEnumerable<IGameListener> listeners)
     {
         _gameLoopManager = gameLoopManager;
         _loadingService = loadingService;
         _interactController = interactController;
         _powerHitController = powerHitController;
-        _cameraMovement = cameraMovement;
+        _battleCameraMovement = battleCameraMovement;
         _listeners = listeners;
     }
 
@@ -33,7 +33,7 @@ public class BattleGroundSceneFlow : MonoBehaviour
         Log.Battle.D("BattlegroundFlow.Start()");
         _interactController.Initialize();
         _powerHitController.Initialize();
-        _cameraMovement.Initialize();
+        _battleCameraMovement.Initialize();
 
         if (_listeners != null && _listeners.Any())
         {

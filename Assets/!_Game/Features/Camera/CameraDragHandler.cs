@@ -27,7 +27,7 @@ namespace Game.Feature.Camera
             var delta = mousePos - _lastPos;
             var movement = -new Vector2(delta.x, delta.y) * _config.moveSpeed;
             _lastPos = mousePos;
-            
+
             return movement;
         }
 

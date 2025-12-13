@@ -18,7 +18,6 @@ public class WorldFlow : MonoBehaviour
     private IEnumerable<IGameListener> _listeners;
     private Container _worldSceneContainer;
 
-
     [Inject]
     private void Construct(Container container, GameLoopManager gameLoopManager, LoadingService loadingService, ScrollController scrollController, IEnumerable<IGameListener> listeners)
     {

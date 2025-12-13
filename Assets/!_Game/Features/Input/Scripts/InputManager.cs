@@ -9,7 +9,7 @@ namespace Game.Feature.Input
         public InputManager()
         {
             Actions = new InputActions();
-            // _inputActions.UI.Enable();
+            Actions.UI.Enable();
             Actions.Gameplay.MousePosition.Enable();
         }
 

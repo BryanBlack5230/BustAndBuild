@@ -10,7 +10,7 @@ namespace Game.Configs
             public static readonly int Loading = SceneUtility.GetBuildIndexByScenePath("1.Loading");
             public static readonly int World = SceneUtility.GetBuildIndexByScenePath("2.World");
             // public static readonly int Battle = SceneUtility.GetBuildIndexByScenePath("3.BattleGround");
-            public static readonly int Battle = SceneUtility.GetBuildIndexByScenePath("3.BattleGroundScene_Efimov");
+            public static readonly int Battle = SceneUtility.GetBuildIndexByScenePath("3.BattleGroundScene");
             public static readonly int City = SceneUtility.GetBuildIndexByScenePath("4.City");
         }
         public static class PhysicLayers

@@ -26,6 +26,6 @@ public class BattleGroundSceneInstaller : MonoBehaviour, IInstaller
         builder.AddSingleton(typeof(InteractController), typeof(InteractController), typeof(IGameListener), typeof(IDisposable));
         builder.AddSingleton(typeof(PowerHitController), typeof(PowerHitController), typeof(IGameListener), typeof(IDisposable));
         
-        builder.AddSingleton(typeof(CameraMovement), typeof(CameraMovement), typeof(IGameListener), typeof(IDisposable));
+        builder.AddSingleton(typeof(BattleCameraMovement), typeof(BattleCameraMovement), typeof(IGameListener), typeof(IDisposable));
     }
 }

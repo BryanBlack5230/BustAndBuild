@@ -30,7 +30,7 @@ namespace Game.Editor
         public static void OpenBattleScene()
         {
             EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-            EditorSceneManager.OpenScene("Assets/!_Game/Scenes/3.BattleGroundScene_Efimov.unity");
+            EditorSceneManager.OpenScene("Assets/!_Game/Scenes/3.BattleGroundScene.unity");
         }
         
         [MenuItem("Game/Scenes/City &5", priority = 206)]

@@ -16,6 +16,7 @@ EditorBuildSettings:
     guid: 2a7d52e58e9cff043ae71400f2bb5948
   - enabled: 1
     path: Assets/!_Game/Scenes/3.BattleGroundScene.unity
-    guid: ee40a19755505764da0d7e8161037a8c
-  m_configObjects: {}
+    guid: 1171b4c7d72138f458be6c9e297d0263
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: be28f3d97f8e880448b7e03e67a1b829, type: 3}
   m_UseUCBPForAssetBundles: 0

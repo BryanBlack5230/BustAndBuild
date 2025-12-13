@@ -27,7 +27,7 @@ namespace Game.Feature.Camera
         }
     }
 
-    public class CameraMovement : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
+    public class BattleCameraMovement : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
     {
         private readonly CinemachineTransposer _transposer;
         private readonly CameraInputHandler _input;
@@ -38,22 +38,22 @@ namespace Game.Feature.Camera
         
         private bool _isDragging;
 
-        public CameraMovement(MousePositionProvider mouse, BattleSceneData battleSceneData, ConfigContainer configContainer)
+        public BattleCameraMovement(MousePositionProvider mouse, BattleSceneData battleSceneData, ConfigContainer configContainer)
         {
             _mouse = mouse;
             var config = configContainer.Battle.CameraConfig;
             _input = new CameraInputHandler(config.timeToHold);
 
-            var rangeX = new BorderRange(battleSceneData.sceneBoundaryLeft.position.x, battleSceneData.sceneBoundaryRight.position.x);
-            var rangeY = new BorderRange(battleSceneData.sceneBoundaryBottom.position.y, battleSceneData.sceneBoundaryTop.position.y);
-
             _transposer = battleSceneData.sceneCamera.GetCinemachineComponent<CinemachineTransposer>();
+            var center = _transposer.FollowTargetPosition;
+            var rangeX = new BorderRange(battleSceneData.sceneBoundaryLeft.position.x - center.x, battleSceneData.sceneBoundaryRight.position.x - center.x);
+            var rangeY = new BorderRange(battleSceneData.sceneBoundaryBottom.position.y - center.y, battleSceneData.sceneBoundaryTop.position.y - center.y);
+
             _drag = new CameraDragHandler(_transposer, config);
             _border = new CameraBorderHandler(_transposer, rangeX, rangeY, config);
         }
 
         public void Initialize() => Register();
-
         public void OnResume() => Register();
         public void OnPause() => Unregister();
         public void Dispose() => Unregister();
@@ -81,6 +81,8 @@ namespace Game.Feature.Camera
 
         private void OnDragEnded()
         {
+            if (!_isDragging) return;
+            
             _isDragging = false;
             if (_border.IsOutsideBounds(_transposer.m_FollowOffset))
                 _border.StartReturn();

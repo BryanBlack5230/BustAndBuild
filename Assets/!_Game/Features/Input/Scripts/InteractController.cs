@@ -1,7 +1,6 @@
 using System;
 using Game.Configs;
 using Game.Core.Events;
-using GameEngine.Utils.Logging;
 using Unity.Entities;
 using Unity.Physics;
 using UnityEngine;
@@ -80,7 +79,6 @@ namespace Game.Feature.Input
                 else
                 {
                     EventManager.Input.GroundGrabbed?.Invoke(false);
-                    // camera movement implementation
                 }
             }
         }
