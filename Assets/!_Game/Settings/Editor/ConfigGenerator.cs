@@ -34,6 +34,14 @@ namespace Game.Configs
                         duration = 1,
                         force = 2,
                         sizeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1),
+                    },
+                    FindTargetConfig = new FindTargetConfig
+                    {
+                        defaultRange = 5f,
+                        defaultCheckInterval = 0.01f,
+                        beaconPriority = 1f,
+                        castleWallPriority = 2f,
+                        unitPriority = 3f,
                     }
                 }
             };

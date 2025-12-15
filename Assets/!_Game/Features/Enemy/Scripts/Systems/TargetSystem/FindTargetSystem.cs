@@ -13,11 +13,14 @@ using UnityEngine;
 public partial struct FindTargetSystem : ISystem
 {
     private CollisionFilter _collisionFilter;
+    private FindTargetConfigBlob _config;
     
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<PhysicsWorldSingleton>();
+        state.RequireForUpdate<FindTargetConfigReference>();
+        
         _collisionFilter = new CollisionFilter
         {
             BelongsTo = ~0u,
@@ -29,6 +32,7 @@ public partial struct FindTargetSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        _config = SystemAPI.GetSingleton<FindTargetConfigReference>().ConfigBlob.Value;
         LookingForTarget(ref state);
     }
 
@@ -45,9 +49,12 @@ public partial struct FindTargetSystem : ISystem
                      RefRW<Target>>()
                      .WithDisabled<UnableToAct>())
         {
+            
             if (!IsTimeToCheck(ref state, findTarget)) continue;
             CheckUnitsInRange(ref state, ref distanceHitList, collisionWorld, localTransform, findTarget, target);
         }
+        
+        distanceHitList.Dispose();
     }
 
     private bool IsTimeToCheck(ref SystemState state, RefRW<FindTarget> findTarget)
@@ -55,7 +62,7 @@ public partial struct FindTargetSystem : ISystem
         findTarget.ValueRW.timer -= SystemAPI.Time.DeltaTime;
         // Debug.Log($"IsTimeToCheck ? current timer: {findTarget.ValueRO.timer}, out of {findTarget.ValueRO.timerMax}");
         if (findTarget.ValueRO.timer > 0f) return false;
-        findTarget.ValueRW.timer = findTarget.ValueRO.timerMax;
+        findTarget.ValueRW.timer = _config.defaultCheckInterval;
         return true;
     }
 
@@ -65,7 +72,7 @@ public partial struct FindTargetSystem : ISystem
         distanceHitList.Clear();
 
         if (!collisionWorld.OverlapSphere(localTransform.ValueRO.Position,
-                findTarget.ValueRO.range,
+                _config.defaultRange,
                 ref distanceHitList,
                 _collisionFilter))
         {

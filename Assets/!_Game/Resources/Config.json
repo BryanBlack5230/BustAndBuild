@@ -91,6 +91,13 @@
         "preWrapMode": 8,
         "postWrapMode": 8
       }
+    },
+    "FindTargetConfig": {
+      "defaultRange": 5.0,
+      "defaultCheckInterval": 0.01,
+      "castleWallPriority": 2.0,
+      "beaconPriority": 1.0,
+      "unitPriority": 3.0
     }
   }
 }
