@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8263167764796634233}
   - component: {fileID: 4294417046276374025}
   - component: {fileID: 1715391600932384686}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -120,6 +120,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7455724397281238663}
+  - component: {fileID: 4412442987476650194}
   m_Layer: 0
   m_Name: Castle
   m_TagString: Untagged
@@ -147,6 +148,18 @@ Transform:
   - {fileID: 4861237908952979543}
   m_Father: {fileID: 2300831321358189313}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4412442987476650194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2619917910171865873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39aa11005c9812742aa6506fea791bbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::CastleAuthoring
 --- !u!1 &2739050741522492021
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,6 +172,7 @@ GameObject:
   - component: {fileID: 2696073789453058633}
   - component: {fileID: 3499632788127568915}
   - component: {fileID: 7691536478270013880}
+  - component: {fileID: 91650295556194626}
   m_Layer: 0
   m_Name: Beacon
   m_TagString: Untagged
@@ -258,6 +272,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &91650295556194626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2739050741522492021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85a40437366721e41a65ca0328992497, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::BeaconAuthoring
 --- !u!1 &2991513778898321684
 GameObject:
   m_ObjectHideFlags: 0
@@ -672,7 +698,8 @@ GameObject:
   - component: {fileID: 6368988545978995836}
   - component: {fileID: 1364715257648983565}
   - component: {fileID: 1590153495596205415}
-  m_Layer: 0
+  - component: {fileID: 3461153815657040419}
+  m_Layer: 9
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -771,6 +798,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3461153815657040419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7078940278049197114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c4441d4b5433d64f94d2111062c0e5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::WallSectionAuthoring
 --- !u!1 &8264327891838782323
 GameObject:
   m_ObjectHideFlags: 0
@@ -783,7 +822,7 @@ GameObject:
   - component: {fileID: 4310807968304720347}
   - component: {fileID: 4686516824205501981}
   - component: {fileID: 1139817046893438592}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}

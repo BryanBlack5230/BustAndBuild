@@ -39,9 +39,21 @@ namespace Game.Configs
                     {
                         defaultRange = 5f,
                         defaultCheckInterval = 0.01f,
-                        beaconPriority = 1f,
-                        castleWallPriority = 2f,
-                        unitPriority = 3f,
+                        
+                        beaconBasePriority = 100f,
+                        wallBasePriority = 80f,
+                        allyBasePriority = 50f,
+                        
+                        distanceWeight = 1f,
+                        closeRangeBonus = 20f,
+                        closeRangeThreshold = 3f,
+                        
+                        aggressionWeight = 30f,
+                        
+                        wallDetectionRadius = 8f,
+                        wallBypassCheckRadius = 12f,
+                        
+                        behindAngleThreshold = 120f,
                     }
                 }
             };

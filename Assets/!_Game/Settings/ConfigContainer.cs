@@ -79,18 +79,42 @@ namespace Game.Configs
     {
         public float defaultRange;
         public float defaultCheckInterval;
-        public float castleWallPriority;
-        public float beaconPriority;
-        public float unitPriority;
+        
+        public float beaconBasePriority;
+        public float wallBasePriority;
+        public float allyBasePriority;
+        
+        public float distanceWeight;
+        public float closeRangeBonus;
+        public float closeRangeThreshold;
+    
+        public float aggressionWeight;
+    
+        public float wallDetectionRadius;
+        public float wallBypassCheckRadius;
+    
+        public float behindAngleThreshold;
     }
 
     public struct FindTargetConfigBlob
     {
         public float defaultRange;
         public float defaultCheckInterval;
-        public float castleWallPriority;
-        public float beaconPriority;
-        public float unitPriority;
+        
+        public float beaconBasePriority;
+        public float wallBasePriority;
+        public float allyBasePriority;
+    
+        public float distanceWeight;
+        public float closeRangeBonus;
+        public float closeRangeThreshold;
+    
+        public float aggressionWeight;
+    
+        public float wallDetectionRadius;
+        public float wallBypassCheckRadius;
+    
+        public float behindAngleThreshold;
     }
     
     [Serializable]

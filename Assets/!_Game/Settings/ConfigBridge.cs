@@ -18,6 +18,7 @@ namespace Game.Configs
             var configEntity = entityManager.CreateEntity();
             entityManager.AddComponentData(configEntity, new FindTargetConfigReference
             {
+                // ConfigBlob = new BlobAssetReference<FindTargetConfigBlob>()
                 ConfigBlob = _container.FindTargetConfigBlob
             });
         }

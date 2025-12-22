@@ -9,7 +9,6 @@ namespace Game.Configs
             public static readonly int Bootstrap = SceneUtility.GetBuildIndexByScenePath("0.Bootstrap");
             public static readonly int Loading = SceneUtility.GetBuildIndexByScenePath("1.Loading");
             public static readonly int World = SceneUtility.GetBuildIndexByScenePath("2.World");
-            // public static readonly int Battle = SceneUtility.GetBuildIndexByScenePath("3.BattleGround");
             public static readonly int Battle = SceneUtility.GetBuildIndexByScenePath("3.BattleGroundScene");
             public static readonly int City = SceneUtility.GetBuildIndexByScenePath("4.City");
         }
@@ -18,6 +17,7 @@ namespace Game.Configs
             public const string Unit = "Unit";
             public const string Grabbable = "Grabbable";
             public const string Ground = "Ground";
+            public const string Obstacle = "Obstacle";
         }
         
         public static class Configs

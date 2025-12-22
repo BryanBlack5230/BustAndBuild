@@ -93,11 +93,18 @@
       }
     },
     "FindTargetConfig": {
-      "defaultRange": 5.0,
+      "defaultRange": 8.0,
       "defaultCheckInterval": 0.01,
-      "castleWallPriority": 2.0,
-      "beaconPriority": 1.0,
-      "unitPriority": 3.0
+      "beaconBasePriority": 100.0,
+      "wallBasePriority": 80.0,
+      "allyBasePriority": 50.0,
+      "distanceWeight": 2.0,
+      "closeRangeBonus": 20.0,
+      "closeRangeThreshold": 3.0,
+      "aggressionWeight": 30.0,
+      "wallDetectionRadius": 8.0,
+      "wallBypassCheckRadius": 8.0,
+      "behindAngleThreshold": 120.0
     }
   }
 }

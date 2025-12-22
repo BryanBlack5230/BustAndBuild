@@ -75,6 +75,11 @@ namespace GameEngine.AI
                 
             physicsVelocity.Linear = moveDirection * unitMover.moveSpeed;
             physicsVelocity.Angular = float3.zero;
+            
+            localTransform.Rotation = quaternion.LookRotationSafe(
+                new float3(moveDirection.x, 0f, moveDirection.z),
+                math.up()
+            );
         }
     }
 }

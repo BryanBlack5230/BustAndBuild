@@ -1,97 +1,103 @@
-using Game.Configs;
 using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
-
 
 [BurstCompile]
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
 public partial struct FindTargetSystem : ISystem
 {
-    private CollisionFilter _collisionFilter;
-    private FindTargetConfigBlob _config;
+    private EntityQuery _directorQuery;
+    private EntityQuery _wallQuery;
+    private EntityQuery _beaconQuery;
+    private EntityQuery _castleQuery;
     
+    private Entity _cachedBeacon;
+    private Entity _cachedCastle;
+    private bool _hasDiscoveredReferences;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<PhysicsWorldSingleton>();
+        state.RequireForUpdate<BattleDirector>();
         state.RequireForUpdate<FindTargetConfigReference>();
-        
-        _collisionFilter = new CollisionFilter
-        {
-            BelongsTo = ~0u,
-            CollidesWith = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Unit),
-            GroupIndex = 0,
-        };
+
+        _directorQuery = state.GetEntityQuery(
+            ComponentType.ReadOnly<BattleDirector>(),
+            ComponentType.ReadOnly<EnemyUnitReference>(),
+            ComponentType.ReadOnly<AllyUnitReference>()
+        );
+
+        _wallQuery = SystemAPI.QueryBuilder()
+            .WithAll<WallSection, LocalTransform>()
+            .Build();
+
+        _beaconQuery = SystemAPI.QueryBuilder()
+            .WithAll<BeaconTag>()
+            .Build();
+
+        _castleQuery = SystemAPI.QueryBuilder()
+            .WithAll<Castle>()
+            .Build();
+
+        _hasDiscoveredReferences = false;
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        _config = SystemAPI.GetSingleton<FindTargetConfigReference>().ConfigBlob.Value;
-        LookingForTarget(ref state);
-    }
-
-    private void LookingForTarget(ref SystemState state)
-    {
-        var physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-        var collisionWorld = physicsWorldSingleton.CollisionWorld;
-        var distanceHitList = new NativeList<DistanceHit>(Allocator.Temp);
-
-        foreach (var (localTransform, findTarget, target) 
-                 in SystemAPI.Query<
-                     RefRO<LocalTransform>, 
-                     RefRW<FindTarget>,
-                     RefRW<Target>>()
-                     .WithDisabled<UnableToAct>())
+        if (!_hasDiscoveredReferences)
         {
-            
-            if (!IsTimeToCheck(ref state, findTarget)) continue;
-            CheckUnitsInRange(ref state, ref distanceHitList, collisionWorld, localTransform, findTarget, target);
+            if (_beaconQuery.CalculateEntityCount() > 0 && _castleQuery.CalculateEntityCount() > 0)
+            {
+                _cachedBeacon = _beaconQuery.GetSingletonEntity();
+                _cachedCastle = _castleQuery.GetSingletonEntity();
+                _hasDiscoveredReferences = true;
+            }
+            else
+            {
+                return;
+            }
         }
         
-        distanceHitList.Dispose();
-    }
+        var directorEntity = _directorQuery.GetSingletonEntity();
+        var director = state.EntityManager.GetComponentData<BattleDirector>(directorEntity);
+        // if (!director.IsDirty) return;
 
-    private bool IsTimeToCheck(ref SystemState state, RefRW<FindTarget> findTarget)
-    {
-        findTarget.ValueRW.timer -= SystemAPI.Time.DeltaTime;
-        // Debug.Log($"IsTimeToCheck ? current timer: {findTarget.ValueRO.timer}, out of {findTarget.ValueRO.timerMax}");
-        if (findTarget.ValueRO.timer > 0f) return false;
-        findTarget.ValueRW.timer = _config.defaultCheckInterval;
-        return true;
-    }
+        director.IsDirty = false;
+        state.EntityManager.SetComponentData(directorEntity, director);
 
-    private void CheckUnitsInRange(ref SystemState state, ref NativeList<DistanceHit> distanceHitList, CollisionWorld collisionWorld, RefRO<LocalTransform> localTransform,
-        RefRW<FindTarget> findTarget, RefRW<Target> target)
-    {
-        distanceHitList.Clear();
-
-        if (!collisionWorld.OverlapSphere(localTransform.ValueRO.Position,
-                _config.defaultRange,
-                ref distanceHitList,
-                _collisionFilter))
-        {
-            findTarget.ValueRW.noTargetInRange = true;
-            target.ValueRW.targetEntity = Entity.Null;
-            return;
-        }
-            
-        foreach (var distanceHit in distanceHitList)
-        {
-            var targetUnit = SystemAPI.GetComponent<Unit>(distanceHit.Entity);
-            if (targetUnit.faction != findTarget.ValueRO.targetFaction) continue;
-                
-            target.ValueRW.targetEntity = distanceHit.Entity;
-            findTarget.ValueRW.noTargetInRange = false;
-            return;
-        }
+        var configRef = SystemAPI.GetSingleton<FindTargetConfigReference>();
+        var allyBuffer = state.EntityManager.GetBuffer<AllyUnitReference>(directorEntity, true);
         
-        findTarget.ValueRW.noTargetInRange = true;
-        target.ValueRW.targetEntity = Entity.Null;
+        var wallEntities = _wallQuery.ToEntityArray(Allocator.TempJob);
+        var wallTransforms = _wallQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+
+        var targetLookup = SystemAPI.GetComponentLookup<Target>(true);
+        var transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
+        var castleData = state.EntityManager.GetComponentData<Castle>(_cachedCastle);
+        
+        var job = new FindTargetJob
+        {
+            ConfigBlob = configRef.ConfigBlob,
+            AllyEntities = allyBuffer.Reinterpret<Entity>().AsNativeArray(),
+            
+            WallEntities = wallEntities,
+            WallTransforms = wallTransforms,
+            
+            TargetLookup = targetLookup,
+            TransformLookup = transformLookup,
+            
+            BeaconEntity = _cachedBeacon,
+            CastleBreached = castleData.hasBeenBreached,
+            
+            DeltaTime = SystemAPI.Time.DeltaTime
+        };
+
+        state.Dependency = job.ScheduleParallel(state.Dependency);
+        
+        state.Dependency = wallEntities.Dispose(state.Dependency);
+        state.Dependency = wallTransforms.Dispose(state.Dependency);
     }
 }
