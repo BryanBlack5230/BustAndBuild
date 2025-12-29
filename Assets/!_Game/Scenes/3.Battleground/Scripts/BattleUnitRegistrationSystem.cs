@@ -12,13 +12,13 @@ public partial struct BattleUnitRegistrationSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<BattleDirector>();
+        state.RequireForUpdate<BattleCoordinator>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var directorEntity = SystemAPI.GetSingletonEntity<BattleDirector>();
+        var directorEntity = SystemAPI.GetSingletonEntity<BattleCoordinator>();
 
         var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(directorEntity);
         var allies = state.EntityManager.GetBuffer<AllyUnitReference>(directorEntity);
@@ -50,7 +50,7 @@ public partial struct BattleUnitRegistrationSystem : ISystem
         // Debug.Log($"UnitRegistrationSystem OnUpdate: listChanged [{listChanged}], enemies [{enemies.Length}], allies [{allies.Length}]");
         if (!listChanged || enemies.Length == 0 || allies.Length == 0) return;
         
-        var director = SystemAPI.GetComponent<BattleDirector>(directorEntity);
+        var director = SystemAPI.GetComponent<BattleCoordinator>(directorEntity);
         director.IsDirty = true;
         state.EntityManager.SetComponentData(directorEntity, director);
     }

@@ -92,19 +92,87 @@
         "postWrapMode": 8
       }
     },
-    "FindTargetConfig": {
-      "defaultRange": 8.0,
-      "defaultCheckInterval": 0.01,
-      "beaconBasePriority": 100.0,
-      "wallBasePriority": 80.0,
-      "allyBasePriority": 50.0,
-      "distanceWeight": 2.0,
-      "closeRangeBonus": 20.0,
-      "closeRangeThreshold": 3.0,
-      "aggressionWeight": 30.0,
-      "wallDetectionRadius": 8.0,
-      "wallBypassCheckRadius": 8.0,
-      "behindAngleThreshold": 120.0
-    }
+    "AllyProfiles": [
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      },
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      },
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      }
+    ],
+    "EnemyProfiles": [
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      },
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      },
+      {
+        "DetectionRadiusSq": 5.0,
+        "ViewAngleCos": 90.0,
+        "CheckInterval": 0.01,
+        "WeightEnemy": 100.0,
+        "WeightAlly": -10.0,
+        "WeightWall": 10.0,
+        "WeightBeacon": 50.0,
+        "DistanceWeight": 1.0,
+        "LowHealthBonus": 0.0,
+        "AggroBonus": 50.0,
+        "LineOfSightBonus": 10.0
+      }
+    ]
   }
 }

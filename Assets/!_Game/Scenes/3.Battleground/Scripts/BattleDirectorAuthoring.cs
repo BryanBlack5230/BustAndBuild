@@ -9,7 +9,7 @@ public class BattleDirectorAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             
-            AddComponent(entity, new BattleDirector
+            AddComponent(entity, new BattleCoordinator
             {
                 IsDirty = true 
             });
@@ -20,7 +20,7 @@ public class BattleDirectorAuthoring : MonoBehaviour
     }
 }
 
-public struct BattleDirector : IComponentData
+public struct BattleCoordinator : IComponentData
 {
     public bool IsDirty;
 }

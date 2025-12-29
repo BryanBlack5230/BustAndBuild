@@ -26,4 +26,11 @@ namespace GameEngine.AI
         public float3 targetPosition;
     }
 
+    public struct Destination : IComponentData
+    {
+        public float3 Value;
+        public bool HasDestination;
+        public float StoppingDistance;
+    }
+
 }

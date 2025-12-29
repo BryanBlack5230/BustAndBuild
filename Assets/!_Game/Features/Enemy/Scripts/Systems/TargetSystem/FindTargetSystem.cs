@@ -8,91 +8,72 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
 public partial struct FindTargetSystem : ISystem
 {
-    private EntityQuery _directorQuery;
+    private EntityQuery _coordinatorQuery;
     private EntityQuery _wallQuery;
     private EntityQuery _beaconQuery;
     private EntityQuery _castleQuery;
-    
-    private Entity _cachedBeacon;
-    private Entity _cachedCastle;
-    private bool _hasDiscoveredReferences;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<BattleDirector>();
-        state.RequireForUpdate<FindTargetConfigReference>();
-
-        _directorQuery = state.GetEntityQuery(
-            ComponentType.ReadOnly<BattleDirector>(),
+        state.RequireForUpdate<BattleCoordinator>();
+        
+        _coordinatorQuery = state.GetEntityQuery(
+            ComponentType.ReadOnly<BattleCoordinator>(),
             ComponentType.ReadOnly<EnemyUnitReference>(),
             ComponentType.ReadOnly<AllyUnitReference>()
         );
 
-        _wallQuery = SystemAPI.QueryBuilder()
-            .WithAll<WallSection, LocalTransform>()
-            .Build();
-
-        _beaconQuery = SystemAPI.QueryBuilder()
-            .WithAll<BeaconTag>()
-            .Build();
-
-        _castleQuery = SystemAPI.QueryBuilder()
-            .WithAll<Castle>()
-            .Build();
-
-        _hasDiscoveredReferences = false;
+        _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalTransform>().Build();
+        _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalTransform>().Build();
+        _castleQuery = SystemAPI.QueryBuilder().WithAll<Castle, LocalTransform>().Build();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (!_hasDiscoveredReferences)
-        {
-            if (_beaconQuery.CalculateEntityCount() > 0 && _castleQuery.CalculateEntityCount() > 0)
-            {
-                _cachedBeacon = _beaconQuery.GetSingletonEntity();
-                _cachedCastle = _castleQuery.GetSingletonEntity();
-                _hasDiscoveredReferences = true;
-            }
-            else
-            {
-                return;
-            }
-        }
+        if (!SystemAPI.TryGetSingleton<TargetProfiles>(out var profilesConfig)) return;
         
-        var directorEntity = _directorQuery.GetSingletonEntity();
-        var director = state.EntityManager.GetComponentData<BattleDirector>(directorEntity);
-        // if (!director.IsDirty) return;
+        var coordEntity = _coordinatorQuery.GetSingletonEntity();
 
-        director.IsDirty = false;
-        state.EntityManager.SetComponentData(directorEntity, director);
 
-        var configRef = SystemAPI.GetSingleton<FindTargetConfigReference>();
-        var allyBuffer = state.EntityManager.GetBuffer<AllyUnitReference>(directorEntity, true);
+        var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
+        var allies = state.EntityManager.GetBuffer<AllyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
         
         var wallEntities = _wallQuery.ToEntityArray(Allocator.TempJob);
         var wallTransforms = _wallQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
 
-        var targetLookup = SystemAPI.GetComponentLookup<Target>(true);
-        var transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
-        var castleData = state.EntityManager.GetComponentData<Castle>(_cachedCastle);
-        
-        var job = new FindTargetJob
+
+        var beaconEnt = Entity.Null;
+        if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
+
+        var castleBreached = false;
+        if (_castleQuery.CalculateEntityCount() > 0)
         {
-            ConfigBlob = configRef.ConfigBlob,
-            AllyEntities = allyBuffer.Reinterpret<Entity>().AsNativeArray(),
+            castleBreached = _castleQuery.GetSingleton<Castle>().hasBeenBreached;
+        }
+
+        
+        var job = new TargetScorerJob
+        {
+            ProfilesBlob = profilesConfig.Blob,
+            
+            GlobalEnemies = enemies,
+            GlobalAllies = allies,
             
             WallEntities = wallEntities,
             WallTransforms = wallTransforms,
             
-            TargetLookup = targetLookup,
-            TransformLookup = transformLookup,
+            BeaconEntity = beaconEnt,
             
-            BeaconEntity = _cachedBeacon,
-            CastleBreached = castleData.hasBeenBreached,
+            UnitLookup = SystemAPI.GetComponentLookup<Unit>(true),
+            EnemyTypeLookup = SystemAPI.GetComponentLookup<EnemyUnitType>(true),
+            AllyTypeLookup = SystemAPI.GetComponentLookup<AllyUnitType>(true),
+            TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
             
-            DeltaTime = SystemAPI.Time.DeltaTime
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            CastleIsBreached = castleBreached
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);

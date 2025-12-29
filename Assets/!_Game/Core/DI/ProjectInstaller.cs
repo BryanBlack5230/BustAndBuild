@@ -13,7 +13,7 @@ public class ProjectInstaller : MonoBehaviour, IInstaller
         builder.AddSingleton(typeof(LoadingService), typeof(LoadingService));
         builder.AddSingleton(typeof(ConfigContainer), typeof(ConfigContainer));
         builder.AddSingleton(typeof(CursorSetter), typeof(CursorSetter));
-        builder.AddSingleton(typeof(ConfigBridge), typeof(ConfigBridge));
+        
         // if (Application.isEditor) builder.AddSingleton(typeof(DummyCursorSetter), typeof(DummyCursorSetter), typeof(IGameListener), typeof(IDisposable));
     }
 }

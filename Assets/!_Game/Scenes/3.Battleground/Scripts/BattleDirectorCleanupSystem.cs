@@ -10,14 +10,14 @@ public partial struct BattleDirectorCleanupSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<BattleDirector>();
+        state.RequireForUpdate<BattleCoordinator>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         Debug.Log("Cleanup OnUpdate");
-        var directorEntity = SystemAPI.GetSingletonEntity<BattleDirector>();
+        var directorEntity = SystemAPI.GetSingletonEntity<BattleCoordinator>();
         var isDirty = false;
 
         isDirty |= CleanupBuffer<EnemyUnitReference>(ref state, directorEntity);
@@ -25,7 +25,7 @@ public partial struct BattleDirectorCleanupSystem : ISystem
 
         if (!isDirty) return;
         
-        var director = SystemAPI.GetComponent<BattleDirector>(directorEntity);
+        var director = SystemAPI.GetComponent<BattleCoordinator>(directorEntity);
         director.IsDirty = true;
         state.EntityManager.SetComponentData(directorEntity, director);
     }

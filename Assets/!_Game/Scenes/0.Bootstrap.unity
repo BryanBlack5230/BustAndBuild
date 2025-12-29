@@ -221,6 +221,118 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &667487151
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 667487153}
+  - component: {fileID: 667487152}
+  m_Layer: 0
+  m_Name: PrototypeConfigSetter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &667487152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667487151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3bd763e9d74ef08c9bc9db98559d26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::Game.Configs.PrototypeConfigSetter
+  EnemyProfiles:
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  AllyProfiles:
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  - DetectionRadiusSq: 5
+    ViewAngleCos: 90
+    CheckInterval: 0.01
+    WeightEnemy: 100
+    WeightAlly: -10
+    WeightWall: 10
+    WeightBeacon: 50
+    DistanceWeight: 1
+    LowHealthBonus: 0
+    AggroBonus: 50
+    LineOfSightBonus: 10
+--- !u!4 &667487153
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667487151}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -116.48911, y: 0, z: -37.41413}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &669851392
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,6 +1252,7 @@ MonoBehaviour:
   _gameLoopManager: {fileID: 1181312369}
   _gameManagerUIController: {fileID: 669851394}
   _bootstrapFlow: {fileID: 1778888967}
+  _prototypeConfigSetter: {fileID: 667487152}
 --- !u!1 &1778888966
 GameObject:
   m_ObjectHideFlags: 0
@@ -1363,4 +1476,5 @@ SceneRoots:
   - {fileID: 1181312368}
   - {fileID: 1144885452}
   - {fileID: 1835219398}
+  - {fileID: 667487153}
   - {fileID: 1261699995}

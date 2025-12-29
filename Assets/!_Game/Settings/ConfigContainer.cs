@@ -1,48 +1,23 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameEngine.Utils;
-using GameEngine.Utils.Logging;
 using Newtonsoft.Json;
-using Unity.Entities;
 using UnityEngine;
 
 namespace Game.Configs
 {
-    public sealed class ConfigContainer : ILoadUnit, IDisposable
+    public sealed class ConfigContainer : ILoadUnit
     {
         public GeneralConfigContainer General;
         public BattleConfigContainer Battle;
-        
-        public BlobAssetReference<FindTargetConfigBlob> FindTargetConfigBlob { get; private set; }
-
 
         public UniTask Load()
         {
             var asset = AssetService.R.Load<TextAsset>(RuntimeConstants.Configs.ConfigFileName);
             JsonConvert.PopulateObject(asset.text, this);
 
-            CreateBlobAssets();
-            
             return UniTask.CompletedTask;
-        }
-        
-        public void Dispose()
-        {
-            if (FindTargetConfigBlob.IsCreated)
-                FindTargetConfigBlob.Dispose();
-        }
-
-        private void CreateBlobAssets()
-        {
-            if (Battle?.FindTargetConfig == null)
-            {
-                Log.Boot.E("FindTargetConfig is null! Check your JSON file");
-            }
-            else
-            {
-                FindTargetConfigBlob = BlobConfigConverter.CreateBlob<FindTargetConfigBlob>(Battle.FindTargetConfig);
-            }
-            
         }
     }
 
@@ -51,7 +26,8 @@ namespace Game.Configs
     {
         public CameraConfig CameraConfig;
         public PowerHitConfig PowerHitConfig;
-        public FindTargetConfig FindTargetConfig;
+        public List<TargetProfile> AllyProfiles;
+        public List<TargetProfile> EnemyProfiles;
     }
 
     [Serializable]
@@ -75,46 +51,43 @@ namespace Game.Configs
     
     [BlobConfig]
     [Serializable]
-    public class FindTargetConfig
+    public class TargetProfile
     {
-        public float defaultRange;
-        public float defaultCheckInterval;
-        
-        public float beaconBasePriority;
-        public float wallBasePriority;
-        public float allyBasePriority;
-        
-        public float distanceWeight;
-        public float closeRangeBonus;
-        public float closeRangeThreshold;
-    
-        public float aggressionWeight;
-    
-        public float wallDetectionRadius;
-        public float wallBypassCheckRadius;
-    
-        public float behindAngleThreshold;
+        public float DetectionRadiusSq;
+        public float ViewAngleCos;
+        public float CheckInterval;
+
+        public float WeightEnemy;
+        public float WeightAlly;
+        public float WeightWall;
+        public float WeightBeacon;
+
+        public float DistanceWeight;
+        public float LowHealthBonus;
+        public float AggroBonus;
+        public float LineOfSightBonus;
     }
 
-    public struct FindTargetConfigBlob
+    public struct TargetProfileBlob
     {
-        public float defaultRange;
-        public float defaultCheckInterval;
-        
-        public float beaconBasePriority;
-        public float wallBasePriority;
-        public float allyBasePriority;
-    
-        public float distanceWeight;
-        public float closeRangeBonus;
-        public float closeRangeThreshold;
-    
-        public float aggressionWeight;
-    
-        public float wallDetectionRadius;
-        public float wallBypassCheckRadius;
-    
-        public float behindAngleThreshold;
+        // General Settings
+        public float DetectionRadiusSq;
+        public float ViewAngleCos;
+        public float CheckInterval;
+
+        // Weights (Positive = Desire, Negative = Avoid/Ignore)
+        // A standard Soldier might have: Enemy=100, Ally=-1, Beacon=50
+        // A Healer might have: Enemy=-10, Ally=100, Beacon=0
+        public float WeightEnemy;
+        public float WeightAlly;
+        public float WeightWall;
+        public float WeightBeacon;
+
+        // Modifiers
+        public float DistanceWeight;       // Usually negative (prefer closer)
+        public float LowHealthBonus;       // Prefer weak targets (or injured friends if healer)
+        public float AggroBonus;           // Priority if they are attacking ME
+        public float LineOfSightBonus;     // Prefer visible targets
     }
     
     [Serializable]

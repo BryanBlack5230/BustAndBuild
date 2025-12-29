@@ -15,10 +15,10 @@ public class BootstrapFlow : MonoBehaviour
     private Container _bootSceneContainer;
     private ConfigContainer _configContainer;
     private DotsGameLoopBridge _dotsGameLoopBridge;
-    private ConfigBridge _configBridge;
+    private BlobContainer _blobContainer;
 
     [Inject]
-    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, ConfigBridge configBridge)
+    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer)
     {
         SceneScope.OnSceneContainerBuilding += OverrideParent;
         _dotsGameLoopBridge = dotsGameLoopBridge;
@@ -27,7 +27,7 @@ public class BootstrapFlow : MonoBehaviour
         _loadingService = loadingService;
         _cursorSetter = cursorSetter;
         _configContainer = configContainer;
-        _configBridge = configBridge;
+        _blobContainer = blobContainer;
     }
 
     private async void Start()
@@ -38,7 +38,7 @@ public class BootstrapFlow : MonoBehaviour
         await _loadingService.BeginLoading(_configContainer);
         await _loadingService.BeginLoading(_cursorSetter);
 
-        _configBridge.Initialize();
+        _blobContainer.Initialize();
 
         SceneManager.LoadSceneAsync(RuntimeConstants.Scenes.World, LoadSceneMode.Additive)
             .completed += OnNextSceneLoaded;

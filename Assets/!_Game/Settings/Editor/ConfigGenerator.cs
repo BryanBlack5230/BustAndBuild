@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEditor;
@@ -35,26 +36,108 @@ namespace Game.Configs
                         force = 2,
                         sizeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1),
                     },
-                    FindTargetConfig = new FindTargetConfig
+                    AllyProfiles = new List<TargetProfile>
                     {
-                        defaultRange = 5f,
-                        defaultCheckInterval = 0.01f,
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
                         
-                        beaconBasePriority = 100f,
-                        wallBasePriority = 80f,
-                        allyBasePriority = 50f,
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
                         
-                        distanceWeight = 1f,
-                        closeRangeBonus = 20f,
-                        closeRangeThreshold = 3f,
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        },
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
                         
-                        aggressionWeight = 30f,
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
                         
-                        wallDetectionRadius = 8f,
-                        wallBypassCheckRadius = 12f,
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        },
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
                         
-                        behindAngleThreshold = 120f,
-                    }
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
+                        
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        }
+                    },
+                    EnemyProfiles = new List<TargetProfile>
+                    {
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
+                        
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
+                        
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        },
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
+                        
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
+                        
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        },
+                        new TargetProfile
+                        {
+                            DetectionRadiusSq = 5f,
+                            ViewAngleCos = 90f,
+                            CheckInterval = 0.01f,
+                        
+                            WeightEnemy = 100f,
+                            WeightAlly = -10f,
+                            WeightWall = 10f,
+                            WeightBeacon = 50f,
+                        
+                            DistanceWeight = 1f,
+                            LowHealthBonus = 0f,
+                            AggroBonus = 50f,
+                            LineOfSightBonus = 10f,
+                        }
+                    },
                 }
             };
             var json = JsonConvert.SerializeObject(configContainer, Formatting.Indented);
