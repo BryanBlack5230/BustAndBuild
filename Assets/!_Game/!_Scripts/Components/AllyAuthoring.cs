@@ -2,18 +2,19 @@ using GameEngine.AI;
 using Unity.Entities;
 using UnityEngine;
 
-public class EnemyAuthoring : MonoBehaviour
+public class AllyAuthoring : MonoBehaviour
 {
-    public Faction faction = Faction.Enemy;
-    public EnemyType enemyType = EnemyType.Grunt;
+    public Faction faction = Faction.Ally;
+    public AllyType allyType = AllyType.Soldier;
     public float moveSpeed = 3f;
     public float stoppingDistance = 1f;
     public float checkInterval = 0.5f;
-    public float health = 50f;
+    public float health = 100f;
     
-    public class Baker : Baker<EnemyAuthoring>
+    
+    public class Baker : Baker<AllyAuthoring>
     {
-        public override void Bake(EnemyAuthoring authoring)
+        public override void Bake(AllyAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             
@@ -28,14 +29,13 @@ public class EnemyAuthoring : MonoBehaviour
             
             // components
             AddComponent(entity, new Unit { faction = authoring.faction, });
-            AddComponent(entity, new EnemyUnitType { Value = authoring.enemyType, });
+            AddComponent(entity, new AllyUnitType { Value = authoring.allyType, });
             AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, });
             AddComponent(entity, new Destination { StoppingDistance = authoring.stoppingDistance });
             AddComponent(entity, new FindTarget { Timer = authoring.checkInterval });
             AddComponent(entity, new Target());
             AddComponent(entity, new Health { Value = authoring.health, Max = authoring.health });
             AddBuffer<DamageBufferElement>(entity);
-            
         }
     }
 }

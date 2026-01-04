@@ -12,14 +12,16 @@ public partial struct AbleToActEvaluationSystem : ISystem
     {
         var em = state.EntityManager;
 
-        foreach (var (unableToAct, grabbed, entity) 
+        foreach (var (unableToAct, grabbed, health, entity) 
                  in SystemAPI.Query<
                      EnabledRefRW<UnableToAct>, 
-                     EnabledRefRO<Grabbed>>()
+                     EnabledRefRO<Grabbed>,
+                     RefRO<Health>>()
                      .WithEntityAccess()
                      .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState))
         {
-            var isUnableToAct = grabbed.ValueRO;
+            var isUnableToAct = grabbed.ValueRO || 
+                                health.ValueRO.IsDead;
             
             em.SetComponentEnabled<UnableToAct>(entity, isUnableToAct);
         }

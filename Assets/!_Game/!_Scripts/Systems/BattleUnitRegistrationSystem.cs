@@ -1,9 +1,6 @@
 using GameManagement;
 using Unity.Burst;
 using Unity.Entities;
-using UnityEngine;
-
-public struct UnitRegisteredTag : IComponentData, IEnableableComponent { }
 
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
 [UpdateAfter(typeof(SpawningSystem))]
@@ -51,7 +48,7 @@ public partial struct BattleUnitRegistrationSystem : ISystem
         if (!listChanged || enemies.Length == 0 || allies.Length == 0) return;
         
         var director = SystemAPI.GetComponent<BattleCoordinator>(directorEntity);
-        director.IsDirty = true;
+        director.ForceGlobalReevaluation = true;
         state.EntityManager.SetComponentData(directorEntity, director);
     }
 }

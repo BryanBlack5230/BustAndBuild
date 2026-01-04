@@ -290,8 +290,8 @@ MonoBehaviour:
     CheckInterval: 0.01
     WeightEnemy: 100
     WeightAlly: -10
-    WeightWall: 10
-    WeightBeacon: 50
+    WeightWall: -1
+    WeightBeacon: -1
     DistanceWeight: 1
     LowHealthBonus: 0
     AggroBonus: 50

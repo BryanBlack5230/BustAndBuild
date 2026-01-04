@@ -24,7 +24,7 @@ public partial struct BattleDirectorCleanupSystem : ISystem
         if (!isDirty) return;
         
         var director = SystemAPI.GetComponent<BattleCoordinator>(directorEntity);
-        director.IsDirty = true;
+        director.ForceGlobalReevaluation = true;
         state.EntityManager.SetComponentData(directorEntity, director);
     }
 

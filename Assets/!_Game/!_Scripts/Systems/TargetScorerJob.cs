@@ -27,12 +27,15 @@ public partial struct TargetScorerJob : IJobEntity
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
     [ReadOnly] public float DeltaTime;
+    [ReadOnly] public bool IsBattleActive;
+    [ReadOnly] public bool ForceUpdate;
     [ReadOnly] public bool CastleIsBreached;
 
     private void Execute(Entity entity, ref FindTarget findTarget, ref Target target, in LocalTransform transform)
     {
         findTarget.Timer -= DeltaTime;
-        if (findTarget.Timer > 0f) return;
+        var shouldSearch = ForceUpdate || (IsBattleActive && findTarget.Timer <= 0f);
+        if (!shouldSearch) return;
         
         var faction = UnitLookup[entity].faction;
         

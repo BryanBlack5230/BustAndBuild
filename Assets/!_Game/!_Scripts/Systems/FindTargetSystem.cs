@@ -11,7 +11,6 @@ public partial struct FindTargetSystem : ISystem
     private EntityQuery _coordinatorQuery;
     private EntityQuery _wallQuery;
     private EntityQuery _beaconQuery;
-    private EntityQuery _castleQuery;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -26,7 +25,6 @@ public partial struct FindTargetSystem : ISystem
 
         _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalTransform>().Build();
         _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalTransform>().Build();
-        _castleQuery = SystemAPI.QueryBuilder().WithAll<Castle, LocalTransform>().Build();
     }
 
     [BurstCompile]
@@ -35,7 +33,13 @@ public partial struct FindTargetSystem : ISystem
         if (!SystemAPI.TryGetSingleton<TargetProfiles>(out var profilesConfig)) return;
         
         var coordEntity = _coordinatorQuery.GetSingletonEntity();
-
+        var coord = SystemAPI.GetComponent<BattleCoordinator>(coordEntity);
+        
+        if (coord.ForceGlobalReevaluation)
+        {
+            var coordRW = SystemAPI.GetComponentRW<BattleCoordinator>(coordEntity);
+            coordRW.ValueRW.ForceGlobalReevaluation = false;
+        }
 
         var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
         var allies = state.EntityManager.GetBuffer<AllyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
@@ -46,13 +50,7 @@ public partial struct FindTargetSystem : ISystem
 
         var beaconEnt = Entity.Null;
         if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
-
-        var castleBreached = false;
-        if (_castleQuery.CalculateEntityCount() > 0)
-        {
-            castleBreached = _castleQuery.GetSingleton<Castle>().hasBeenBreached;
-        }
-
+        
         
         var job = new TargetScorerJob
         {
@@ -73,7 +71,9 @@ public partial struct FindTargetSystem : ISystem
             TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
             
             DeltaTime = SystemAPI.Time.DeltaTime,
-            CastleIsBreached = castleBreached
+            IsBattleActive = coord.IsBattleActive,
+            ForceUpdate = coord.ForceGlobalReevaluation,
+            CastleIsBreached = coord.WasCastleBreached
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);

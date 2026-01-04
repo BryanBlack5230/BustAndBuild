@@ -11,7 +11,9 @@ public class BattleDirectorAuthoring : MonoBehaviour
             
             AddComponent(entity, new BattleCoordinator
             {
-                IsDirty = true 
+                IsBattleActive = false,
+                ForceGlobalReevaluation = false,
+                WasCastleBreached = false,
             });
 
             AddBuffer<EnemyUnitReference>(entity);
@@ -22,7 +24,9 @@ public class BattleDirectorAuthoring : MonoBehaviour
 
 public struct BattleCoordinator : IComponentData
 {
-    public bool IsDirty;
+    public bool IsBattleActive;
+    public bool ForceGlobalReevaluation;
+    public bool WasCastleBreached;
 }
 
 public struct EnemyUnitReference : IBufferElementData { public Entity Value; }

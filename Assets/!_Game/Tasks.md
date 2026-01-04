@@ -7,7 +7,7 @@
 | ------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 |        | Scenes       |                                                                                                                                                    |
 |    ✅   |              | Create a greybox island with probuilder                                                                                                            |
-|        |              | All scenes must run simultaneously, but frustum cull visual and some logic                                                                         |
+|    ✅   |              | All scenes must run simultaneously, but frustum cull visual and some logic                                                                         |
 |        | Camera types |                                                                                                                                                    |
 |   ✅    |              | Map scene - set up camera position for bird's eye view, slightly tilted isometric                                                                  |
 |   ✅    |              | Battleground scene - orthogonal 2.5d                                                                                                               |
@@ -39,7 +39,7 @@
 |   ✅    |               | Has a faction                                                                                                                                    |
 |   ✅    |               | Can walk (walks to Target till desired range)                                                                                                    |
 |        |               | Has performable Action and cooldown, for now only one type of Action - attack                                                                    |
-|        |               | Has Target (if no target, receives default Target based on faction)                                                                              |
+|   ✅     |               | Has Target (if no target, receives default Target based on faction)                                                                              |
 |   ✅   |               | Looks for nearby targets                                                                                                                         |
 |        |               | Has Health                                                                                                                                       |
 |   ✅   |               | If grabbed, all other logic is stopped                                                                                                           |
@@ -51,7 +51,7 @@
 |        |               | Damage event: collision                                                                                                                          |
 |        |               | Damage events: unit attack                                                                                                                       |
 |        | Enemy unit AI |                                                                                                                                                  |
-|        |               | Default Target is set to Beacon                                                                                                                  |
+|    ✅    |               | Default Target is set to Beacon                                                                                                                  |
 |        |               | Calls death event on unit death                                                                                                                  |
 |        | Ally unit AI  |                                                                                                                                                  |
 |        |               | Stays in front of wall                                                                                                                           |
