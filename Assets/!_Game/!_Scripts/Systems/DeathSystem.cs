@@ -3,7 +3,6 @@ using Unity.Entities;
 
 [BurstCompile]
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderLast = true)]
-// Run AFTER damage is applied so we catch deaths in the same frame
 [UpdateAfter(typeof(ApplyDamageSystem))] 
 public partial struct DeathSystem : ISystem
 {
@@ -20,31 +19,41 @@ public partial struct DeathSystem : ISystem
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        new DeathJob
+        new MarkDeathJob
         {
-            ECB = ecb,
-            IsDeadHandle = state.GetComponentTypeHandle<IsDead>()
+            ECB = ecb
+        }.ScheduleParallel();
+
+        new DestroyDeadJob
+        {
+            ECB = ecb
         }.ScheduleParallel();
     }
 }
 
 [BurstCompile]
-public partial struct DeathJob : IJobEntity
+[WithNone(typeof(IsDead))]
+public partial struct MarkDeathJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ECB;
-    public ComponentTypeHandle<IsDead> IsDeadHandle;
 
-    public void Execute(Entity entity, [EntityIndexInQuery] int sortKey, ref Health health, EnabledRefRW<IsDead> isDeadTag)
+    public void Execute(Entity entity, [EntityIndexInQuery] int sortKey, in Health health)
     {
-        if (health.IsDead && !isDeadTag.ValueRO)
+        if (health.Value <= 0)
         {
-            isDeadTag.ValueRW = true;
-            return;
+            ECB.SetComponentEnabled<IsDead>(sortKey, entity, true);
         }
-        
-        if (isDeadTag.ValueRO)
-        {
-            ECB.DestroyEntity(sortKey, entity);
-        }
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(IsDead))]
+public partial struct DestroyDeadJob : IJobEntity
+{
+    public EntityCommandBuffer.ParallelWriter ECB;
+
+    public void Execute(Entity entity, [EntityIndexInQuery] int sortKey)
+    {
+        ECB.DestroyEntity(sortKey, entity);
     }
 }

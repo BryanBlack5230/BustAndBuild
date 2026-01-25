@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Entities;
+using Unity.Mathematics;
 
 public class UnitAuthoring : MonoBehaviour
 {
@@ -40,6 +41,11 @@ public enum AllyType : byte
 public struct Unit : IComponentData
 {
     public Faction faction;
+}
+
+public struct BattleUnitBase : IComponentData
+{
+    public float3 position;
 }
 
 public struct EnemyUnitType : IComponentData

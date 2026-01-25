@@ -11,12 +11,13 @@ namespace GameEngine.AI
         {
             foreach (var (unitMover, target) in SystemAPI.Query<RefRW<UnitMover>, RefRO<Target>>().WithDisabled<UnableToAct>())
             {
+                continue;
                 if (target.ValueRO.TargetEntity == Entity.Null) continue;
                 
                 if (state.EntityManager.HasComponent<LocalTransform>(target.ValueRO.TargetEntity))
                 {
                     var targetTransform = state.EntityManager.GetComponentData<LocalTransform>(target.ValueRO.TargetEntity);
-                    unitMover.ValueRW.targetPosition = targetTransform.Position;
+                    // unitMover.ValueRW.targetPosition = targetTransform.Position;
                 }
             }
         }

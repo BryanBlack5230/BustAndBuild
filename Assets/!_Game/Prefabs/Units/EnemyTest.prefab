@@ -129,8 +129,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::EnemyAuthoring
   faction: 2
+  enemyType: 0
+  unitBase: {fileID: 0}
   moveSpeed: 3
   stoppingDistance: 1
+  checkInterval: 0.5
+  health: 50
+  attackDamage: 10
+  attackCooldown: 2
+  attackRange: 1.5
 --- !u!54 &8147585489975437197
 Rigidbody:
   m_ObjectHideFlags: 0
