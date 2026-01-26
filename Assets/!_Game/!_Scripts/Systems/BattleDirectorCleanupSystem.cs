@@ -3,7 +3,7 @@ using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
-[UpdateBefore(typeof(FindTargetSystem))]
+[UpdateBefore(typeof(TargetSearchSystem))]
 [BurstCompile]
 public partial struct BattleDirectorCleanupSystem : ISystem
 {

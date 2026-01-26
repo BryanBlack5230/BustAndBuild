@@ -7,7 +7,7 @@ using Unity.Transforms;
 
 
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-[UpdateAfter(typeof(FindTargetSystem))]
+[UpdateAfter(typeof(TargetSearchSystem))]
 [UpdateBefore(typeof(UnitMoverSystem))]
 public partial struct BattleBrainSystem : ISystem
 {

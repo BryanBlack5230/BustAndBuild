@@ -9,7 +9,6 @@ public class AllyAuthoring : MonoBehaviour
     public Transform unitBase;
     public float moveSpeed = 3f;
     public float stoppingDistance = 1f;
-    public float checkInterval = 0.5f;
     public float health = 100f;
     public float attackDamage = 20f;
     public float attackCooldown = 2f;
@@ -26,11 +25,13 @@ public class AllyAuthoring : MonoBehaviour
             AddComponent(entity, new Grabbed());
             AddComponent(entity, new IsDead());
             AddComponent(entity, new AttackCooldownExpirationTimestamp());
+            AddComponent(entity, new TargetSearchCooldownExpirationTimestamp());
             
             SetComponentEnabled<UnableToAct>(entity, false);
             SetComponentEnabled<Grabbed>(entity, false);
             SetComponentEnabled<IsDead>(entity, false);
             SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
+            SetComponentEnabled<TargetSearchCooldownExpirationTimestamp>(entity, false);
             
             // components
             AddComponent(entity, new Unit { faction = authoring.faction, });
@@ -38,7 +39,6 @@ public class AllyAuthoring : MonoBehaviour
             AddComponent(entity, new AllyUnitType { Value = authoring.allyType, });
             AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, });
             AddComponent(entity, new Destination { StoppingDistanceSq = authoring.stoppingDistance * authoring.stoppingDistance });
-            AddComponent(entity, new FindTarget { Timer = authoring.checkInterval });
             AddComponent(entity, new Target());
             AddComponent(entity, new Health { Value = authoring.health, Max = authoring.health });
             AddBuffer<DamageBufferElement>(entity);

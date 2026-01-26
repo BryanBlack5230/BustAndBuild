@@ -7,6 +7,8 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [BurstCompile]
+[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+[WithAll(typeof(Target))]
 public partial struct TargetScorerJob : IJobEntity
 {
     [ReadOnly] public BlobAssetReference<TargetProfilesBlob> ProfilesBlob;
@@ -26,15 +28,14 @@ public partial struct TargetScorerJob : IJobEntity
     [ReadOnly] public ComponentLookup<Target> TargetLookup;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
-    [ReadOnly] public float DeltaTime;
+    [ReadOnly] public double ElapsedTime;
     [ReadOnly] public bool IsBattleActive;
     [ReadOnly] public bool ForceUpdate;
     [ReadOnly] public bool CastleIsBreached;
 
-    private void Execute(Entity entity, ref FindTarget findTarget, ref Target target, in LocalTransform transform)
+    private void Execute(Entity entity, ref Target target, in LocalTransform transform, EnabledRefRW<TargetSearchCooldownExpirationTimestamp> cooldownEnabled, ref TargetSearchCooldownExpirationTimestamp cooldownTimestamp)
     {
-        findTarget.Timer -= DeltaTime;
-        var shouldSearch = ForceUpdate || (IsBattleActive && findTarget.Timer <= 0f);
+        var shouldSearch = ForceUpdate || (IsBattleActive && cooldownEnabled.ValueRO);
         if (!shouldSearch) return;
         
         var faction = UnitLookup[entity].faction;
@@ -68,7 +69,8 @@ public partial struct TargetScorerJob : IJobEntity
             }
         }
         
-        findTarget.Timer = settings.CheckInterval;
+        cooldownTimestamp.Value = ElapsedTime + settings.CheckInterval;
+        cooldownEnabled.ValueRW = true;
 
         var bestScore = float.MinValue;
         TargetCandidate bestCandidate = default;
@@ -78,12 +80,12 @@ public partial struct TargetScorerJob : IJobEntity
         var hostiles = faction == Faction.Ally ? GlobalEnemies : GlobalAllies;
         var friends = faction == Faction.Ally ? GlobalAllies : GlobalEnemies;
 
-        if (settings.WeightEnemy != 0) 
+        if (settings.WeightEnemy > 0) 
         {
             ProcessUnitList(entity, hostiles, myPos, myForward, ref settings, settings.WeightEnemy, isHostileList: true, ref bestScore, ref bestCandidate);
         }
 
-        if (settings.WeightAlly != 0)
+        if (settings.WeightAlly > 0)
         {
             ProcessUnitList(entity, friends, myPos, myForward, ref settings, settings.WeightAlly, isHostileList: false, ref bestScore, ref bestCandidate);
         }

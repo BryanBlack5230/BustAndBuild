@@ -18,6 +18,8 @@ public class AttackAuthoring : MonoBehaviour
                 CooldownTime = authoring.cooldown,
                 AttackRange = authoring.range,
             });
+            AddComponent(entity, new AttackCooldownExpirationTimestamp());
+            SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
         }
     }
 }

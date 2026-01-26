@@ -2,7 +2,7 @@ using GameManagement;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
-[UpdateBefore(typeof(FindTargetSystem))]
+[UpdateBefore(typeof(TargetSearchSystem))]
 public partial struct BattleCoordinatorSystem : ISystem
 {
     public void OnCreate(ref SystemState state)

@@ -6,7 +6,7 @@ using Unity.Transforms;
 
 [BurstCompile]
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
-public partial struct FindTargetSystem : ISystem
+public partial struct TargetSearchSystem : ISystem
 {
     private EntityQuery _coordinatorQuery;
     private EntityQuery _wallQuery;
@@ -40,6 +40,13 @@ public partial struct FindTargetSystem : ISystem
             var coordRW = SystemAPI.GetComponentRW<BattleCoordinator>(coordEntity);
             coordRW.ValueRW.ForceGlobalReevaluation = false;
         }
+        
+        var elapsedTime = SystemAPI.Time.ElapsedTime;
+        foreach (var (expirationTimestamp, cooldownEnabled) in SystemAPI.Query<RefRO<TargetSearchCooldownExpirationTimestamp>, EnabledRefRW<TargetSearchCooldownExpirationTimestamp>>())
+        {
+            if (expirationTimestamp.ValueRO.Value > elapsedTime) continue;
+            cooldownEnabled.ValueRW = false;
+        }
 
         var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
         var allies = state.EntityManager.GetBuffer<AllyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
@@ -50,7 +57,6 @@ public partial struct FindTargetSystem : ISystem
 
         var beaconEnt = Entity.Null;
         if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
-        
         
         var job = new TargetScorerJob
         {
@@ -70,7 +76,7 @@ public partial struct FindTargetSystem : ISystem
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
             
-            DeltaTime = SystemAPI.Time.DeltaTime,
+            ElapsedTime = elapsedTime,
             IsBattleActive = coord.IsBattleActive,
             ForceUpdate = coord.ForceGlobalReevaluation,
             CastleIsBreached = coord.WasCastleBreached

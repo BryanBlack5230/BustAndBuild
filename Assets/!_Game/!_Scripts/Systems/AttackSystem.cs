@@ -1,5 +1,6 @@
 using GameManagement;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
@@ -19,35 +20,38 @@ public partial struct AttackSystem : ISystem
             if (expirationTimestamp.ValueRO.Value > elapsedTime) continue;
             cooldownEnabled.ValueRW = false;
         }
+        
+        var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
 
         var attackJob = new AttackJob
         {
-            CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(),
-            DamageBufferLookup = SystemAPI.GetBufferLookup<DamageBufferElement>(),
+            Ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
             ElapsedTime = elapsedTime
         };
 
-        state.Dependency = attackJob.Schedule(state.Dependency);
+        state.Dependency = attackJob.ScheduleParallel(state.Dependency);
     }
 }
 
+[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+[WithAll(typeof(AttackData), typeof(Target), typeof(BattleBrain))]
 public partial struct AttackJob : IJobEntity
 {
-    public ComponentLookup<AttackCooldownExpirationTimestamp> CooldownLookup;
-    public BufferLookup<DamageBufferElement> DamageBufferLookup;
-    
-    public double ElapsedTime;
+    [ReadOnly] public double ElapsedTime;
+    public EntityCommandBuffer.ParallelWriter Ecb;
 
-    private void Execute(Entity entity, in AttackData attackData, in Target target, in BattleBrain battleBrain)
+    private void Execute(Entity entity, [ChunkIndexInQuery] int sortKey, in AttackData attackData, in Target target, in BattleBrain battleBrain,
+        EnabledRefRW<AttackCooldownExpirationTimestamp> cooldownEnabled, ref AttackCooldownExpirationTimestamp cooldownTimestamp)
     {
         if (!battleBrain.CanAttack) return;
-        if (CooldownLookup.IsComponentEnabled(entity)) return;
-        if (target.TargetEntity == Entity.Null) return;
-        CooldownLookup[entity] = new AttackCooldownExpirationTimestamp { Value = ElapsedTime + attackData.CooldownTime };
         
-        CooldownLookup.SetComponentEnabled(entity, true);
-        var damageBuffer = DamageBufferLookup[target.TargetEntity];
-        damageBuffer.Add(new DamageBufferElement
+        if (cooldownEnabled.ValueRO) return;
+        if (target.TargetEntity == Entity.Null) return;
+        
+        cooldownTimestamp.Value = ElapsedTime + attackData.CooldownTime;
+        cooldownEnabled.ValueRW = true;
+        
+        Ecb.AppendToBuffer(sortKey, target.TargetEntity, new DamageBufferElement
         {
             Value = attackData.Damage
         });

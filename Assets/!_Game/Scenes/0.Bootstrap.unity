@@ -253,9 +253,9 @@ MonoBehaviour:
   EnemyProfiles:
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
+    WeightAlly: 0
     WeightWall: 10
     WeightBeacon: 50
     DistanceWeight: 1
@@ -264,9 +264,9 @@ MonoBehaviour:
     LineOfSightBonus: 10
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
+    WeightAlly: 0
     WeightWall: 10
     WeightBeacon: 50
     DistanceWeight: 1
@@ -275,9 +275,9 @@ MonoBehaviour:
     LineOfSightBonus: 10
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
+    WeightAlly: 0
     WeightWall: 10
     WeightBeacon: 50
     DistanceWeight: 1
@@ -287,33 +287,33 @@ MonoBehaviour:
   AllyProfiles:
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
-    WeightWall: -1
-    WeightBeacon: -1
+    WeightAlly: 0
+    WeightWall: 0
+    WeightBeacon: 0
     DistanceWeight: 1
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
-    WeightWall: 10
-    WeightBeacon: 50
+    WeightAlly: 0
+    WeightWall: 0
+    WeightBeacon: 0
     DistanceWeight: 1
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
   - DetectionRadiusSq: 5
     ViewAngleCos: 90
-    CheckInterval: 0.01
+    CheckInterval: 0.5
     WeightEnemy: 100
-    WeightAlly: -10
-    WeightWall: 10
-    WeightBeacon: 50
+    WeightAlly: 0
+    WeightWall: 0
+    WeightBeacon: 0
     DistanceWeight: 1
     LowHealthBonus: 0
     AggroBonus: 50
@@ -327,7 +327,7 @@ Transform:
   m_GameObject: {fileID: 667487151}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -116.48911, y: 0, z: -37.41413}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1230,7 +1230,7 @@ Transform:
   m_GameObject: {fileID: 1664718994}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -108.74756, y: 0, z: -24.10391}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
