@@ -35,7 +35,6 @@ public class EnemyAuthoring : MonoBehaviour
 
             // components
             AddComponent(entity, new Unit { faction = authoring.faction, });
-            AddComponent(entity, new BattleUnitBase{position = authoring.transform.position}); // TODO this needs to be set up properly
             AddComponent(entity, new EnemyUnitType { Value = authoring.enemyType, });
             AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, });
             AddComponent(entity, new Destination { StoppingDistanceSq = authoring.stoppingDistance * authoring.stoppingDistance});

@@ -43,11 +43,6 @@ public struct Unit : IComponentData
     public Faction faction;
 }
 
-public struct BattleUnitBase : IComponentData
-{
-    public float3 position;
-}
-
 public struct EnemyUnitType : IComponentData
 {
     public EnemyType Value;

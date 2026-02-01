@@ -6,7 +6,6 @@ public class AllyAuthoring : MonoBehaviour
 {
     public Faction faction = Faction.Ally;
     public AllyType allyType = AllyType.Soldier;
-    public Transform unitBase;
     public float moveSpeed = 3f;
     public float stoppingDistance = 1f;
     public float health = 100f;
@@ -35,7 +34,6 @@ public class AllyAuthoring : MonoBehaviour
             
             // components
             AddComponent(entity, new Unit { faction = authoring.faction, });
-            AddComponent(entity, new BattleUnitBase{position = authoring.transform.position}); // TODO this needs to be set up properly
             AddComponent(entity, new AllyUnitType { Value = authoring.allyType, });
             AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, });
             AddComponent(entity, new Destination { StoppingDistanceSq = authoring.stoppingDistance * authoring.stoppingDistance });
@@ -44,7 +42,7 @@ public class AllyAuthoring : MonoBehaviour
             AddBuffer<DamageBufferElement>(entity);
             AddComponent(entity, new AttackData { Damage = authoring.attackDamage, CooldownTime = authoring.attackCooldown, AttackRange = authoring.attackRange});
             AddComponent(entity, new BattleBrain{ CanAttack = false});
-            AddComponent(entity, new EmotionalState {Value = Emotion.Normal});
+            AddComponent(entity, new EmotionalState {Value = Emotion.Scared});
             AddComponent(entity, new ActionState { Value = ActionType.Moving });
         }
     }
