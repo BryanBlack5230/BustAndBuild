@@ -1,0 +1,351 @@
+fileFormatVersion: 2
+guid: 36214435df952954da10c70d6fc7cc1c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6102725260466032420
+    second: game-icon-v4-rogue-pixarts-store_83@4x_0
+  - first:
+      213: 7414592600049934519
+    second: game-icon-v4-rogue-pixarts-store_83@4x_1
+  - first:
+      213: 1526355113774310809
+    second: game-icon-v4-rogue-pixarts-store_83@4x_2
+  - first:
+      213: -4510941442412432301
+    second: game-icon-v4-rogue-pixarts-store_83@4x_3
+  - first:
+      213: -4614884741372096780
+    second: game-icon-v4-rogue-pixarts-store_83@4x_4
+  - first:
+      213: -108673893868691662
+    second: game-icon-v4-rogue-pixarts-store_83@4x_5
+  - first:
+      213: -898413108971314502
+    second: game-icon-v4-rogue-pixarts-store_83@4x_6
+  - first:
+      213: -1400895401411206647
+    second: game-icon-v4-rogue-pixarts-store_83@4x_7
+  - first:
+      213: -4535823980945784092
+    second: game-icon-v4-rogue-pixarts-store_83@4x_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_0
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 141
+        width: 33
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd07e1095b3ce4ba0800000000000000
+      internalID: -6102725260466032420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_1
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 114
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b067308face5e660800000000000000
+      internalID: 7414592600049934519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_2
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 128
+        width: 66
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9956e9593e3be2510800000000000000
+      internalID: 1526355113774310809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_3
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 82
+        width: 115
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3543b6a78aae561c0800000000000000
+      internalID: -4510941442412432301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_4
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 122
+        width: 48
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fe452747c2a4ffb0800000000000000
+      internalID: -4614884741372096780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 35
+        width: 62
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23f19975ba9ed7ef0800000000000000
+      internalID: -108673893868691662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_6
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 20
+        width: 94
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab2e53299023883f0800000000000000
+      internalID: -898413108971314502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_7
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 0
+        width: 41
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 902286ffd050f8ce0800000000000000
+      internalID: -1400895401411206647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v4-rogue-pixarts-store_83@4x_8
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 47
+        width: 39
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e247040f148d01c0800000000000000
+      internalID: -4535823980945784092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      game-icon-v4-rogue-pixarts-store_83@4x_0: -6102725260466032420
+      game-icon-v4-rogue-pixarts-store_83@4x_1: 7414592600049934519
+      game-icon-v4-rogue-pixarts-store_83@4x_2: 1526355113774310809
+      game-icon-v4-rogue-pixarts-store_83@4x_3: -4510941442412432301
+      game-icon-v4-rogue-pixarts-store_83@4x_4: -4614884741372096780
+      game-icon-v4-rogue-pixarts-store_83@4x_5: -108673893868691662
+      game-icon-v4-rogue-pixarts-store_83@4x_6: -898413108971314502
+      game-icon-v4-rogue-pixarts-store_83@4x_7: -1400895401411206647
+      game-icon-v4-rogue-pixarts-store_83@4x_8: -4535823980945784092
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

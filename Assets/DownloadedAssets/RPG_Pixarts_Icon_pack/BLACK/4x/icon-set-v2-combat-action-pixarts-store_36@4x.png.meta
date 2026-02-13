@@ -1,0 +1,377 @@
+fileFormatVersion: 2
+guid: bc7466bd9e24b144ba141c3c492e3b4c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4270937722666352846
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_0
+  - first:
+      213: -5255611192887500167
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_1
+  - first:
+      213: -3072858551908571083
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_2
+  - first:
+      213: -3988458726620471065
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_3
+  - first:
+      213: -7220814985759957061
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_4
+  - first:
+      213: -5582393293785515250
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_5
+  - first:
+      213: 980751859028663184
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_6
+  - first:
+      213: 6362448974090363980
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_7
+  - first:
+      213: -7110055424302186622
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_8
+  - first:
+      213: -4446794216501560155
+    second: icon-set-v2-combat-action-pixarts-store_36@4x_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_0
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 109
+        width: 82
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec00859fa3b654b30800000000000000
+      internalID: 4270937722666352846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 32
+        width: 147
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 972af5a27715017b0800000000000000
+      internalID: -5255611192887500167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_2
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 87
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 538e7708d630b55d0800000000000000
+      internalID: -3072858551908571083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_3
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 63
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e0ea7e7be526a8c0800000000000000
+      internalID: -3988458726620471065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 34
+        width: 20
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbfd5f827038acb90800000000000000
+      internalID: -7220814985759957061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_5
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 0
+        width: 217
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0b346740ea5782b0800000000000000
+      internalID: -5582393293785515250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_6
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 48
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09b153a9e945c9d00800000000000000
+      internalID: 980751859028663184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_7
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 12
+        width: 130
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c44643ad1a5fb4850800000000000000
+      internalID: 6362448974090363980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_8
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 38
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28ff0252342045d90800000000000000
+      internalID: -7110055424302186622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-set-v2-combat-action-pixarts-store_36@4x_9
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 46
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5acb9206830d942c0800000000000000
+      internalID: -4446794216501560155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      icon-set-v2-combat-action-pixarts-store_36@4x_0: 4270937722666352846
+      icon-set-v2-combat-action-pixarts-store_36@4x_1: -5255611192887500167
+      icon-set-v2-combat-action-pixarts-store_36@4x_2: -3072858551908571083
+      icon-set-v2-combat-action-pixarts-store_36@4x_3: -3988458726620471065
+      icon-set-v2-combat-action-pixarts-store_36@4x_4: -7220814985759957061
+      icon-set-v2-combat-action-pixarts-store_36@4x_5: -5582393293785515250
+      icon-set-v2-combat-action-pixarts-store_36@4x_6: 980751859028663184
+      icon-set-v2-combat-action-pixarts-store_36@4x_7: 6362448974090363980
+      icon-set-v2-combat-action-pixarts-store_36@4x_8: -7110055424302186622
+      icon-set-v2-combat-action-pixarts-store_36@4x_9: -4446794216501560155
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

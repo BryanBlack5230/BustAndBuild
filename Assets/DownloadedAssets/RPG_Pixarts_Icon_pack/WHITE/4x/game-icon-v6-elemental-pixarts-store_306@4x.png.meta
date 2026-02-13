@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: e12fcb0242fd75f4d9079fea7ed279e4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1743035968348277951
+    second: game-icon-v6-elemental-pixarts-store_306@4x_0
+  - first:
+      213: -319171821990449116
+    second: game-icon-v6-elemental-pixarts-store_306@4x_1
+  - first:
+      213: 7375582141413449365
+    second: game-icon-v6-elemental-pixarts-store_306@4x_2
+  - first:
+      213: 4953161190843431997
+    second: game-icon-v6-elemental-pixarts-store_306@4x_3
+  - first:
+      213: -6153037511780444306
+    second: game-icon-v6-elemental-pixarts-store_306@4x_4
+  - first:
+      213: 696423340161115573
+    second: game-icon-v6-elemental-pixarts-store_306@4x_5
+  - first:
+      213: 3600101096495938540
+    second: game-icon-v6-elemental-pixarts-store_306@4x_6
+  - first:
+      213: 2790284695548023477
+    second: game-icon-v6-elemental-pixarts-store_306@4x_7
+  - first:
+      213: -3469830917651779179
+    second: game-icon-v6-elemental-pixarts-store_306@4x_8
+  - first:
+      213: -6265032388622481385
+    second: game-icon-v6-elemental-pixarts-store_306@4x_9
+  - first:
+      213: -4451580423469278369
+    second: game-icon-v6-elemental-pixarts-store_306@4x_10
+  - first:
+      213: -1528052753728173551
+    second: game-icon-v6-elemental-pixarts-store_306@4x_11
+  - first:
+      213: -4337998535624748408
+    second: game-icon-v6-elemental-pixarts-store_306@4x_12
+  - first:
+      213: 8166574287044827163
+    second: game-icon-v6-elemental-pixarts-store_306@4x_13
+  - first:
+      213: 8967694315143396916
+    second: game-icon-v6-elemental-pixarts-store_306@4x_14
+  - first:
+      213: 515911490525120329
+    second: game-icon-v6-elemental-pixarts-store_306@4x_15
+  - first:
+      213: 519458529795397911
+    second: game-icon-v6-elemental-pixarts-store_306@4x_16
+  - first:
+      213: 8358580649794327282
+    second: game-icon-v6-elemental-pixarts-store_306@4x_17
+  - first:
+      213: 1275483096393125660
+    second: game-icon-v6-elemental-pixarts-store_306@4x_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_0
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 157
+        width: 40
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1433fd3950e7fc7e0800000000000000
+      internalID: -1743035968348277951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_1
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 124
+        width: 18
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 420f1ff3be2129bf0800000000000000
+      internalID: -319171821990449116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 103
+        width: 66
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59ed9ae41e45b5660800000000000000
+      internalID: 7375582141413449365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_3
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 138
+        width: 17
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3c397f2cd92db440800000000000000
+      internalID: 4953161190843431997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_4
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 134
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e675ca4bbf40c9aa0800000000000000
+      internalID: -6153037511780444306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_5
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 121
+        width: 58
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b5289b86513aa900800000000000000
+      internalID: 696423340161115573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 77
+        width: 33
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ceb72248fd026f130800000000000000
+      internalID: 3600101096495938540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_7
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 88
+        width: 66
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b25954a52519b620800000000000000
+      internalID: 2790284695548023477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_8
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 103
+        width: 41
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 591b2b21a2fa8dfc0800000000000000
+      internalID: -3469830917651779179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_9
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 73
+        width: 48
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71807d17c322e09a0800000000000000
+      internalID: -6265032388622481385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_10
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 88
+        width: 65
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5bd70ab03fc832c0800000000000000
+      internalID: -4451580423469278369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_11
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 78
+        width: 36
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11a89ffcd144bcae0800000000000000
+      internalID: -1528052753728173551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_12
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 29
+        width: 58
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8821ce7c0555cc3c0800000000000000
+      internalID: -4337998535624748408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_13
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 47
+        width: 57
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b185523bb00855170800000000000000
+      internalID: 8166574287044827163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_14
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 11
+        width: 19
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43e796c7776a37c70800000000000000
+      internalID: 8967694315143396916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_15
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 66
+        width: 40
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 947ca4864c2e82700800000000000000
+      internalID: 515911490525120329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_16
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 24
+        width: 22
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7195008d7cc753700800000000000000
+      internalID: 519458529795397911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_17
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 49
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f2d179b0d4aff370800000000000000
+      internalID: 8358580649794327282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v6-elemental-pixarts-store_306@4x_18
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 0
+        width: 40
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1f078d4e1d63b110800000000000000
+      internalID: 1275483096393125660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      game-icon-v6-elemental-pixarts-store_306@4x_0: -1743035968348277951
+      game-icon-v6-elemental-pixarts-store_306@4x_1: -319171821990449116
+      game-icon-v6-elemental-pixarts-store_306@4x_10: -4451580423469278369
+      game-icon-v6-elemental-pixarts-store_306@4x_11: -1528052753728173551
+      game-icon-v6-elemental-pixarts-store_306@4x_12: -4337998535624748408
+      game-icon-v6-elemental-pixarts-store_306@4x_13: 8166574287044827163
+      game-icon-v6-elemental-pixarts-store_306@4x_14: 8967694315143396916
+      game-icon-v6-elemental-pixarts-store_306@4x_15: 515911490525120329
+      game-icon-v6-elemental-pixarts-store_306@4x_16: 519458529795397911
+      game-icon-v6-elemental-pixarts-store_306@4x_17: 8358580649794327282
+      game-icon-v6-elemental-pixarts-store_306@4x_18: 1275483096393125660
+      game-icon-v6-elemental-pixarts-store_306@4x_2: 7375582141413449365
+      game-icon-v6-elemental-pixarts-store_306@4x_3: 4953161190843431997
+      game-icon-v6-elemental-pixarts-store_306@4x_4: -6153037511780444306
+      game-icon-v6-elemental-pixarts-store_306@4x_5: 696423340161115573
+      game-icon-v6-elemental-pixarts-store_306@4x_6: 3600101096495938540
+      game-icon-v6-elemental-pixarts-store_306@4x_7: 2790284695548023477
+      game-icon-v6-elemental-pixarts-store_306@4x_8: -3469830917651779179
+      game-icon-v6-elemental-pixarts-store_306@4x_9: -6265032388622481385
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,325 @@
+fileFormatVersion: 2
+guid: 85e84067410aeb94093a68a8a77a8d13
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7256517699846804199
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_0
+  - first:
+      213: 8882410474483022073
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_1
+  - first:
+      213: 7052940612921905928
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_2
+  - first:
+      213: 4523504428172622782
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_3
+  - first:
+      213: -2361851681728068874
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_4
+  - first:
+      213: 2875974324700089171
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_5
+  - first:
+      213: -8894732566889540405
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_6
+  - first:
+      213: -4841466028988066630
+    second: game-icon-v3-dark-magic-pixarts-store_55@4x_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 110
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91deb42499bab4b90800000000000000
+      internalID: -7256517699846804199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_1
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 9
+        width: 115
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f8f4c8f349a44b70800000000000000
+      internalID: 8882410474483022073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_2
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 91
+        width: 137
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 803d22f8e1411e160800000000000000
+      internalID: 7052940612921905928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_3
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 0
+        width: 52
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebbb2259f47b6ce30800000000000000
+      internalID: 4523504428172622782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_4
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 0
+        width: 128
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f2807ab864093fd0800000000000000
+      internalID: -2361851681728068874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_5
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 64
+        width: 118
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35b84e6296389e720800000000000000
+      internalID: 2875974324700089171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_6
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 79
+        width: 52
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc453725bdf8f8480800000000000000
+      internalID: -8894732566889540405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v3-dark-magic-pixarts-store_55@4x_7
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 48
+        width: 131
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab49b0e3c48afccb0800000000000000
+      internalID: -4841466028988066630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      game-icon-v3-dark-magic-pixarts-store_55@4x_0: -7256517699846804199
+      game-icon-v3-dark-magic-pixarts-store_55@4x_1: 8882410474483022073
+      game-icon-v3-dark-magic-pixarts-store_55@4x_2: 7052940612921905928
+      game-icon-v3-dark-magic-pixarts-store_55@4x_3: 4523504428172622782
+      game-icon-v3-dark-magic-pixarts-store_55@4x_4: -2361851681728068874
+      game-icon-v3-dark-magic-pixarts-store_55@4x_5: 2875974324700089171
+      game-icon-v3-dark-magic-pixarts-store_55@4x_6: -8894732566889540405
+      game-icon-v3-dark-magic-pixarts-store_55@4x_7: -4841466028988066630
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

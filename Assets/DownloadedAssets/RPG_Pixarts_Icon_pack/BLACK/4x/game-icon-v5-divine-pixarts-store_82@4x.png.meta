@@ -1,0 +1,377 @@
+fileFormatVersion: 2
+guid: 6a30d217e08d25c4e948bb7913c617e7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8595764384136824316
+    second: game-icon-v5-divine-pixarts-store_82@4x_0
+  - first:
+      213: 1377570050466922944
+    second: game-icon-v5-divine-pixarts-store_82@4x_1
+  - first:
+      213: 8452181637042622557
+    second: game-icon-v5-divine-pixarts-store_82@4x_2
+  - first:
+      213: -456066919897328165
+    second: game-icon-v5-divine-pixarts-store_82@4x_3
+  - first:
+      213: 2154365800840748770
+    second: game-icon-v5-divine-pixarts-store_82@4x_4
+  - first:
+      213: 6036484596741824010
+    second: game-icon-v5-divine-pixarts-store_82@4x_5
+  - first:
+      213: -4995044658618999616
+    second: game-icon-v5-divine-pixarts-store_82@4x_6
+  - first:
+      213: -5073111386930827199
+    second: game-icon-v5-divine-pixarts-store_82@4x_7
+  - first:
+      213: 761976203398171984
+    second: game-icon-v5-divine-pixarts-store_82@4x_8
+  - first:
+      213: -8071062850096329921
+    second: game-icon-v5-divine-pixarts-store_82@4x_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_0
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 124
+        width: 118
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40af19eb5d5b5b880800000000000000
+      internalID: -8595764384136824316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_1
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 189
+        width: 31
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c14c4789ac1e1310800000000000000
+      internalID: 1377570050466922944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_2
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 142
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d505105da6e2c4570800000000000000
+      internalID: 8452181637042622557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_3
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 113
+        width: 56
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd596bd7d89bba9f0800000000000000
+      internalID: -456066919897328165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_4
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 128
+        width: 30
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2eedc531848d5ed10800000000000000
+      internalID: 2154365800840748770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 35
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0ed9e012c6e5c350800000000000000
+      internalID: 6036484596741824010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_6
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 1
+        width: 88
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cc5dcd09590eaab0800000000000000
+      internalID: -4995044658618999616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_7
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 14
+        width: 76
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 140bff37210b899b0800000000000000
+      internalID: -5073111386930827199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_8
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 28
+        width: 178
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05d49d2e155139a00800000000000000
+      internalID: 761976203398171984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: game-icon-v5-divine-pixarts-store_82@4x_9
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 17
+        width: 16
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3b0824a913ddff80800000000000000
+      internalID: -8071062850096329921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      game-icon-v5-divine-pixarts-store_82@4x_0: -8595764384136824316
+      game-icon-v5-divine-pixarts-store_82@4x_1: 1377570050466922944
+      game-icon-v5-divine-pixarts-store_82@4x_2: 8452181637042622557
+      game-icon-v5-divine-pixarts-store_82@4x_3: -456066919897328165
+      game-icon-v5-divine-pixarts-store_82@4x_4: 2154365800840748770
+      game-icon-v5-divine-pixarts-store_82@4x_5: 6036484596741824010
+      game-icon-v5-divine-pixarts-store_82@4x_6: -4995044658618999616
+      game-icon-v5-divine-pixarts-store_82@4x_7: -5073111386930827199
+      game-icon-v5-divine-pixarts-store_82@4x_8: 761976203398171984
+      game-icon-v5-divine-pixarts-store_82@4x_9: -8071062850096329921
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

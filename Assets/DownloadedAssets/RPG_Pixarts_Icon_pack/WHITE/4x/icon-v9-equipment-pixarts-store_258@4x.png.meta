@@ -1,0 +1,351 @@
+fileFormatVersion: 2
+guid: 75fac25c6b8779b46bd7dc2f6aad5a61
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8889925201943960029
+    second: icon-v9-equipment-pixarts-store_258@4x_0
+  - first:
+      213: -1276238076305647053
+    second: icon-v9-equipment-pixarts-store_258@4x_1
+  - first:
+      213: -5527311267461977102
+    second: icon-v9-equipment-pixarts-store_258@4x_2
+  - first:
+      213: -9029119449627151832
+    second: icon-v9-equipment-pixarts-store_258@4x_3
+  - first:
+      213: 4207636810636992601
+    second: icon-v9-equipment-pixarts-store_258@4x_4
+  - first:
+      213: 6094007199190230583
+    second: icon-v9-equipment-pixarts-store_258@4x_5
+  - first:
+      213: -1950331096479330593
+    second: icon-v9-equipment-pixarts-store_258@4x_6
+  - first:
+      213: -1715926232088374041
+    second: icon-v9-equipment-pixarts-store_258@4x_7
+  - first:
+      213: 1229543744091821849
+    second: icon-v9-equipment-pixarts-store_258@4x_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 62
+        width: 210
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32666523124a0a480800000000000000
+      internalID: -8889925201943960029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_1
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 47
+        width: 18
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33a59fc3b34e94ee0800000000000000
+      internalID: -1276238076305647053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_2
+      rect:
+        serializedVersion: 2
+        x: 37
+        y: 9
+        width: 24
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fb2aebefab0b43b0800000000000000
+      internalID: -5527311267461977102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_3
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 44
+        width: 18
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 822376ae2bf12b280800000000000000
+      internalID: -9029119449627151832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_4
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 53
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95020e1e267846a30800000000000000
+      internalID: 4207636810636992601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_5
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 11
+        width: 23
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 736286e9243429450800000000000000
+      internalID: 6094007199190230583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_6
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 50
+        width: 41
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fde83f773380fe4e0800000000000000
+      internalID: -1950331096479330593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_7
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 48
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e4199bee2ecf28e0800000000000000
+      internalID: -1715926232088374041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-v9-equipment-pixarts-store_258@4x_8
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 36
+        width: 25
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91795665587301110800000000000000
+      internalID: 1229543744091821849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      icon-v9-equipment-pixarts-store_258@4x_0: -8889925201943960029
+      icon-v9-equipment-pixarts-store_258@4x_1: -1276238076305647053
+      icon-v9-equipment-pixarts-store_258@4x_2: -5527311267461977102
+      icon-v9-equipment-pixarts-store_258@4x_3: -9029119449627151832
+      icon-v9-equipment-pixarts-store_258@4x_4: 4207636810636992601
+      icon-v9-equipment-pixarts-store_258@4x_5: 6094007199190230583
+      icon-v9-equipment-pixarts-store_258@4x_6: -1950331096479330593
+      icon-v9-equipment-pixarts-store_258@4x_7: -1715926232088374041
+      icon-v9-equipment-pixarts-store_258@4x_8: 1229543744091821849
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
