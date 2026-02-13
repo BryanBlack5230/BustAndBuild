@@ -7,11 +7,19 @@ public class AllyAuthoring : MonoBehaviour
     public Faction faction = Faction.Ally;
     public AllyType allyType = AllyType.Soldier;
     public float moveSpeed = 3f;
+    public float turnSpeed = 15f;
     public float stoppingDistance = 1f;
     public float health = 100f;
     public float attackDamage = 20f;
     public float attackCooldown = 2f;
-    public float attackRange = 0.5f;
+    public float attackRange = 1.5f;
+    
+    public float AgentSize = 1f;
+    public float DangerWeight = 2.0f;
+    public float SurroundRadius = 6.0f;
+    public float VisionDistance = 3.0f;
+    public float ScanInterval = 0.5f;
+    public LayerMask ObstacleLayer;
     
     public class Baker : Baker<AllyAuthoring>
     {
@@ -25,17 +33,19 @@ public class AllyAuthoring : MonoBehaviour
             AddComponent(entity, new IsDead());
             AddComponent(entity, new AttackCooldownExpirationTimestamp());
             AddComponent(entity, new TargetSearchCooldownExpirationTimestamp());
+            AddComponent(entity, new SteeringEnabled());
             
             SetComponentEnabled<UnableToAct>(entity, false);
             SetComponentEnabled<Grabbed>(entity, false);
             SetComponentEnabled<IsDead>(entity, false);
             SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
             SetComponentEnabled<TargetSearchCooldownExpirationTimestamp>(entity, false);
+            SetComponentEnabled<SteeringEnabled>(entity, true);
             
             // components
             AddComponent(entity, new Unit { faction = authoring.faction, });
             AddComponent(entity, new AllyUnitType { Value = authoring.allyType, });
-            AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, });
+            AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, turnSpeed = authoring.turnSpeed});
             AddComponent(entity, new Destination { StoppingDistanceSq = authoring.stoppingDistance * authoring.stoppingDistance });
             AddComponent(entity, new Target());
             AddComponent(entity, new Health { Value = authoring.health, Max = authoring.health });
@@ -44,6 +54,19 @@ public class AllyAuthoring : MonoBehaviour
             AddComponent(entity, new BattleBrain{ CanAttack = false});
             AddComponent(entity, new EmotionalState {Value = Emotion.Scared});
             AddComponent(entity, new ActionState { Value = ActionType.Moving });
+            
+            AddComponent(entity, new SteerBehavior_Seek{Weight = 1f});
+            AddComponent(entity, new SteeringContext{AgentRadius = authoring.AgentSize});
+            AddComponent(entity, new SteerBehavior_Obstacle
+            {
+                DangerWeight = authoring.DangerWeight,
+                SurroundRadius = authoring.SurroundRadius,
+                VisionSize = authoring.AgentSize,
+                VisionDistance = authoring.VisionDistance,
+                UpdateInterval = authoring.ScanInterval,
+                ObstacleLayer = authoring.ObstacleLayer
+            });
+            AddComponent(entity, new ObstacleShadow{Timer = 0});
         }
     }
 }

@@ -1,11 +1,12 @@
 using GameEngine.AI;
+using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(SimulationSystemGroup))]
+[UpdateInGroup(typeof(GameLoopSystemGroup))]
 [UpdateAfter(typeof(TargetSearchSystem))]
 [UpdateBefore(typeof(UnitMoverSystem))]
 public partial struct BattleBrainSystem : ISystem
@@ -46,6 +47,7 @@ public partial struct BrainDecisionJob : IJobEntity
         ref BattleBrain brain,
         ref ActionState action,
         ref Destination destination,
+        EnabledRefRW<SteeringEnabled> steerEnabled,
         in Target target,
         in EmotionalState emotion,
         in AttackData attackData,
@@ -56,10 +58,12 @@ public partial struct BrainDecisionJob : IJobEntity
         {
             action.Value = ActionType.Stunned;
             brain.CanAttack = false;
+            steerEnabled.ValueRW = false;
             return;
         }
         
         var myPos = transform.Position;
+        steerEnabled.ValueRW = true;
         
         if (emotion.Value == Emotion.Scared)
         {
@@ -97,6 +101,7 @@ public partial struct BrainDecisionJob : IJobEntity
                 action.Value = ActionType.Attacking;
                 destination.Value = myPos; // Stop moving
                 destination.StoppingDistanceSq = attackRangeSq;
+                steerEnabled.ValueRW = false;
                 brain.CanAttack = true;
             }
             else
@@ -109,9 +114,10 @@ public partial struct BrainDecisionJob : IJobEntity
         }
         else
         {
-            action.Value = ActionType.Moving;
-            destination.Value = targetPos; // need new logic here for running around the target
-            destination.StoppingDistanceSq = 1f;
+            action.Value = ActionType.Evading;
+            var dirAway = math.normalize(myPos - targetPos);
+            destination.Value = myPos + (dirAway * 3.0f);
+            destination.StoppingDistanceSq = 0.5f;
             brain.CanAttack = false;
         }
     }

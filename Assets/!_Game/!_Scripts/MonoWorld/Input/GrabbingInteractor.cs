@@ -33,10 +33,14 @@ namespace Game.Feature.Input
             DisablePhysics(_grabbedEntity);
         }
     
-        public void Release()
+        public void Release(out Entity grabbedEntity)
         {
-            if (_grabbedEntity == Entity.Null) return;
-            
+            if (_grabbedEntity == Entity.Null)
+            {
+                grabbedEntity = Entity.Null;
+                return;
+            }
+            grabbedEntity = _grabbedEntity;
             RestorePhysics(_grabbedEntity);
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, false);
             Debug.Log($"Entity {_grabbedEntity} was launched with force {_cursorMovementCalculations.velocity.magnitude} in direction {_cursorMovementCalculations.velocity.normalized}");

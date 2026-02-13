@@ -23,12 +23,19 @@ namespace GameEngine.AI
     public struct UnitMover : IComponentData
     {
         public float moveSpeed;
+        public float turnSpeed;
     }
 
     public struct Destination : IComponentData
     {
         public float3 Value;
         public float StoppingDistanceSq;
+    }
+
+    public struct EvasionDestination : IComponentData
+    {
+        public float3 MoveDirection;
+        public float3 Position;
     }
 
 }

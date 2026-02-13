@@ -13,7 +13,7 @@ namespace GameEngine.AI
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var unitMoverJob = new UnitMoverJob();
+            var unitMoverJob = new UnitMoverJob { DeltaTime = SystemAPI.Time.DeltaTime };
             unitMoverJob.ScheduleParallel();
         }
     }
@@ -22,6 +22,7 @@ namespace GameEngine.AI
     [WithDisabled(typeof(UnableToAct))]
     public partial struct UnitMoverJob : IJobEntity
     {
+        public float DeltaTime;
         public void Execute(ref LocalTransform localTransform, in ActionState action, in UnitMover unitMover, in Destination destination, ref PhysicsVelocity physicsVelocity)
         {
             if (action.Value == ActionType.Attacking || action.Value == ActionType.Stunned) return;
@@ -38,9 +39,15 @@ namespace GameEngine.AI
             physicsVelocity.Linear = moveDirection * unitMover.moveSpeed;
             physicsVelocity.Angular = float3.zero;
             
-            localTransform.Rotation = quaternion.LookRotationSafe(
+            var targetRotation = quaternion.LookRotationSafe(
                 new float3(moveDirection.x, 0f, moveDirection.z),
                 math.up()
+            );
+            
+            localTransform.Rotation = math.slerp(
+                localTransform.Rotation, 
+                targetRotation, 
+                DeltaTime * unitMover.turnSpeed
             );
         }
     }

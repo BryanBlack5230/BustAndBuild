@@ -107,14 +107,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::AllyAuthoring
   faction: 1
   allyType: 0
-  unitBase: {fileID: 0}
   moveSpeed: 2
+  turnSpeed: 13
   stoppingDistance: 1
-  checkInterval: 0.5
   health: 100
   attackDamage: 20
   attackCooldown: 2
   attackRange: 1.5
+  AgentSize: 0.5
+  DangerWeight: 2
+  SurroundRadius: 8
+  VisionDistance: 5
+  ScanInterval: 0.5
+  ObstacleLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!54 &3362322714341214501
 Rigidbody:
   m_ObjectHideFlags: 0
