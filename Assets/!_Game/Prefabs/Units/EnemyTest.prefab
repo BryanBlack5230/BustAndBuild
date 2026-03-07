@@ -139,12 +139,13 @@ MonoBehaviour:
   attackRange: 1.5
   AgentSize: 0.5
   DangerWeight: 2
-  SurroundRadius: 8
+  SurroundRadius: 12
   VisionDistance: 5
-  ScanInterval: 0.5
+  ScanInterval: 1
   ObstacleLayer:
     serializedVersion: 2
     m_Bits: 512
+  ObstacleDangerCurve: 1
 --- !u!54 &8147585489975437197
 Rigidbody:
   m_ObjectHideFlags: 0

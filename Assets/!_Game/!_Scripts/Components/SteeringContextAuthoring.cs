@@ -82,12 +82,15 @@ public struct SteerBehavior_Seek : IComponentData
     public float Weight;
 }
 
+public enum Curve {Linear, Quadratic, Cubic, Quadruple, Quintuple, Exponential}
+
 public struct SteerBehavior_Obstacle : IComponentData
 {
     public float DangerWeight;       // Multiplier for danger
     public float SurroundRadius;     // "Personal Space" (Sphere Radius)
     public float VisionSize;
     public float VisionDistance;
+    public Curve Curve;
 
     public float UpdateInterval;     
     public LayerMask ObstacleLayer;

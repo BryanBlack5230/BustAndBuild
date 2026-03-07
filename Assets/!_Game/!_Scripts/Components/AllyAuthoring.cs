@@ -21,6 +21,8 @@ public class AllyAuthoring : MonoBehaviour
     public float ScanInterval = 0.5f;
     public LayerMask ObstacleLayer;
     
+    public Curve ObstacleDangerCurve = Curve.Quadratic;
+    
     public class Baker : Baker<AllyAuthoring>
     {
         public override void Bake(AllyAuthoring authoring)
@@ -64,9 +66,13 @@ public class AllyAuthoring : MonoBehaviour
                 VisionSize = authoring.AgentSize,
                 VisionDistance = authoring.VisionDistance,
                 UpdateInterval = authoring.ScanInterval,
-                ObstacleLayer = authoring.ObstacleLayer
+                ObstacleLayer = authoring.ObstacleLayer,
+                Curve = authoring.ObstacleDangerCurve,
             });
             AddComponent(entity, new ObstacleShadow{Timer = 0});
+            
+            AddComponent(entity, new PathTarget());
+            AddComponent(entity, new FinalDestination());
         }
     }
 }

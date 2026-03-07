@@ -55,17 +55,31 @@ public partial struct ObstacleOverlapJob : IJobEntity
             GroupIndex = 0
         };
 
-        for (int i = 0; i < 8; i++)
+        for (var i = 0; i < 8; i++)
         {
             var dir = SteeringConstants.Directions[i];
             var isFrontDirection = math.dot(dir, transform.Forward()) > 0.5f;
             var scanRange = isFrontDirection ? config.SurroundRadius + config.VisionDistance : config.SurroundRadius;
-            var dangerWeight = isFrontDirection ? config.DangerWeight * 0.5f : config.DangerWeight;
 
             if (!PhysicsWorld.SphereCast(transform.Position + dir * steeringContext.AgentRadius, steeringContext.AgentRadius, dir, scanRange, out var hit, filter)) continue;
+
+            var absDist = hit.Fraction * scanRange;
+            var physicalProximity = math.saturate(1.0f - (absDist / config.SurroundRadius));
+            var visionProximity = !isFrontDirection ? 0f : math.saturate(1.0f - (absDist / scanRange)) * 0.3f;
+
+            var proximity = math.max(physicalProximity, visionProximity);
+
+            var proximityWeight = config.Curve switch
+            {
+                Curve.Linear => proximity,
+                Curve.Quadratic => proximity * proximity,
+                Curve.Cubic => proximity * proximity * proximity,
+                Curve.Quadruple => proximity * proximity * proximity * proximity,
+                Curve.Quintuple => proximity * proximity * proximity * proximity * proximity,
+                _ => proximity
+            };
             
-            var proximity = 1.0f - hit.Fraction;
-            var danger = proximity * proximity * proximity * dangerWeight; // cubic falloff -the further the danger, the less we care about it 
+            var danger = proximityWeight * config.DangerWeight;
 
             shadow.CachedDanger[i] = danger;
         }
@@ -77,28 +91,28 @@ public partial struct ObstacleApplyJob : IJobEntity
 {
     private void Execute(ref SteeringContext context, in ObstacleShadow shadow, in LocalTransform transform, in SteerBehavior_Obstacle config)
     {
-        for (int i = 0; i < 8; i++)
-        {
-            context.Danger[i] += shadow.CachedDanger[i];
-        }
-        // var movementSinceScan = transform.Position - shadow.MyLastPos;
-        // var timeRatio = (config.UpdateInterval - shadow.Timer) / config.UpdateInterval;
-        //
-        // var sensitivity = 0.5f;
-        //
         // for (int i = 0; i < 8; i++)
         // {
-        //     var baseDanger = shadow.CachedDanger[i];
-        //     if (baseDanger <= 0.001f) continue;
-        //
-        //     var direction = SteeringConstants.Directions[i];
-        //     var alignment = math.dot(movementSinceScan, direction);
-        //     var modifier = alignment * sensitivity * timeRatio;
-        //
-        //     var finalDanger = baseDanger + modifier;
-        //     finalDanger = math.clamp(finalDanger, 0f, config.DangerWeight);
-        //
-        //     context.Danger[i] += finalDanger;
+        //     context.Danger[i] += shadow.CachedDanger[i];
         // }
+        
+        var movementSinceScan = transform.Position - shadow.MyLastPos;
+        var distanceNormalization = 1.0f / config.SurroundRadius;
+        
+        
+        for (int i = 0; i < 8; i++)
+        {
+            var baseDanger = shadow.CachedDanger[i];
+            if (baseDanger <= 0.001f) continue;
+        
+            var direction = SteeringConstants.Directions[i];
+            var alignment = math.dot(movementSinceScan, direction);
+            var modifier = alignment * distanceNormalization;
+        
+            var finalDanger = baseDanger + modifier;
+            finalDanger = math.clamp(finalDanger, 0f, config.DangerWeight);
+        
+            context.Danger[i] += finalDanger;
+        }
     }
 }

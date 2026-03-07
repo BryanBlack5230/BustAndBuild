@@ -1,4 +1,5 @@
 using GameEngine.AI;
+using GameEngine.Utils.Logging;
 using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
@@ -47,6 +48,7 @@ public partial struct BrainDecisionJob : IJobEntity
         ref BattleBrain brain,
         ref ActionState action,
         ref Destination destination,
+        ref FinalDestination finalDestination,
         EnabledRefRW<SteeringEnabled> steerEnabled,
         in Target target,
         in EmotionalState emotion,
@@ -71,7 +73,7 @@ public partial struct BrainDecisionJob : IJobEntity
             
             action.Value = ActionType.Moving;
             // unitMover.moveSpeed = config.moveSpeed * config.scaredMoveMultiplier; // this should be handled in emotion system at switch time
-            destination.Value = baseBounds.ClosestPoint(myPos);
+            finalDestination.Value = baseBounds.ClosestPoint(myPos);
             destination.StoppingDistanceSq = 0f;
             brain.CanAttack = false;
             return;
@@ -82,7 +84,7 @@ public partial struct BrainDecisionJob : IJobEntity
             var baseBounds = unit.faction == Faction.Ally ? Bases.AllyBaseBounds : Bases.EnemyBaseBounds;
             
             action.Value = ActionType.Moving; 
-            destination.Value = baseBounds.ClosestPoint(myPos);
+            finalDestination.Value = baseBounds.ClosestPoint(myPos);
             destination.StoppingDistanceSq = 0f;
             brain.CanAttack = false;
             return;
@@ -99,7 +101,7 @@ public partial struct BrainDecisionJob : IJobEntity
             if (distToTargetSq <= attackRangeSq)
             {
                 action.Value = ActionType.Attacking;
-                destination.Value = myPos; // Stop moving
+                finalDestination.Value = myPos; // Stop moving
                 destination.StoppingDistanceSq = attackRangeSq;
                 steerEnabled.ValueRW = false;
                 brain.CanAttack = true;
@@ -107,7 +109,7 @@ public partial struct BrainDecisionJob : IJobEntity
             else
             {
                 action.Value = ActionType.Moving;
-                destination.Value = targetPos;
+                finalDestination.Value = targetPos;
                 destination.StoppingDistanceSq = 1f;
                 brain.CanAttack = false;
             }
@@ -116,7 +118,7 @@ public partial struct BrainDecisionJob : IJobEntity
         {
             action.Value = ActionType.Evading;
             var dirAway = math.normalize(myPos - targetPos);
-            destination.Value = myPos + (dirAway * 3.0f);
+            finalDestination.Value = myPos + (dirAway * 3.0f);
             destination.StoppingDistanceSq = 0.5f;
             brain.CanAttack = false;
         }

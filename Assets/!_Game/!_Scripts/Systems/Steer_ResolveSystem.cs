@@ -86,22 +86,9 @@ public partial struct Steer_ResolveSystem : ISystem
             }
             else
             {
-                // var leftIndex = (bestIndex + 7) % 8;
-                // var rightIndex = (bestIndex + 1) % 8;
-
-                // var scoreL = scores[leftIndex];
-                // var scoreC = scores[bestIndex];
-                // var scoreR = scores[rightIndex];
-
-                // var dirL = SteeringConstants.Directions[leftIndex];
-                // var dirC = SteeringConstants.Directions[bestIndex];
-                // var dirR = SteeringConstants.Directions[rightIndex];
-
-                // var finalDir = (dirL * scoreL) + (dirC * scoreC) + (dirR * scoreR);
-
                 finalDir = math.lengthsq(finalDir) > 0.001f ? math.normalize(finalDir) : SteeringConstants.Directions[bestIndex];
 
-                destination.StoppingDistanceSq = context.AgentRadius * context.AgentRadius;
+                destination.StoppingDistanceSq = context.AgentRadius + 0.5f;
                 destination.Value = transform.Position + (finalDir * LookAheadDistance);
                 context.BestDirection = finalDir;
             }

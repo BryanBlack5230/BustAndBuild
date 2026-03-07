@@ -21,6 +21,7 @@ public class EnemyAuthoring : MonoBehaviour
     public float VisionDistance = 3.0f;
     public float ScanInterval = 0.5f;
     public LayerMask ObstacleLayer;
+    public Curve ObstacleDangerCurve = Curve.Quadratic;
     
     public class Baker : Baker<EnemyAuthoring>
     {
@@ -65,9 +66,13 @@ public class EnemyAuthoring : MonoBehaviour
                 VisionSize = authoring.AgentSize,
                 VisionDistance = authoring.VisionDistance,
                 UpdateInterval = authoring.ScanInterval,
-                ObstacleLayer = authoring.ObstacleLayer
+                ObstacleLayer = authoring.ObstacleLayer,
+                Curve = authoring.ObstacleDangerCurve,
             });
             AddComponent(entity, new ObstacleShadow{Timer = 0});
+            
+            AddComponent(entity, new PathTarget());
+            AddComponent(entity, new FinalDestination());
         }
     }
 }

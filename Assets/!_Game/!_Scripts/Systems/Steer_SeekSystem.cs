@@ -16,9 +16,9 @@ public partial struct Steer_SeekSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        foreach (var (context, destination, seekConfig, transform) in SystemAPI.Query<RefRW<SteeringContext>, RefRO<Destination>, RefRO<SteerBehavior_Seek>, RefRO<LocalTransform>>())
+        foreach (var (context, pathTarget, seekConfig, transform) in SystemAPI.Query<RefRW<SteeringContext>, RefRO<PathTarget>, RefRO<SteerBehavior_Seek>, RefRO<LocalTransform>>())
         {
-            var dirToGoal = destination.ValueRO.Value - transform.ValueRO.Position;
+            var dirToGoal = pathTarget.ValueRO.Value - transform.ValueRO.Position;
             var distSq = math.lengthsq(dirToGoal);
 
             if (distSq < 0.01f) continue;
