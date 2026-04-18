@@ -80,7 +80,7 @@ public partial struct Steer_ResolveSystem : ISystem
 
             if (bestIndex == -1)
             {
-                destination.StoppingDistanceSq = 0.1f;
+                // destination.StoppingDistanceSq = 0.1f;
                 destination.Value = transform.Position;
                 context.BestDirection = float3.zero;
             }
@@ -88,7 +88,7 @@ public partial struct Steer_ResolveSystem : ISystem
             {
                 finalDir = math.lengthsq(finalDir) > 0.001f ? math.normalize(finalDir) : SteeringConstants.Directions[bestIndex];
 
-                destination.StoppingDistanceSq = context.AgentRadius + 0.5f;
+                // destination.StoppingDistanceSq = context.AgentRadius + 0.5f;
                 destination.Value = transform.Position + (finalDir * LookAheadDistance);
                 context.BestDirection = finalDir;
             }

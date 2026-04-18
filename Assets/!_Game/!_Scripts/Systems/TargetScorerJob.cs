@@ -16,7 +16,7 @@ public partial struct TargetScorerJob : IJobEntity
     [ReadOnly] public NativeArray<Entity> GlobalAllies;
 
     [ReadOnly] public NativeArray<Entity> WallEntities;
-    [ReadOnly] public NativeArray<LocalTransform> WallTransforms;
+    [ReadOnly] public NativeArray<LocalToWorld> WallTransforms;
 
     [ReadOnly] public Entity BeaconEntity;
 
@@ -27,17 +27,17 @@ public partial struct TargetScorerJob : IJobEntity
     [NativeDisableContainerSafetyRestriction]
     [ReadOnly] public ComponentLookup<Target> TargetLookup;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+    [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
 
     [ReadOnly] public double ElapsedTime;
     [ReadOnly] public bool IsBattleActive;
     [ReadOnly] public bool ForceUpdate;
     [ReadOnly] public bool CastleIsBreached;
 
-    private void Execute(Entity entity, ref Target target, in LocalTransform transform, EnabledRefRW<TargetSearchCooldownExpirationTimestamp> cooldownEnabled, ref TargetSearchCooldownExpirationTimestamp cooldownTimestamp)
+    private void Execute(Entity entity, ref Target target, in LocalTransform transform, EnabledRefRW<TargetSearchCooldownExpirationTimestamp> cooldownEnabled, ref TargetSearchCooldownExpirationTimestamp cooldownTimestamp, in LocalToWorld worldTransform)
     {
-        var shouldSearch = ForceUpdate || (IsBattleActive && cooldownEnabled.ValueRO);
+        var shouldSearch = ForceUpdate || (IsBattleActive && !cooldownEnabled.ValueRO);
         if (!shouldSearch) return;
-        
         var faction = UnitLookup[entity].faction;
         
         ref var globalProfiles = ref ProfilesBlob.Value;
@@ -75,6 +75,7 @@ public partial struct TargetScorerJob : IJobEntity
         var bestScore = float.MinValue;
         TargetCandidate bestCandidate = default;
         var myPos = transform.Position;
+        var myWorldPos = worldTransform.Position;
         var myForward = transform.Forward();
 
         var hostiles = faction == Faction.Ally ? GlobalEnemies : GlobalAllies;
@@ -94,13 +95,21 @@ public partial struct TargetScorerJob : IJobEntity
         {
             for (var i = 0; i < WallEntities.Length; i++)
             {
-                var distSq = math.distancesq(myPos, WallTransforms[i].Position);
+                var wallWorldPos = WallTransforms[i].Position;
+                var distSq = math.distancesq(myWorldPos, wallWorldPos);
                 if (distSq > settings.DetectionRadiusSq) continue;
 
                 var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
                 var score = settings.WeightWall + distanceWeight;
-
-                if (!(score > bestScore)) continue;
+                
+                var dirToTarget = math.normalize(wallWorldPos - myWorldPos);
+            
+                if (math.dot(myForward, dirToTarget) >= settings.ViewAngleCos)
+                {
+                    score += settings.LineOfSightBonus;
+                }
+                
+                if (score < bestScore) continue;
                 
                 bestScore = score;
                 bestCandidate = new TargetCandidate 
@@ -115,10 +124,11 @@ public partial struct TargetScorerJob : IJobEntity
         
         if (settings.WeightBeacon > 0 && BeaconEntity != Entity.Null)
         {
-            var distSq = math.distancesq(myPos, TransformLookup[BeaconEntity].Position);
+            var beaconWorldPos = LocalToWorldLookup[BeaconEntity].Position;
+            var distSq = math.distancesq(myWorldPos, beaconWorldPos);
             var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
             var score = settings.WeightBeacon + distanceWeight;
-        
+            
             if (score > bestScore)
             {
                 bestCandidate = new TargetCandidate { Entity = BeaconEntity, Type = TargetType.Beacon, DistanceSq = distSq, Score = score };

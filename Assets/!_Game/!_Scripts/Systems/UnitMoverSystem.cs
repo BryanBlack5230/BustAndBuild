@@ -1,3 +1,4 @@
+using GameEngine.Utils.Logging;
 using GameManagement;
 using Unity.Burst;
 using Unity.Entities;
@@ -23,7 +24,7 @@ namespace GameEngine.AI
     public partial struct UnitMoverJob : IJobEntity
     {
         public float DeltaTime;
-        public void Execute(ref LocalTransform localTransform, in ActionState action, in UnitMover unitMover, in Destination destination, ref PhysicsVelocity physicsVelocity)
+        private void Execute(ref LocalTransform localTransform, in ActionState action, in UnitMover unitMover, in Destination destination, ref PhysicsVelocity physicsVelocity)
         {
             if (action.Value == ActionType.Attacking || action.Value == ActionType.Stunned) return;
             

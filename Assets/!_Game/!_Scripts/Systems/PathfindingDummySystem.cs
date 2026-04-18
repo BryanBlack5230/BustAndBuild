@@ -23,7 +23,7 @@ public partial struct PathfindingDummySystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().PhysicsWorld;
-        var navData = SystemAPI.GetSingleton<FakePathfinderPoint>();
+        var fakePoint = SystemAPI.GetSingleton<FakePathfinderPoint>();
 
         var filter = new CollisionFilter {
             BelongsTo = ~0u,
@@ -31,17 +31,17 @@ public partial struct PathfindingDummySystem : ISystem
             GroupIndex = 0
         };
 
-        foreach (var (finalDestination, pathTarget, transform) in SystemAPI.Query<RefRO<FinalDestination>, RefRW<PathTarget>, RefRO<LocalTransform>>())
+        foreach (var (finalDestination, pathTarget, worldTransform) in SystemAPI.Query<RefRO<FinalDestination>, RefRW<PathTarget>, RefRO<LocalToWorld>>())
         {
             var rayInput = new RaycastInput {
-                Start = transform.ValueRO.Position,
+                Start = worldTransform.ValueRO.Position,
                 End = finalDestination.ValueRO.Value,
                 Filter = filter
             };
 
             if (physicsWorld.CastRay(rayInput, out _)) 
             {
-                pathTarget.ValueRW.Value = navData.GatePosition;
+                pathTarget.ValueRW.Value = fakePoint.GatePosition;
             }
             else 
             {

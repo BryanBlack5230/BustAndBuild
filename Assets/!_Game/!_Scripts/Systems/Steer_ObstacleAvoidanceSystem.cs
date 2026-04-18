@@ -1,3 +1,4 @@
+using GameEngine.Utils.Logging;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -22,7 +23,9 @@ public partial struct Steer_ObstacleAvoidanceSystem : ISystem
         state.Dependency = new ObstacleOverlapJob
         {
             PhysicsWorld = physicsWorld.PhysicsWorld,
-            DeltaTime = SystemAPI.Time.DeltaTime
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            WallLookup = SystemAPI.GetComponentLookup<WallSection>(true),
+            WallReferenceLookup = SystemAPI.GetComponentLookup<WallReference>(true),
         }.ScheduleParallel(state.Dependency);
 
         state.Dependency = new ObstacleApplyJob().ScheduleParallel(state.Dependency);
@@ -32,6 +35,8 @@ public partial struct Steer_ObstacleAvoidanceSystem : ISystem
 [BurstCompile]
 public partial struct ObstacleOverlapJob : IJobEntity
 {
+    [ReadOnly] public ComponentLookup<WallSection> WallLookup;
+    [ReadOnly] public ComponentLookup<WallReference> WallReferenceLookup;
     [ReadOnly] public PhysicsWorld PhysicsWorld;
     public float DeltaTime;
 
@@ -39,7 +44,8 @@ public partial struct ObstacleOverlapJob : IJobEntity
         ref ObstacleShadow shadow,
         in SteerBehavior_Obstacle config,
         in LocalTransform transform,
-        in SteeringContext steeringContext)
+        in SteeringContext steeringContext,
+        in Target target)
     {
         shadow.Timer -= DeltaTime;
         if (shadow.Timer > 0) return;
@@ -63,6 +69,15 @@ public partial struct ObstacleOverlapJob : IJobEntity
 
             if (!PhysicsWorld.SphereCast(transform.Position + dir * steeringContext.AgentRadius, steeringContext.AgentRadius, dir, scanRange, out var hit, filter)) continue;
 
+            if (target.TargetEntity != Entity.Null && target.Type == TargetType.Wall)
+            {
+                // skip obstacle, if unit is targeting walls
+                var currentCheck = hit.Entity;
+                var isTargetWall = WallLookup.HasComponent(currentCheck) || WallReferenceLookup.HasComponent(currentCheck);
+                
+                if (isTargetWall) continue;
+            }
+            
             var absDist = hit.Fraction * scanRange;
             var physicalProximity = math.saturate(1.0f - (absDist / config.SurroundRadius));
             var visionProximity = !isFrontDirection ? 0f : math.saturate(1.0f - (absDist / scanRange)) * 0.3f;
@@ -91,11 +106,6 @@ public partial struct ObstacleApplyJob : IJobEntity
 {
     private void Execute(ref SteeringContext context, in ObstacleShadow shadow, in LocalTransform transform, in SteerBehavior_Obstacle config)
     {
-        // for (int i = 0; i < 8; i++)
-        // {
-        //     context.Danger[i] += shadow.CachedDanger[i];
-        // }
-        
         var movementSinceScan = transform.Position - shadow.MyLastPos;
         var distanceNormalization = 1.0f / config.SurroundRadius;
         

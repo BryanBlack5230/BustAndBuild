@@ -1,3 +1,4 @@
+using GameEngine.Utils.Logging;
 using GameManagement;
 using Unity.Burst;
 using Unity.Collections;
@@ -23,8 +24,8 @@ public partial struct TargetSearchSystem : ISystem
             ComponentType.ReadOnly<AllyUnitReference>()
         );
 
-        _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalTransform>().Build();
-        _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalTransform>().Build();
+        _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalToWorld>().Build();
+        _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalToWorld>().Build();
     }
 
     [BurstCompile]
@@ -35,25 +36,19 @@ public partial struct TargetSearchSystem : ISystem
         var coordEntity = _coordinatorQuery.GetSingletonEntity();
         var coord = SystemAPI.GetComponent<BattleCoordinator>(coordEntity);
         
-        if (coord.ForceGlobalReevaluation)
-        {
-            var coordRW = SystemAPI.GetComponentRW<BattleCoordinator>(coordEntity);
-            coordRW.ValueRW.ForceGlobalReevaluation = false;
-        }
-        
         var elapsedTime = SystemAPI.Time.ElapsedTime;
         foreach (var (expirationTimestamp, cooldownEnabled) in SystemAPI.Query<RefRO<TargetSearchCooldownExpirationTimestamp>, EnabledRefRW<TargetSearchCooldownExpirationTimestamp>>())
         {
             if (expirationTimestamp.ValueRO.Value > elapsedTime) continue;
             cooldownEnabled.ValueRW = false;
         }
+        // Log.Battle.D($"Target search system, coordinator data: battle active: {coord.IsBattleActive}, force update: {coord.ForceGlobalReevaluation}");
 
         var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
         var allies = state.EntityManager.GetBuffer<AllyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
         
         var wallEntities = _wallQuery.ToEntityArray(Allocator.TempJob);
-        var wallTransforms = _wallQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
-
+        var wallTransforms = _wallQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
 
         var beaconEnt = Entity.Null;
         if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
@@ -74,6 +69,7 @@ public partial struct TargetSearchSystem : ISystem
             EnemyTypeLookup = SystemAPI.GetComponentLookup<EnemyUnitType>(true),
             AllyTypeLookup = SystemAPI.GetComponentLookup<AllyUnitType>(true),
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
             
             ElapsedTime = elapsedTime,
@@ -81,6 +77,12 @@ public partial struct TargetSearchSystem : ISystem
             ForceUpdate = coord.ForceGlobalReevaluation,
             CastleIsBreached = coord.WasCastleBreached
         };
+        
+        if (coord.ForceGlobalReevaluation)
+        {
+            var coordRW = SystemAPI.GetComponentRW<BattleCoordinator>(coordEntity);
+            coordRW.ValueRW.ForceGlobalReevaluation = false;
+        }
 
         state.Dependency = job.ScheduleParallel(state.Dependency);
         

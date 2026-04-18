@@ -11,6 +11,8 @@ public class BeaconAuthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, new BeaconTag { });
             AddComponent(entity, new Health {Max = authoring.health, Value = authoring.health });
+            AddComponent(entity, new IsDead());
+            SetComponentEnabled<IsDead>(entity, false);
             AddBuffer<DamageBufferElement>();
         }
     }

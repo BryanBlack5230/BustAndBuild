@@ -251,70 +251,70 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::Game.Configs.PrototypeConfigSetter
   EnemyProfiles:
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
-    WeightWall: 10
+    WeightWall: 25
     WeightBeacon: 50
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
-    WeightWall: 10
+    WeightWall: 25
     WeightBeacon: 50
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
-    WeightWall: 10
+    WeightWall: 25
     WeightBeacon: 50
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
   AllyProfiles:
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
     WeightWall: 0
     WeightBeacon: 0
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
     WeightWall: 0
     WeightBeacon: 0
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10
-  - DetectionRadiusSq: 5
+  - DetectionRadiusSq: 8
     ViewAngleCos: 90
     CheckInterval: 0.5
-    WeightEnemy: 100
+    WeightEnemy: 80
     WeightAlly: 0
     WeightWall: 0
     WeightBeacon: 0
-    DistanceWeight: 1
+    DistanceWeight: 30
     LowHealthBonus: 0
     AggroBonus: 50
     LineOfSightBonus: 10

@@ -20,7 +20,7 @@ namespace GameEngine.AI
         }
     }
 
-    public struct UnitMover : IComponentData
+    public struct UnitMover : IComponentData, IEnableableComponent
     {
         public float moveSpeed;
         public float turnSpeed;
