@@ -32,7 +32,7 @@ public partial struct BattleCoordinatorSystem : ISystem
         var wallChanged = isBreached != coordinator.WasCastleBreached;
         coordinator.WasCastleBreached = isBreached;
 
-        coordinator.IsBattleActive = enemyBuffer.Length > 0 && allyBuffer.Length > 0;
+        coordinator.IsBattleActive = enemyBuffer.Length > 0;
         coordinator.ForceGlobalReevaluation = coordinator.ForceGlobalReevaluation || wallChanged;
     }
 

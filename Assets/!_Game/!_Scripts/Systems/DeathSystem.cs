@@ -32,7 +32,7 @@ public partial struct DeathSystem : ISystem
 }
 
 [BurstCompile]
-[WithNone(typeof(IsDead))]
+[WithDisabled(typeof(IsDead))]
 public partial struct MarkDeathJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ECB;

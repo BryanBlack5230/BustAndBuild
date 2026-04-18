@@ -27,7 +27,7 @@ public partial struct BattleBrainSystem : ISystem
         var brainJob = new BrainDecisionJob
         {
             Bases = bases,
-            TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
             UnableToActLookup = SystemAPI.GetComponentLookup<UnableToAct>(true),
             CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(true),
         };
@@ -36,13 +36,15 @@ public partial struct BattleBrainSystem : ISystem
 }
 
 [BurstCompile]
+[WithPresent(typeof(SteeringEnabled))]
 public partial struct BrainDecisionJob : IJobEntity
 {
-    [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+    [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
     [ReadOnly] public ComponentLookup<UnableToAct> UnableToActLookup;
     [ReadOnly] public ComponentLookup<AttackCooldownExpirationTimestamp> CooldownLookup;
     [ReadOnly] public FactionBases Bases;
 
+    
     private void Execute(
         Entity entity,
         ref BattleBrain brain,
@@ -53,7 +55,7 @@ public partial struct BrainDecisionJob : IJobEntity
         in Target target,
         in EmotionalState emotion,
         in AttackData attackData,
-        in LocalTransform transform,
+        in LocalToWorld worldTransform,
         in Unit unit)
     {
         if (UnableToActLookup.IsComponentEnabled(entity))
@@ -64,7 +66,7 @@ public partial struct BrainDecisionJob : IJobEntity
             return;
         }
         
-        var myPos = transform.Position;
+        var myWorldPos = worldTransform.Position;
         steerEnabled.ValueRW = true;
         
         if (emotion.Value == Emotion.Scared)
@@ -73,54 +75,60 @@ public partial struct BrainDecisionJob : IJobEntity
             
             action.Value = ActionType.Moving;
             // unitMover.moveSpeed = config.moveSpeed * config.scaredMoveMultiplier; // this should be handled in emotion system at switch time
-            finalDestination.Value = baseBounds.ClosestPoint(myPos);
-            destination.StoppingDistanceSq = 0f;
+            finalDestination.Value = baseBounds.ClosestPoint(myWorldPos);
             brain.CanAttack = false;
             return;
         }
 
-        if (target.TargetEntity == Entity.Null || !TransformLookup.HasComponent(target.TargetEntity))
+        if (target.TargetEntity == Entity.Null || !LocalToWorldLookup.HasComponent(target.TargetEntity))
         {
             var baseBounds = unit.faction == Faction.Ally ? Bases.AllyBaseBounds : Bases.EnemyBaseBounds;
             
             action.Value = ActionType.Moving; 
-            finalDestination.Value = baseBounds.ClosestPoint(myPos);
-            destination.StoppingDistanceSq = 0f;
+            finalDestination.Value = baseBounds.ClosestPoint(myWorldPos);
             brain.CanAttack = false;
             return;
         }
         
-        var targetPos = TransformLookup[target.TargetEntity].Position;
-        var distToTargetSq = math.distancesq(myPos, targetPos);
+        var targetWorldPos = LocalToWorldLookup[target.TargetEntity].Position;
+        
+        var distToTargetSq = math.distancesq(myWorldPos, targetWorldPos);
         var attackRangeSq = attackData.AttackRange * attackData.AttackRange;
 
         action.Value = CooldownLookup.IsComponentEnabled(entity) ? ActionType.Evading : ActionType.Attacking;
-
+        
         if (action.Value == ActionType.Attacking)
         {
             if (distToTargetSq <= attackRangeSq)
             {
                 action.Value = ActionType.Attacking;
-                finalDestination.Value = myPos; // Stop moving
-                destination.StoppingDistanceSq = attackRangeSq;
+                finalDestination.Value = myWorldPos; // Stop moving
                 steerEnabled.ValueRW = false;
                 brain.CanAttack = true;
             }
             else
             {
                 action.Value = ActionType.Moving;
-                finalDestination.Value = targetPos;
-                destination.StoppingDistanceSq = 1f;
+                finalDestination.Value = targetWorldPos;
                 brain.CanAttack = false;
             }
         }
         else
         {
-            action.Value = ActionType.Evading;
-            var dirAway = math.normalize(myPos - targetPos);
-            finalDestination.Value = myPos + (dirAway * 3.0f);
-            destination.StoppingDistanceSq = 0.5f;
-            brain.CanAttack = false;
+            if (distToTargetSq <= attackRangeSq * 32) //TODO this is a quick-fix, need a proper evasion system
+            {
+                action.Value = ActionType.Evading;
+                var dirAway = math.normalize(myWorldPos - targetWorldPos);
+                finalDestination.Value = myWorldPos + (dirAway * 3.0f);
+                brain.CanAttack = false;
+            }
+            else
+            {
+                action.Value = ActionType.Moving;
+                finalDestination.Value = targetWorldPos;
+                brain.CanAttack = false;
+            }
+            
         }
     }
 }
