@@ -14,6 +14,10 @@ public class AllyAuthoring : MonoBehaviour
     public float attackCooldown = 2f;
     public float attackRange = 1.5f;
     
+    public float bounceBaseDamage = 5f;
+    public float bounceMultiplier = 2f;
+    public float bounceElasticity = 0.8f;
+    
     public float AgentSize = 1f;
     public float DangerWeight = 2.0f;
     public float SurroundRadius = 6.0f;
@@ -32,6 +36,7 @@ public class AllyAuthoring : MonoBehaviour
             // tags
             AddComponent(entity, new UnableToAct());
             AddComponent(entity, new Grabbed());
+            AddComponent(entity, new InAir());
             AddComponent(entity, new IsDead());
             AddComponent(entity, new AttackCooldownExpirationTimestamp());
             AddComponent(entity, new TargetSearchCooldownExpirationTimestamp());
@@ -39,6 +44,7 @@ public class AllyAuthoring : MonoBehaviour
             
             SetComponentEnabled<UnableToAct>(entity, false);
             SetComponentEnabled<Grabbed>(entity, false);
+            SetComponentEnabled<InAir>(entity, false);
             SetComponentEnabled<IsDead>(entity, false);
             SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
             SetComponentEnabled<TargetSearchCooldownExpirationTimestamp>(entity, false);
@@ -56,6 +62,14 @@ public class AllyAuthoring : MonoBehaviour
             AddComponent(entity, new BattleBrain{ CanAttack = false});
             AddComponent(entity, new EmotionalState {Value = Emotion.Scared});
             AddComponent(entity, new ActionState { Value = ActionType.Moving });
+            
+            AddComponent(entity, new BounceDamage
+            {
+                BaseDamage = authoring.bounceBaseDamage,
+                BounceCount = 0,
+                BounceDamageMultiplier = authoring.bounceMultiplier,
+                BounceElasticity = authoring.bounceElasticity
+            });
             
             AddComponent(entity, new SteerBehavior_Seek{Weight = 1f});
             AddComponent(entity, new SteeringContext{AgentRadius = authoring.AgentSize});

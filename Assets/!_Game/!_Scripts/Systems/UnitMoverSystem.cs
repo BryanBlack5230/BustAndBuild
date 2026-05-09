@@ -1,4 +1,3 @@
-using GameEngine.Utils.Logging;
 using GameManagement;
 using Unity.Burst;
 using Unity.Entities;
@@ -28,16 +27,17 @@ namespace GameEngine.AI
         {
             if (action.Value == ActionType.Attacking || action.Value == ActionType.Stunned) return;
             
+            
             var moveDirection = destination.Value - localTransform.Position;
             if (math.lengthsq(moveDirection) <= destination.StoppingDistanceSq)
             {
-                physicsVelocity.Linear = float3.zero;
+                physicsVelocity.Linear = new float3(0f, physicsVelocity.Linear.y, 0f);
                 physicsVelocity.Angular = float3.zero;
                 return;
             }
             moveDirection = math.normalize(moveDirection); // set transform to anything but 0 0 0, or you'll get NaN
-                
-            physicsVelocity.Linear = moveDirection * unitMover.moveSpeed;
+
+            physicsVelocity.Linear = new float3(moveDirection.x * unitMover.moveSpeed, physicsVelocity.Linear.y, moveDirection.z * unitMover.moveSpeed);
             physicsVelocity.Angular = float3.zero;
             
             var targetRotation = quaternion.LookRotationSafe(

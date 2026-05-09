@@ -24,7 +24,6 @@ public partial class GizmoDrawSystem : SystemBase
         SteeringContextGizmo();
         SteerObstacleGizmo();
         FinalDestinationGizmo();
-     
         // More ForEach queries as needed ...
     }
 
