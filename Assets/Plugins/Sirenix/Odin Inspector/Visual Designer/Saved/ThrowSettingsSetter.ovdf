@@ -1,0 +1,38 @@
+OVDF v1.1
+ThrowSettingsSetter, Runtime
+MetaGuid:8e706e968b020234594d7bd8f92de82e
+
+# _currentEntitySpeed
++ [Sirenix.OdinInspector.LabelTextAttribute]
+	Text = "Entity Speed"
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
++ [Sirenix.OdinInspector.ProgressBarAttribute]
+	MinMember = "_velocityMin"
+	MaxMember = "_velocityMax"
+	Segmented = False
+	G = 0,92
+
+# _computedVelocityPower
++ [Sirenix.OdinInspector.LabelTextAttribute]
+	Text = "Velocity Power"
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
++ [Sirenix.OdinInspector.ProgressBarAttribute]
+	Min = 0
+	Max = 1
+	G = 0,75
+	B = 0,72
+	R = 0,93
+
+# _lastThrowRawPower
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
+
+# _thrownEntityMass
++ [Sirenix.OdinInspector.LabelTextAttribute]
+	Text = "Mass"
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
+
+# _throwImpulse
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
+
+# _scaledThrowForce
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
