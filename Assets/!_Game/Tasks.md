@@ -17,18 +17,18 @@
 |   ✅    |              | While mouse button is held, calculate the latest speed and direction of movement                                                                   |
 |   ✅    |              | If ground - move camera, if object - move object                                                                                                   |
 |   ✅    |              | On release, call event to pass the values to object\camera movement                                                                                |
-|   ✅     |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
-|   ✅     |              | Zoom In/Out transition event                                                                                                                       |
+|   ✅    |              | Same for RMB (in case of RMB calculations of speed and direction, but no movement, just call event on release)                                     |
+|   ✅    |              | Zoom In/Out transition event                                                                                                                       |
 |        | Physics      |                                                                                                                                                    |
-|        |              | Objects on the ground are still, if not affected by other forces (or moving themselves)                                                            |
-|        |              | Objects in the air fall down due to gravity, they have settable weight                                                                             |
-|        |              | Objects in the air collide with the screen borders. Caution - since camera can move, so will the borders                                           |
+|   ✅    |              | Objects on the ground are still, if not affected by other forces (or moving themselves)                                                            |
+|   ✅    |              | Objects in the air fall down due to gravity, they have settable weight                                                                             |
+|   ✅     |              | Objects in the air collide with the screen borders. Caution - since camera can move, so will the borders                                           |
 |        |              | Airborne objects collide in 2D world                                                                                                               |
-|        |              | Objects on the ground collide in 3D world                                                                                                          |
+|    ✅    |              | Objects on the ground collide in 3D world                                                                                                          |
 |        |              | Airborne objects falling to the ground can collide with objects on the ground with the 3D logic                                                    |
-|        |              | Object that has collided with another object, will bounce, depending on the force and the bounciness parameter of object and it's collision object |
+|   ✅     |              | Object that has collided with another object, will bounce, depending on the force and the bounciness parameter of object and it's collision object |
 |        |              | Flick trajectory prediction system for debugging                                                                                                   |
-|        |              | Screen borders disappear on scene change event                                                                                                     |
+|   ✅     |              | Screen borders disappear on scene change event                                                                                                     |
 ## Scenes
 
 ### Battleground Scene
@@ -52,14 +52,14 @@
 |        |               | Damage events: unit attack                                                                                                                       |
 |        | Enemy unit AI |                                                                                                                                                  |
 |    ✅    |               | Default Target is set to Beacon                                                                                                                  |
-|        |               | Calls death event on unit death                                                                                                                  |
+|    ✅    |               | Calls death event on unit death                                                                                                                  |
 |        | Ally unit AI  |                                                                                                                                                  |
 |        |               | Stays in front of wall                                                                                                                           |
 |        |               | Target can be a spot in front of the wall                                                                                                        |
 |        |               | If Target is a spot, changes target after 5s of reaching previous target                                                                         |
 |        |               | If health drops to zero, runs to barrack                                                                                                         |
 |        | Castle        |                                                                                                                                                  |
-|        |               | Wall segments with health                                                                                                                        |
+|    ✅    |               | Wall segments with health                                                                                                                        |
 |        |               | Walls have slots for ally units                                                                                                                  |
 |        |               | Wall at zero health is sending event, units on it fall down, it stops being counted as Target for Enemies, visuals are replaced with broken wall |
 |        |               | Barracks heal ally units that are close                                                                                                          |
@@ -68,7 +68,7 @@
 |        | Beacon        |                                                                                                                                                  |
 |        |               | Can be interracted with to start wave                                                                                                            |
 |        |               | Starts daylight event                                                                                                                            |
-|        |               | Has health                                                                                                                                       |
+|     ✅   |               | Has health                                                                                                                                       |
 |        |               | On zero health stops daylight event                                                                                                              |
 |        | Daylight      |                                                                                                                                                  |
 |   ✅   |               | Starts daylight cycle                                                                                                                            |
