@@ -9,24 +9,23 @@ namespace Game.Configs
     {
         private readonly ConfigContainer _container;
         private readonly PrototypeConfigSetter _prototypeConfig;
-        
+
         public BlobContainer(ConfigContainer container, PrototypeConfigSetter prototypeConfig)
         {
             _container = container;
             _prototypeConfig = prototypeConfig;
         }
-        
+
         public void Initialize()
         {
             var world = World.DefaultGameObjectInjectionWorld;
             var entityManager = world.EntityManager;
-        
+
             var configEntity = entityManager.CreateEntity();
             entityManager.AddComponentData(configEntity, new TargetProfiles
             {
                 Blob = CreateProfilesBlob()
             });
-        
             entityManager.SetName(configEntity, "Global_Target_Profiles");
         }
         

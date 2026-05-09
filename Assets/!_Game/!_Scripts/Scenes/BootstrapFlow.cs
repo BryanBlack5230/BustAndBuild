@@ -16,9 +16,10 @@ public class BootstrapFlow : MonoBehaviour
     private ConfigContainer _configContainer;
     private DotsGameLoopBridge _dotsGameLoopBridge;
     private BlobContainer _blobContainer;
+    private ThrowSettingsSetter _throwSettingsSetter;
 
     [Inject]
-    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer)
+    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer, ThrowSettingsSetter throwSettingsSetter)
     {
         SceneScope.OnSceneContainerBuilding += OverrideParent;
         _dotsGameLoopBridge = dotsGameLoopBridge;
@@ -28,13 +29,15 @@ public class BootstrapFlow : MonoBehaviour
         _cursorSetter = cursorSetter;
         _configContainer = configContainer;
         _blobContainer = blobContainer;
+        _throwSettingsSetter = throwSettingsSetter;
     }
 
     private async void Start()
     {
         Log.Boot.D("BootstrapFlow.Start()");
         _dotsGameLoopBridge.Initialize();
-        
+        _throwSettingsSetter.Initialize();
+
         await _loadingService.BeginLoading(_configContainer);
         await _loadingService.BeginLoading(_cursorSetter);
 

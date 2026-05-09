@@ -22,10 +22,16 @@ public class BattleGroundSceneInstaller : MonoBehaviour, IInstaller
         builder.AddSingleton(typeof(MousePositionProvider), typeof(MousePositionProvider));
         builder.AddSingleton(typeof(CursorMovementCalculations), typeof(CursorMovementCalculations), typeof(IGameListener));
         
+        builder.AddSingleton(typeof(GrabbedEntityMover), typeof(GrabbedEntityMover), typeof(IDisposable));
+        builder.AddSingleton(typeof(OverlapResolver), typeof(OverlapResolver), typeof(IDisposable));
+        builder.AddSingleton(typeof(TunnelTeleporter), typeof(TunnelTeleporter), typeof(IDisposable));
+        builder.AddSingleton(typeof(ReleaseCoordinator), typeof(ReleaseCoordinator));
         builder.AddSingleton(typeof(GrabbingInteractor), typeof(GrabbingInteractor), typeof(IGameListener));
         builder.AddSingleton(typeof(InteractController), typeof(InteractController), typeof(IGameListener), typeof(IDisposable));
         builder.AddSingleton(typeof(PowerHitController), typeof(PowerHitController), typeof(IGameListener), typeof(IDisposable));
         
         builder.AddSingleton(typeof(BattleCameraMovement), typeof(BattleCameraMovement), typeof(IGameListener), typeof(IDisposable));
+        
+        builder.AddSingleton(typeof(BattleCameraBorderSyncBridge), typeof(BattleCameraBorderSyncBridge), typeof(IGameListener));
     }
 }

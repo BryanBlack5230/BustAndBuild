@@ -1192,50 +1192,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1547821724}
   m_CullTransparentMesh: 1
---- !u!1 &1664718994
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1664718996}
-  - component: {fileID: 1664718995}
-  m_Layer: 0
-  m_Name: GizmosHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1664718995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664718994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6398fd65a5784044878cdb4e998603c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Runtime::GizmoSystemHandler
---- !u!4 &1664718996
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664718994}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1666649045
 GameObject:
   m_ObjectHideFlags: 0
@@ -1297,6 +1253,7 @@ MonoBehaviour:
   _gameManagerUIController: {fileID: 669851394}
   _bootstrapFlow: {fileID: 1778888967}
   _prototypeConfigSetter: {fileID: 667487152}
+  _throwSettingsSetter: {fileID: 2002722188}
 --- !u!1 &1778888966
 GameObject:
   m_ObjectHideFlags: 0
@@ -1511,6 +1468,85 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1961575939}
   m_CullTransparentMesh: 1
+--- !u!1 &2002722187
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2002722189}
+  - component: {fileID: 2002722188}
+  m_Layer: 0
+  m_Name: ThrowSettingsSetter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2002722188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002722187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e706e968b020234594d7bd8f92de82e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::ThrowSettingsSetter
+  ThrowScale: 0.1
+  MinMaxVelocity: {x: 5, y: 75}
+  _velocityPowerCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _velocityMin: 5
+  _velocityMax: 75
+  _lastThrowRawPower: 0
+  _scaledThrowForce: 0
+  _throwImpulse: 0
+  _thrownEntityMass: 0
+  _currentEntitySpeed: 0
+  _computedVelocityPower: 0
+  Gravity: 40
+--- !u!4 &2002722189
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002722187}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -129.89037, y: 0, z: -18.98916}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1522,4 +1558,4 @@ SceneRoots:
   - {fileID: 1835219398}
   - {fileID: 667487153}
   - {fileID: 1261699995}
-  - {fileID: 1664718996}
+  - {fileID: 2002722189}

@@ -52,7 +52,7 @@ namespace Game.Feature.Input
         private void OnCanceled(InputAction.CallbackContext obj)
         {
             EventManager.Input.Release?.Invoke();
-            _grabbingInteractor.Release(out var releaseEntity);
+            _grabbingInteractor.Release();
         }
 
         private void OnClick(InputAction.CallbackContext context)
