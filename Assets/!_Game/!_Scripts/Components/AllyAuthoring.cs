@@ -60,7 +60,7 @@ public class AllyAuthoring : MonoBehaviour
             AddBuffer<DamageBufferElement>(entity);
             AddComponent(entity, new AttackData { Damage = authoring.attackDamage, CooldownTime = authoring.attackCooldown, AttackRange = authoring.attackRange});
             AddComponent(entity, new BattleBrain{ CanAttack = false});
-            AddComponent(entity, new EmotionalState {Value = Emotion.Scared});
+            AddComponent(entity, new EmotionalState {Value = Emotion.Normal});
             AddComponent(entity, new ActionState { Value = ActionType.Moving });
             
             AddComponent(entity, new BounceDamage

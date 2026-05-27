@@ -1498,6 +1498,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::ThrowSettingsSetter
   ThrowScale: 0.1
+  ThrowThreshold: 100
   MinMaxVelocity: {x: 5, y: 75}
   _velocityPowerCurve:
     serializedVersion: 2

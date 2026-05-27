@@ -134,10 +134,13 @@ MonoBehaviour:
   moveSpeed: 3
   turnSpeed: 13
   stoppingDistance: 1
-  health: 5000
+  health: 50
   attackDamage: 10
   attackCooldown: 2
   attackRange: 1.5
+  bounceBaseDamage: 5
+  bounceMultiplier: 2
+  bounceElasticity: 0.8
   AgentSize: 0.5
   DangerWeight: 2
   SurroundRadius: 12
