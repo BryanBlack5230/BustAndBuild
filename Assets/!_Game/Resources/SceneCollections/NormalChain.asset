@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf4566e7c5cfa33459c6b6540ab5d972, type: 3}
+  m_Name: NormalChain
+  m_EditorClassIdentifier: Runtime::Game.Configs.GameFlow
+  _scenes:
+  - _sceneAsset: {fileID: 102900000, guid: faa18f31c2277ea4181eaedb6851c539, type: 3}
+  - _sceneAsset: {fileID: 102900000, guid: 2a7d52e58e9cff043ae71400f2bb5948, type: 3}
+  - _sceneAsset: {fileID: 102900000, guid: 1171b4c7d72138f458be6c9e297d0263, type: 3}
+  - _sceneAsset: {fileID: 102900000, guid: 933f397e3e424c24aa9b9908d5540458, type: 3}

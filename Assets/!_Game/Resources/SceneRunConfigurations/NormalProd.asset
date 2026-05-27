@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c57ba7d4c4a0c4438caa67885af7703, type: 3}
+  m_Name: NormalProd
+  m_EditorClassIdentifier: Runtime::Game.Configs.RunConfiguration
+  _isDefault: 0
+  _isBuildConfig: 1
+  _chain: {fileID: 11400000, guid: 2e9456b1ec2402343b69dd8e51a815be, type: 2}
+  _overrides: []
+  references:
+    version: 2
+    RefIds: []

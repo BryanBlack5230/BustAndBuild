@@ -1,0 +1,8 @@
+OVDF v1.1
+Game.Configs.SceneChain+SceneChainElement, Runtime
+
+# _sceneName
++ [Sirenix.OdinInspector.ReadOnlyAttribute]
+
+# _scenePath
++ [Sirenix.OdinInspector.ReadOnlyAttribute]

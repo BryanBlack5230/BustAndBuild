@@ -8,7 +8,7 @@ namespace Game.Configs
 {
     public class ConfigGenerator
     {
-        [MenuItem("Game/Generate Configs")]
+        [MenuItem("BarkingBird/Generate Configs")]
         public static void Generate()
         {
             var configContainer = new ConfigContainer

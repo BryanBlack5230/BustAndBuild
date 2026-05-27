@@ -1,28 +1,32 @@
+#nullable enable
+
 using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
 using Game.Feature.Camera;
+using Game.SceneWorkflow;
 using Game.Feature.Input;
-using GameEngine.Utils;
 using GameEngine.Utils.Logging;
 using GameManagement;
 using Reflex.Attributes;
 using UnityEngine;
 
-public class BattleGroundSceneFlow : MonoBehaviour
+public sealed class BattleGroundSceneFlow : MonoBehaviour, ISceneFlow
 {
-    private LoadingService _loadingService;
-    private InteractController _interactController;
-    private PowerHitController _powerHitController;
-    private BattleCameraMovement _battleCameraMovement;
-    private BattleCameraBorderSyncBridge _battleCameraBorderSyncBridge;
-    private IEnumerable<IGameListener> _listeners;
-    private GameLoopManager _gameLoopManager;
+    private readonly UniTaskCompletionSource _initCompleted = new();
+
+    private InteractController _interactController = null!;
+    private PowerHitController _powerHitController = null!;
+    private BattleCameraMovement _battleCameraMovement = null!;
+    private BattleCameraBorderSyncBridge _battleCameraBorderSyncBridge = null!;
+    private IEnumerable<IGameListener>? _listeners;
+    private GameLoopManager _gameLoopManager = null!;
+
+    UniTask ISceneFlow.WaitForInit() => _initCompleted.Task;
 
     [Inject]
-    public void Construct(GameLoopManager gameLoopManager, LoadingService loadingService, InteractController interactController, PowerHitController powerHitController, BattleCameraMovement battleCameraMovement, IEnumerable<IGameListener> listeners, BattleCameraBorderSyncBridge battleCameraBorderSyncBridge)
+    private void Construct(GameLoopManager gameLoopManager, InteractController interactController, PowerHitController powerHitController, BattleCameraMovement battleCameraMovement, IEnumerable<IGameListener> listeners, BattleCameraBorderSyncBridge battleCameraBorderSyncBridge)
     {
         _gameLoopManager = gameLoopManager;
-        _loadingService = loadingService;
         _interactController = interactController;
         _powerHitController = powerHitController;
         _battleCameraMovement = battleCameraMovement;
@@ -30,7 +34,7 @@ public class BattleGroundSceneFlow : MonoBehaviour
         _listeners = listeners;
     }
 
-    private async void Start()
+    private void Start()
     {
         Log.Battle.D("BattlegroundFlow.Start()");
         _interactController.Initialize();
@@ -38,21 +42,17 @@ public class BattleGroundSceneFlow : MonoBehaviour
         _battleCameraMovement.Initialize();
         _battleCameraBorderSyncBridge.Initialize();
 
-        if (_listeners != null && _listeners.Any())
-        {
-            Log.Battle.D($"BattlegroundFlow registering {_listeners.Count()} listeners");
+        if (_listeners != null)
             _gameLoopManager.AddListeners(_listeners);
-        }
+
+        _initCompleted.TrySetResult();
     }
 
     private void OnDestroy()
     {
-        if (_listeners != null && _listeners.Any())
-        {
-            Log.Battle.D($"BattlegroundFlow removing {_listeners.Count()} listeners");
+        if (_listeners != null)
             _gameLoopManager.RemoveListeners(_listeners);
-        }
-        
+
         Log.Battle.D("BattlegroundFlow.Destroyed()");
     }
 }

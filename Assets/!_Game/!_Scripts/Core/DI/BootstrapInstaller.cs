@@ -6,11 +6,12 @@ using UnityEngine;
 
 public class BootstrapInstaller : MonoBehaviour, IInstaller
 {
-    [SerializeField] private GameLoopManager _gameLoopManager;
-    [SerializeField] private GameManagerUIController _gameManagerUIController;
-    [SerializeField] private BootstrapFlow _bootstrapFlow;
-    [SerializeField] private PrototypeConfigSetter _prototypeConfigSetter;
-    [SerializeField] private ThrowSettingsSetter _throwSettingsSetter;
+    [SerializeField] private GameLoopManager _gameLoopManager = null!;
+    [SerializeField] private GameManagerUIController _gameManagerUIController = null!;
+    [SerializeField] private BootstrapFlow _bootstrapFlow = null!;
+    [SerializeField] private PrototypeConfigSetter _prototypeConfigSetter = null!;
+    [SerializeField] private ThrowSettingsSetter _throwSettingsSetter = null!;
+
     public void InstallBindings(ContainerBuilder builder)
     {
         InstallGameLoop(builder);
@@ -19,7 +20,7 @@ public class BootstrapInstaller : MonoBehaviour, IInstaller
         builder.AddSingleton(_bootstrapFlow, typeof(BootstrapFlow));
         builder.AddSingleton(_throwSettingsSetter, typeof(ThrowSettingsSetter), typeof(IGameListener));
     }
-    
+
     private void InstallGameLoop(ContainerBuilder builder)
     {
         builder.AddSingleton(_gameLoopManager, typeof(GameLoopManager));

@@ -1,4 +1,8 @@
+#nullable enable
+
+using Cysharp.Threading.Tasks;
 using Game.Configs;
+using Game.SceneWorkflow;
 using Game.Feature.Input;
 using GameEngine.Utils;
 using GameEngine.Utils.Logging;
@@ -6,28 +10,30 @@ using GameManagement;
 using Reflex.Attributes;
 using Reflex.Core;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class BootstrapFlow : MonoBehaviour
+public sealed class BootstrapFlow : MonoBehaviour, ISceneFlow
 {
-    private LoadingService _loadingService;
-    private CursorSetter _cursorSetter;
-    private Container _bootSceneContainer;
-    private ConfigContainer _configContainer;
-    private DotsGameLoopBridge _dotsGameLoopBridge;
-    private BlobContainer _blobContainer;
-    private ThrowSettingsSetter _throwSettingsSetter;
+    private readonly UniTaskCompletionSource _initCompleted = new();
+
+    private LoadingService _loadingService = null!;
+    private CursorSetter _cursorSetter = null!;
+    private Container _bootSceneContainer = null!;
+    private ConfigContainer _configContainer = null!;
+    private DotsGameLoopBridge _dotsGameLoopBridge = null!;
+    private BlobContainer _blobContainer = null!;
+    private ThrowSettingsSetter _throwSettingsSetter = null!;
+
+    UniTask ISceneFlow.WaitForInit() => _initCompleted.Task;
 
     [Inject]
-    public void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer, ThrowSettingsSetter throwSettingsSetter)
+    private void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, ConfigContainer configContainer, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer, ThrowSettingsSetter throwSettingsSetter)
     {
         SceneScope.OnSceneContainerBuilding += OverrideParent;
-        _dotsGameLoopBridge = dotsGameLoopBridge;
         _bootSceneContainer = container;
-
         _loadingService = loadingService;
         _cursorSetter = cursorSetter;
         _configContainer = configContainer;
+        _dotsGameLoopBridge = dotsGameLoopBridge;
         _blobContainer = blobContainer;
         _throwSettingsSetter = throwSettingsSetter;
     }
@@ -42,11 +48,12 @@ public class BootstrapFlow : MonoBehaviour
         await _loadingService.BeginLoading(_cursorSetter);
 
         _blobContainer.Initialize();
-
-        SceneManager.LoadSceneAsync(RuntimeConstants.Scenes.World, LoadSceneMode.Additive)
-            .completed += OnNextSceneLoaded;
+        _initCompleted.TrySetResult();
     }
-    
-    private void OnNextSceneLoaded(AsyncOperation _) => SceneScope.OnSceneContainerBuilding -= OverrideParent;
-    private void OverrideParent(Scene scene, ContainerBuilder builder) => builder.SetParent(_bootSceneContainer);
+
+    private void OverrideParent(UnityEngine.SceneManagement.Scene scene, ContainerBuilder builder)
+    {
+        SceneScope.OnSceneContainerBuilding -= OverrideParent;
+        builder.SetParent(_bootSceneContainer);
+    }
 }
