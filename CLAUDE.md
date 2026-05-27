@@ -6,8 +6,10 @@ This is a game project by BarkingBird studio. For more information , load the [P
 ```
 Bust and Build/
 ├── Claud.md                                 ← You are here (always loaded)
-├── Project.md                               ← Task router
-├── Input.md                                 ← User inputed prompt
+├── `Claud/`                                 ← Folder for claude related files
+│   ├── `learnings/`                         ← Your knowledge database for internal use
+│   ├── Project.md                           ← Task router
+│   └── Input.md                             ← User inputed prompt
 │
 ├── `Assets/`                                ← Assets for Unity
 │   ├── `!_Game/`                            ← Assets made in BarkingBird studio
@@ -24,6 +26,6 @@ Bust and Build/
 │   │   │   ├── `Settings/`                  ← Various JSON configs and blob assets
 │   │   │   └── `Editor/`                    ← Editor scripts
 │   │   ├── `Resources/`                    
-│   │   │   ├── Config.json                  ← Immutable (after game starts) configs
+│   │   │   └── Config.json                  ← Immutable (after game starts) configs
 │   │   └── Tasks.md                         ← Task management memos
 ```
