@@ -1254,6 +1254,57 @@ MonoBehaviour:
   _bootstrapFlow: {fileID: 1778888967}
   _prototypeConfigSetter: {fileID: 667487152}
   _throwSettingsSetter: {fileID: 2002722188}
+--- !u!1 &1763959280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1763959282}
+  - component: {fileID: 1763959281}
+  m_Layer: 0
+  m_Name: GizmoHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1763959281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1763959280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6398fd65a5784044878cdb4e998603c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::GizmoSystemHandler
+  showUnitState: 1
+  showAttackRange: 0
+  showTarget: 0
+  showDestination: 0
+  showSteeringContext: 0
+  showSteerObstacle: 0
+  showFinalDestination: 0
+--- !u!4 &1763959282
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1763959280}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -116.92981, y: 0, z: -16.96091}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1778888966
 GameObject:
   m_ObjectHideFlags: 0
@@ -1560,3 +1611,4 @@ SceneRoots:
   - {fileID: 667487153}
   - {fileID: 1261699995}
   - {fileID: 2002722189}
+  - {fileID: 1763959282}
