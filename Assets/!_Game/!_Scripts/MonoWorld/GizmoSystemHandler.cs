@@ -5,6 +5,15 @@ using UnityEngine;
 #if UNITY_EDITOR
 public class GizmoSystemHandler : MonoBehaviour
 {
+    [Header("Gizmo Toggles")]
+    [SerializeField] public bool showUnitState = true;
+    [SerializeField] public bool showAttackRange = true;
+    [SerializeField] public bool showTarget = true;
+    [SerializeField] public bool showDestination = true;
+    [SerializeField] public bool showSteeringContext = true;
+    [SerializeField] public bool showSteerObstacle = true;
+    [SerializeField] public bool showFinalDestination = true;
+
     public Action DrawGizmos;
     public Action DrawGizmosSelected;
 
@@ -32,13 +41,15 @@ public static class GizmoManager
         Handler.DrawGizmos += action;
     }
 
-    private static GizmoSystemHandler Handler => _handler != null ? _handler : (_handler = createHandler());
+    public static GizmoSystemHandler Handler => _handler != null ? _handler : (_handler = findOrCreateHandler());
     private static GizmoSystemHandler _handler;
 
-    private static GizmoSystemHandler createHandler()
+    private static GizmoSystemHandler findOrCreateHandler()
     {
-        var go = new GameObject("Gizmo Handler") { hideFlags = HideFlags.DontSave };
+        var existing = UnityEngine.Object.FindFirstObjectByType<GizmoSystemHandler>();
+        if (existing != null) return existing;
 
+        var go = new GameObject("Gizmo Handler") { hideFlags = HideFlags.DontSave };
         return go.AddComponent<GizmoSystemHandler>();
     }
 

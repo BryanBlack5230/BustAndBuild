@@ -17,14 +17,14 @@ public partial class GizmoDrawSystem : SystemBase
 
     private void DrawGizmos()
     {
-        UnitStateGizmo();
-        AttackRangeGizmo();
-        TargetGizmo();
-        DestinationGizmo();
-        SteeringContextGizmo();
-        SteerObstacleGizmo();
-        FinalDestinationGizmo();
-        // More ForEach queries as needed ...
+        var h = GizmoManager.Handler;
+        if (h.showUnitState)        UnitStateGizmo();
+        if (h.showAttackRange)      AttackRangeGizmo();
+        if (h.showTarget)           TargetGizmo();
+        if (h.showDestination)      DestinationGizmo();
+        if (h.showSteeringContext)  SteeringContextGizmo();
+        if (h.showSteerObstacle)    SteerObstacleGizmo();
+        if (h.showFinalDestination) FinalDestinationGizmo();
     }
 
     private void FinalDestinationGizmo()
