@@ -39,6 +39,26 @@ UnityEditor.AssetDatabase.SaveAssets();
 ```
 **Why it matters:** Reusable pattern for any "exclusive selection" flag on ScriptableObject assets.
 
+## Odin [PropertyOrder] to Hoist Buttons Above Fields
+**Context:** Moving "Set Default" / "Set Build Config" buttons to the top of `RunConfiguration` inspector.  
+**Finding:** Add `[PropertyOrder(-1)]` to `[Button]` methods — fields without an explicit order default to 0, so any negative value places the button above them.  
+**Why it matters:** No custom editor needed; one attribute line is enough to reorder any Odin-drawn member.
+
+## Odin [ShowIf] Self-Reference on Bool Fields
+**Context:** Hiding `_isDefault` / `_isBuildConfig` when their value is `false`.  
+**Finding:** `[ShowIf("_isDefault")]` on `_isDefault` itself shows the field only when its own value is `true`. Self-referencing works for any bool field. When all members of a `[HorizontalGroup]` are hidden, the group row disappears entirely.  
+**Why it matters:** Avoids cluttering the inspector with flags that are irrelevant most of the time.
+
+## Odin [GUIColor] for Per-Field Tinting — User Colour Preferences
+**Context:** Colouring flag fields green; user revised to distinct colours per flag.  
+**Finding:** `[GUIColor(r, g, b)]` tints the full control (label + widget). User chose cyan `(0.5f, 1f, 1f)` for `_isDefault` and orange/gold `(1f, 0.7f, 0f)` for `_isBuildConfig` — different colours per flag, not uniform. Suggest distinct colours, not the same shade for all flags.  
+**Why it matters:** Distinct colours make each flag instantly recognisable at a glance.
+
+## Odin [HorizontalGroup] Collapses When All Members Hidden
+**Context:** `_isDefault` and `_isBuildConfig` share `[HorizontalGroup("Flags")]` and both use `[ShowIf]`.  
+**Finding:** When all fields in a `[HorizontalGroup]` are hidden by `[ShowIf]`, the row itself vanishes — no empty gap left behind.  
+**Why it matters:** Safe to combine `[HorizontalGroup]` with `[ShowIf]`; no need to hide the group separately.
+
 ## SetBuildConfig Pattern — Global Exclusive Flag (No Scoping)
 **Context:** `RunConfiguration.SetBuildConfig()` — only one config in the entire project can be the build entry point.  
 **Finding:** Same pattern as `SetDefault` but omit the chain equality check — clears the flag on every other asset of the type globally.

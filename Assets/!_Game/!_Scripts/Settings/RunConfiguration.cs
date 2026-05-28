@@ -9,9 +9,15 @@ namespace Game.Configs
     [CreateAssetMenu(fileName = "RunConfiguration", menuName = "BarkingBird/Run Configuration")]
     public sealed class RunConfiguration : ScriptableObject
     {
+        [HorizontalGroup("Flags")]
+        [ShowIf("_isDefault")]
+        [GUIColor(0.5f, 1f, 1f)]
         [ReadOnly]
         [SerializeField] private bool _isDefault;
 
+        [HorizontalGroup("Flags")]
+        [ShowIf("_isBuildConfig")]
+        [GUIColor(1f, 0.7f, 0f)]
         [ReadOnly]
         [SerializeField] private bool _isBuildConfig;
 
@@ -28,6 +34,7 @@ namespace Game.Configs
         public IReadOnlyList<StateOverride> Overrides => _overrides;
 
 #if UNITY_EDITOR
+        [PropertyOrder(-1)]
         [Button("Set Default")]
         private void SetDefault()
         {
@@ -47,6 +54,7 @@ namespace Game.Configs
             UnityEditor.AssetDatabase.SaveAssets();
         }
 
+        [PropertyOrder(-1)]
         [Button("Set Build Config")]
         private void SetBuildConfig()
         {

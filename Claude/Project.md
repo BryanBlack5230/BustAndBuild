@@ -44,6 +44,25 @@ Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesA
 
 All simulation runs inside `GameLoopSystemGroup` (extends `SimulationSystemGroup`).
 
+### Scene Workflow System
+
+`SceneWorkflowRunner` bootstraps the full scene chain at runtime via `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]`.
+
+- **`RunConfiguration`** (SO, `Resources/SceneRunConfigurations/`) — pairs a `SceneChain` with a list of `StateOverride`s. Flags: `IsDefault` (one per chain, editor default) and `IsBuildConfig` (one global, used in builds).
+- **`SceneChain`** (SO) — ordered list of scenes loaded additively. Each element stores name + path (synced from `SceneAsset` in editor).
+- **`StateOverride`** — abstract async action applied after all scenes are loaded. Concrete subclass: `GameLoopStateOverride` (Start / Pause / Finish).
+- **Runtime**: In builds, loads the `IsBuildConfig` config from Resources and loads scenes in order, waiting for each scene's `ISceneFlow.WaitForInit()` before loading the next.
+- **Editor**: `SceneWorkflowToolbox` (`BarkingBird/Scenes/Scene Workflow`, `Ctrl+Shift+W`) writes the selected config to `SessionState`; runner picks it up on Play.  Single Scene Mode loads Bootstrap + current scene only.
+
+**Configs in `Resources/SceneRunConfigurations/`:**
+
+| Asset | Purpose |
+|---|---|
+| `BattleDev` | Jump straight to Battle scene |
+| `CityDev` | Jump straight to City scene |
+| `NormalDev` | Full game flow (dev default) |
+| `NormalProd` | Full game flow (build config) |
+
 ### Configuration Pipeline
 
 JSON configs are loaded at bootstrap via `AssetService` (Resources), parsed with Newtonsoft.Json into `ConfigContainer`, then baked into DOTS Blob Assets by `BlobContainer` / `BlobConfigConverter` for Burst-safe access inside systems.
