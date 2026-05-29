@@ -49,7 +49,7 @@ public partial class GizmoDrawSystem : SystemBase
             
             for (var i = 0; i < 8; i++)
             {
-                var dir = SteeringConstants.Directions[i];
+                var dir = SteeringConstants.GetDirection(i);
                 var isFrontDirection = math.dot(dir, transform.ValueRO.Forward()) > 0.5f;
                 var scanRange = isFrontDirection ? obstacle.ValueRO.SurroundRadius + obstacle.ValueRO.VisionDistance : obstacle.ValueRO.SurroundRadius;
                 
@@ -83,7 +83,7 @@ public partial class GizmoDrawSystem : SystemBase
             var debugText = "";
             for (int interest = 0; interest < 8; interest++)
             {
-                var direction = SteeringConstants.Directions[interest];
+                var direction = SteeringConstants.GetDirection(interest);
                 var startPoint = lineStart + direction * 0.2f;
                 var endPoint = lineStart + direction * math.clamp(steeringContext.ValueRO.Interest[interest], 0.25f, 1f);
                 Gizmos.DrawLine(startPoint, endPoint);
@@ -105,7 +105,7 @@ public partial class GizmoDrawSystem : SystemBase
             lineStart += new float3(0, 0.1f, 0);
             for (int danger = 0; danger < 8; danger++)
             {
-                var direction = SteeringConstants.Directions[danger];
+                var direction = SteeringConstants.GetDirection(danger);
                 var startPoint = lineStart + direction * 0.2f;
                 var endPoint = lineStart + direction * math.clamp(steeringContext.ValueRO.Danger[danger], 0.3f, 1f);
                 Gizmos.DrawLine(startPoint, endPoint);

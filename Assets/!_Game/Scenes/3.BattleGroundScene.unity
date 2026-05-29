@@ -695,6 +695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleSceneData: {fileID: 1613355548}
   _battleGroundSceneFlow: {fileID: 595206564}
+  _trajectoryPredictorSettings: {fileID: 11400000, guid: 597a2c9ce7de27049bf10585929615af, type: 2}
 --- !u!114 &345921083
 MonoBehaviour:
   m_ObjectHideFlags: 0

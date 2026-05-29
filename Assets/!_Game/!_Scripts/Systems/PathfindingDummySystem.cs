@@ -13,10 +13,13 @@ using UnityEngine;
 [UpdateBefore(typeof(Steer_SeekSystem))]
 public partial struct PathfindingDummySystem : ISystem
 {
+    private uint _obstacleLayerMask;
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<FakePathfinderPoint>();
         state.RequireForUpdate<PhysicsWorldSingleton>();
+        _obstacleLayerMask = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Obstacle);
     }
 
     [BurstCompile]
@@ -27,7 +30,7 @@ public partial struct PathfindingDummySystem : ISystem
 
         var filter = new CollisionFilter {
             BelongsTo = ~0u,
-            CollidesWith = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Obstacle),
+            CollidesWith = _obstacleLayerMask,
             GroupIndex = 0
         };
 

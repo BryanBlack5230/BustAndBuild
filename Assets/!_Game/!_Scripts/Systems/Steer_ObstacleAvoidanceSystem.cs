@@ -63,7 +63,7 @@ public partial struct ObstacleOverlapJob : IJobEntity
 
         for (var i = 0; i < 8; i++)
         {
-            var dir = SteeringConstants.Directions[i];
+            var dir = SteeringConstants.GetDirection(i);
             var isFrontDirection = math.dot(dir, transform.Forward()) > 0.5f;
             var scanRange = isFrontDirection ? config.SurroundRadius + config.VisionDistance : config.SurroundRadius;
 
@@ -115,7 +115,7 @@ public partial struct ObstacleApplyJob : IJobEntity
             var baseDanger = shadow.CachedDanger[i];
             if (baseDanger <= 0.001f) continue;
         
-            var direction = SteeringConstants.Directions[i];
+            var direction = SteeringConstants.GetDirection(i);
             var alignment = math.dot(movementSinceScan, direction);
             var modifier = alignment * distanceNormalization;
         

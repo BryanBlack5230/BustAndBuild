@@ -57,7 +57,8 @@ namespace GameManagement
         public void Dispose()
         {
             if (!_isInitialized) return;
-            
+            if (_world == null || !_world.IsCreated) return;
+
             _gameLoopGroup.Enabled = false;
         }
     }

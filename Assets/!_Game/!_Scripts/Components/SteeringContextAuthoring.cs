@@ -16,28 +16,27 @@ public class SteeringContextAuthoring : MonoBehaviour
 
 public static class SteeringConstants
 {
-    public static readonly float3[] Directions = new float3[]
+    private const float DiagonalComponent = 0.70710678118f; // 1/sqrt(2)
+
+    public static float3 GetDirection(int index)
     {
-        new float3(0, 0, 1),                     // North
-        math.normalize(new float3(1, 0, 1)),     // North-East
-        new float3(1, 0, 0),                     // East
-        math.normalize(new float3(1, 0, -1)),    // South-East
-        new float3(0, 0, -1),                    // South
-        math.normalize(new float3(-1, 0, -1)),   // South-West
-        new float3(-1, 0, 0),                    // West
-        math.normalize(new float3(-1, 0, 1))     // North-West
-    };
-    
+        switch (index)
+        {
+            case 0: return new float3(0,                0,  1);
+            case 1: return new float3(DiagonalComponent,  0,  DiagonalComponent);
+            case 2: return new float3(1,                0,  0);
+            case 3: return new float3(DiagonalComponent,  0, -DiagonalComponent);
+            case 4: return new float3(0,                0, -1);
+            case 5: return new float3(-DiagonalComponent, 0, -DiagonalComponent);
+            case 6: return new float3(-1,               0,  0);
+            case 7: return new float3(-DiagonalComponent, 0,  DiagonalComponent);
+            default: return float3.zero;
+        }
+    }
+
     public static readonly string[] DirectionsText = new string[]
     {
-        "N",     // North
-        "NE",    // North-East
-        "E",     // East
-        "SE",    // South-East
-        "S",     // South
-        "SW",    // South-West
-        "W",     // West
-        "NW",    // North-West
+        "N", "NE", "E", "SE", "S", "SW", "W", "NW",
     };
 }
 

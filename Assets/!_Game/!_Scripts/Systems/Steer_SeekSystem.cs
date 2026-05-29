@@ -25,7 +25,7 @@ public partial struct Steer_SeekSystem : ISystem
 
             for (var i = 0; i < 8; i++)
             {
-                var alignment = math.dot(normalizedDir, SteeringConstants.Directions[i]);
+                var alignment = math.dot(normalizedDir, SteeringConstants.GetDirection(i));
                 var value = (alignment + 1.0f) * 0.5f;
                 context.ValueRW.Interest[i] += value * seekConfig.ValueRO.Weight;
             }

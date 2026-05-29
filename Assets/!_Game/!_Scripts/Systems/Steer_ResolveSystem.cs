@@ -65,7 +65,7 @@ public partial struct Steer_ResolveSystem : ISystem
                 
                 score = math.max(0f, score);
                 scores[i] = score;
-                finalDir += score * SteeringConstants.Directions[i];
+                finalDir += score * SteeringConstants.GetDirection(i);
                 
                 // Log.Battle.D($"{SteeringConstants.DirectionsText[i]}: interest {interest}, danger {danger}, score {score}");
 
@@ -86,7 +86,7 @@ public partial struct Steer_ResolveSystem : ISystem
             }
             else
             {
-                finalDir = math.lengthsq(finalDir) > 0.001f ? math.normalize(finalDir) : SteeringConstants.Directions[bestIndex];
+                finalDir = math.lengthsq(finalDir) > 0.001f ? math.normalize(finalDir) : SteeringConstants.GetDirection(bestIndex);
 
                 // destination.StoppingDistanceSq = context.AgentRadius + 0.5f;
                 destination.Value = transform.Position + (finalDir * LookAheadDistance);
