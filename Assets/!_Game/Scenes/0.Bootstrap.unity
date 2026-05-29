@@ -1583,7 +1583,7 @@ MonoBehaviour:
   _thrownEntityMass: 0
   _currentEntitySpeed: 0
   _computedVelocityPower: 0
-  Gravity: 40
+  Gravity: 30
 --- !u!4 &2002722189
 Transform:
   m_ObjectHideFlags: 0

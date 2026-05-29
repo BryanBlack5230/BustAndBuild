@@ -1,32 +1,57 @@
 # Scene Flow System
 
-## SceneWorkflowRunner Is Stripped From Builds
-**Context:** Analyzing what happens when the game is built while `SceneWorkflowRunner` is wrapped in `#if UNITY_EDITOR`.  
-**Finding:** The entire class is stripped — `[RuntimeInitializeOnLoadMethod]` never fires, no scene sequencing happens. The game launches to whatever scene is first in Build Settings and stays there. `ISceneFlow` implementations still compile and initialize themselves fine, but `WaitForInit()` is never consumed.  
-**Why it matters:** `SceneWorkflowRunner` is a dev-only tool by original design; builds need an explicit runtime path.
+## Overview
+Two parallel systems:
+1. **`ISceneFlow` runtime contract** — every scene's `*Flow` MonoBehaviour exposes `WaitForInit()` so the runner can sequence loads.
+2. **`RunConfiguration` / `SceneChain`** — designer-authored ScriptableObjects selecting which scenes run together, with `StateOverride[]` hooks to manipulate state on bootup.
 
-## RunConfiguration Assets Are in Resources — Loadable at Runtime
-**Context:** Needed to find a RunConfiguration at runtime without `AssetDatabase`.  
-**Finding:** All RunConfiguration assets live in `Assets/!_Game/Resources/SceneRunConfigurations/`. Use `Resources.LoadAll<RunConfiguration>("SceneRunConfigurations")` to get all of them at runtime.  
-**Why it matters:** No wrapper SO needed — the assets are already Resources-accessible.
-
-## #if UNITY_EDITOR / #else / #endif for Editor vs Build Split in Runtime Class
-**Context:** `SceneWorkflowRunner` needed to preserve existing editor behavior while adding a build-only path.  
-**Finding:** Use `#if / #else / #endif` (not just `#if`) to make the two paths mutually exclusive. The `#else` block only compiles into builds; the `#if` block only compiles in editor. The class stays in the runtime assembly (not Editor folder).
+## ISceneFlow Contract
 ```csharp
-#if UNITY_EDITOR
-    // SessionState path — existing editor tool behavior, unchanged
-    if (string.IsNullOrEmpty(path)) return;
-    ...
-#else
-    // Build path — Resources scan
-    var configs = Resources.LoadAll<RunConfiguration>("SceneRunConfigurations");
-    ...
-#endif
+public interface ISceneFlow { UniTask WaitForInit(); }
 ```
-**Why it matters:** Cleaner than a fallthrough — editor play mode is completely isolated from the build path.
+Implementations (`BootstrapFlow`, `WorldFlow`, `BattleGroundSceneFlow`) hold a `UniTaskCompletionSource` and `TrySetResult()` at the end of `Start()`. `SceneWorkflowRunner.WaitForSceneInit(sceneName)` finds the flow via `GetComponentInChildren<ISceneFlow>(true)` and awaits it before loading the next scene.
 
-## UnityEditor APIs vs Editor-Assembly Classes Behind #if UNITY_EDITOR
-**Context:** Considered referencing `SceneWorkflowHandoff` (Editor folder) from `SceneWorkflowRunner` (runtime assembly) behind a `#if UNITY_EDITOR` guard.  
-**Finding:** `UnityEditor.*` APIs (SessionState, AssetDatabase) CAN be used from runtime assembly scripts behind `#if UNITY_EDITOR` — they compile fine. But classes defined in the Editor folder belong to the editor assembly and CANNOT be referenced from runtime assembly scripts at all, even behind the guard. The preprocessor strips the code, but the assembly reference doesn't exist.  
-**Why it matters:** Inline editor-API calls directly in the runtime class rather than delegating to an Editor-folder helper.
+## SceneWorkflowRunner — Editor vs Build Split
+Uses `#if UNITY_EDITOR / #else / #endif` to make editor and build paths mutually exclusive:
+- **Editor:** reads `SessionState` keys (`SceneWorkflow.RunConfigPath`, `IsSingleScene`, `SingleSceneTarget`). If unset → returns silently (default Unity play).
+- **Build:** `Resources.LoadAll<RunConfiguration>("SceneRunConfigurations")` and finds the first `IsBuildConfig == true`.
+
+The class lives in runtime assembly; `UnityEditor.*` API calls (SessionState, AssetDatabase) work fine when wrapped in `#if UNITY_EDITOR`. **But classes defined in Editor folder (like `SceneWorkflowHandoff`) cannot be referenced from runtime assembly even behind the guard** — the assembly reference doesn't exist. Inline editor API calls directly.
+
+`SceneWorkflowRunner` spawns a `DontDestroyOnLoad` GameObject and self-destroys after applying all `StateOverride`s.
+
+## RunConfiguration (ScriptableObject)
+- `_chain` (SceneChain SO) — list of scenes to load in order.
+- `_overrides` (List<StateOverride>, `[SerializeReference]`) — polymorphic list applied after scene chain is up.
+- `_isDefault` flag — auto-picked by `SceneWorkflowHandoff.AutoResolveConfig(sceneName)` when no explicit selection. Scoped per chain.
+- `_isBuildConfig` flag — globally exclusive; the one config used when running a build.
+
+Both flags are `[ReadOnly]` + `[ShowIf("_flagName")]` so they only render when true (cleaner inspector). `Set Default` / `Set Build Config` buttons (Odin, editor-only) clear the flag on all sibling configs.
+
+Resources directory: `Assets/!_Game/Resources/SceneRunConfigurations/` — `CityDev`, `BattleDev`, `NormalDev`, `NormalProd`.
+
+## SceneChain (ScriptableObject)
+List of `SceneChainElement` — each holds `_sceneAsset` (UnityEditor-only `SceneAsset` ref) and cached `SceneName` / `ScenePath` properties synced via `OnValidate` → `SyncFromAsset()`. Custom inspector (`SceneChainEditor`) adds "Open Chain" / per-element "Open additively"/"Open single" buttons.
+
+## SceneWorkflow Toolbox (`Cmd+Shift+W`)
+`SceneWorkflowToolbox : EditorWindow` (BarkingBird/Scenes/Scene Workflow). Lists all RunConfigurations as selection buttons, has "Single Scene Mode" toggle, shows inline editor preview of the selected config. Writes `SceneWorkflowHandoff.Set(...)` so the next Play tick activates the runner.
+
+`SceneWorkflowPlayModeHandler` (`InitializeOnLoad` in Editor) hooks `EditorApplication.playModeStateChanged`:
+- On `ExitingEditMode`, if the bootstrap (chain[0]) scene isn't the active scene, saves current scene setup, swaps to bootstrap, restarts Play. After Play exits → restores saved scenes.
+
+## StateOverride (Polymorphic, [SerializeReference])
+Abstract base with `UniTask Apply()`. Concrete:
+- `GameLoopStateOverride` — finds `GameLoopManager` and calls `StartGame/PauseGame/FinishGame`. Useful for "start in pause state" dev runs.
+- `ActiveCameraOverride` — fires `EventManager.Input.SceneChangeRequest(_switchUp)` to flip between battle/world cams.
+
+To add a new override: subclass `StateOverride`, mark `[Serializable]`, implement `Apply()`. The Odin/Unity SerializeReference picker in `RunConfiguration` inspector exposes it.
+
+## Open-In-Editor Toolbox
+`ToolBox.cs` exposes Alt+1..5 shortcuts to open individual scenes single-mode (`BarkingBird/Scenes/Bootstrap &1` etc.). Uses `EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()` before swap.
+
+## Common Pitfalls
+- `SceneWorkflowRunner` is stripped from builds when no `IsBuildConfig` flag set. Game launches to whatever scene is first in Build Settings.
+- Need a new scene to participate in the workflow? Add a `*Flow : MonoBehaviour, ISceneFlow` with a `UniTaskCompletionSource` and `_initCompleted.TrySetResult()` in `Start()`. Register its container parent via `SceneScope.OnSceneContainerBuilding`.
+- Backwards iteration `for (int i = sceneCount-1; i >= 0; i--)` required when closing multiple scenes in editor — forward iteration shifts indices.
+- `EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()` returns `false` on user Cancel — always check and abort.
+- `EditorSceneManager.GetSceneByPath(path).IsValid()` returns true if scene is already loaded — guard `OpenScene(Additive)` calls with this or you'll load a second copy.

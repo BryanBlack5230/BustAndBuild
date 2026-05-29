@@ -18,7 +18,6 @@ namespace Game.Feature.Input
         private readonly EntityManager _entityManager;
         private readonly EntityQuery _physicsWorldQuery;
         private readonly CollisionFilter _nonGroundFilter;
-        private readonly CollisionFilter _groundFilter;
 
         private const float DisplaceSpeed = 15f;
         private const float DisplaceMaxTime = 0.5f;
@@ -28,7 +27,6 @@ namespace Game.Feature.Input
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
             var groundMask = (uint)(1 << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground));
-            _groundFilter = new CollisionFilter { BelongsTo = ~0u, CollidesWith = groundMask, GroupIndex = 0 };
             _nonGroundFilter = new CollisionFilter { BelongsTo = ~0u, CollidesWith = ~groundMask, GroupIndex = 0 };
         }
 
@@ -88,45 +86,18 @@ namespace Game.Feature.Input
         public void ClampToViewportAndGround(Entity entity)
         {
             var localTransform = _entityManager.GetComponentData<LocalTransform>(entity);
-            var halfExtents = GetEntityHalfExtentsXY(entity, localTransform);
+            var halfExtents = EntityPhysicsHelper.GetEntityHalfExtentsXY(entity, _entityManager);
+            var physicsWorld = _physicsWorldQuery.GetSingleton<PhysicsWorldSingleton>();
 
-            var groundY = GetGroundY(localTransform.Position);
+            var groundY = BoundaryConstraints.GetGroundY(localTransform.Position, in physicsWorld);
             localTransform.Position.y = math.max(localTransform.Position.y, groundY + halfExtents.y);
 
             var camera = CoreHelper.MainCamera;
             if (camera != null)
-            {
-                var pos = localTransform.Position;
-                var rot = localTransform.Rotation;
-                var hw = halfExtents.x;
-                var hh = halfExtents.y;
+                localTransform.Position = BoundaryConstraints.ClampToViewport(
+                    localTransform.Position, localTransform.Rotation, halfExtents, camera, clampBottom: true);
 
-                var vp0 = camera.WorldToViewportPoint(pos + math.rotate(rot, new float3(-hw, -hh, 0f)));
-                var vp1 = camera.WorldToViewportPoint(pos + math.rotate(rot, new float3(+hw, -hh, 0f)));
-                var vp2 = camera.WorldToViewportPoint(pos + math.rotate(rot, new float3(-hw, +hh, 0f)));
-                var vp3 = camera.WorldToViewportPoint(pos + math.rotate(rot, new float3(+hw, +hh, 0f)));
-
-                var minVpX = Mathf.Min(Mathf.Min(vp0.x, vp1.x), Mathf.Min(vp2.x, vp3.x));
-                var maxVpX = Mathf.Max(Mathf.Max(vp0.x, vp1.x), Mathf.Max(vp2.x, vp3.x));
-                var minVpY = Mathf.Min(Mathf.Min(vp0.y, vp1.y), Mathf.Min(vp2.y, vp3.y));
-                var maxVpY = Mathf.Max(Mathf.Max(vp0.y, vp1.y), Mathf.Max(vp2.y, vp3.y));
-
-                const float margin = 0.01f;
-                float shiftX = 0f, shiftY = 0f;
-                if (minVpX < margin)           shiftX = margin - minVpX;
-                else if (maxVpX > 1f - margin) shiftX = (1f - margin) - maxVpX;
-                if (minVpY < margin)           shiftY = margin - minVpY;
-                else if (maxVpY > 1f - margin) shiftY = (1f - margin) - maxVpY;
-
-                if (shiftX != 0f || shiftY != 0f)
-                {
-                    var centerVp = camera.WorldToViewportPoint(pos);
-                    var newWorld = camera.ViewportToWorldPoint(new Vector3(centerVp.x + shiftX, centerVp.y + shiftY, centerVp.z));
-                    localTransform.Position = new float3(newWorld.x, newWorld.y, localTransform.Position.z);
-                }
-            }
-
-            groundY = GetGroundY(localTransform.Position);
+            groundY = BoundaryConstraints.GetGroundY(localTransform.Position, in physicsWorld);
             localTransform.Position.y = math.max(localTransform.Position.y, groundY + halfExtents.y);
 
             _entityManager.SetComponentData(entity, localTransform);
@@ -178,23 +149,5 @@ namespace Game.Feature.Input
             }
         }
 
-        private float2 GetEntityHalfExtentsXY(Entity entity, LocalTransform localTransform)
-        {
-            var collider = _entityManager.GetComponentData<PhysicsCollider>(entity);
-            var aabb = collider.Value.Value.CalculateAabb(new RigidTransform(localTransform.Rotation, float3.zero));
-            return new float2((aabb.Max.x - aabb.Min.x) * 0.5f, (aabb.Max.y - aabb.Min.y) * 0.5f);
-        }
-
-        private float GetGroundY(float3 position)
-        {
-            var physicsWorld = _physicsWorldQuery.GetSingleton<PhysicsWorldSingleton>();
-            var rayInput = new RaycastInput
-            {
-                Start  = new float3(position.x, 100, position.z),
-                End    = new float3(position.x, -100, position.z),
-                Filter = _groundFilter
-            };
-            return physicsWorld.CastRay(rayInput, out var hit) ? hit.Position.y : 0f;
-        }
     }
 }

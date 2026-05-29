@@ -6,7 +6,7 @@
 
 ## Architecture
 The project uses a **hybrid MonoBehaviour + ECS (DOTS)** architecture. The game loop is controlled by `GameLoopManager`, All services are wired with [Reflex](https://github.com/gustavopsantos/Reflex). Each scene has a scoped installer and a flow that controls initialisation.
-Scenes are loaded additevly, in the following order: Bootstrap → World → Battle || City
+Scenes are loaded additively, in the following order: Bootstrap → Loading → World → Battle || City
 
 Bootstrap scene is a startup scene that loads the game loop and configures the game.
 World scene contains the world map, and the shared data for Battle and City scenes.
@@ -25,9 +25,9 @@ GameLoopManager (Reflex DI — game state machine)
 | Installer | Scope | Binds |
 |---|---|---|
 | `ProjectInstaller` | Global | `InputManager`, `LoadingService`, `ConfigContainer`, `CursorSetter` |
-| `BootstrapInstaller` | Bootstrap scene | `GameLoopManager`, `GameManager`, `BlobContainer` |
-| `WorldSceneInstaller` | World scene | `WorldFlow`, `DayNightCycle`, `ScrollController` |
-| `BattleGroundSceneInstaller` | Battle scene | Camera handlers, input controllers, `InteractController`, `PowerHitController` |
+| `BootstrapInstaller` | Bootstrap scene | `GameLoopManager`, `GameManagerUIController`, `BootstrapFlow`, `PrototypeConfigSetter`, `BlobContainer`, `ThrowSettingsSetter`, `DotsGameLoopBridge`, `GameManager` (NonLazy) |
+| `WorldSceneInstaller` | World scene | `WorldFlow`, `DayNightCycle`, `WorldSceneData`, `ScrollController`, `WorldCameraHandler` |
+| `BattleGroundSceneInstaller` | Battle scene | `BattleSceneData`, `BattleGroundSceneFlow`, `MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `TrajectoryPredictorSettings`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge` (registration order matters — `ThrowTrajectoryPredictor` must precede `GrabbingInteractor`) |
 
 Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesAndSelf<T>()` and `NonLazy<T>()` extensions defined in `Core/DI/`.
 
@@ -42,7 +42,7 @@ Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesA
 
 ### ECS Systems (DOTS)
 
-All simulation runs inside `GameLoopSystemGroup` (extends `SimulationSystemGroup`).
+`GameLoopSystemGroup` is a `ComponentSystemGroup` placed inside `SimulationSystemGroup` via `[UpdateInGroup(typeof(SimulationSystemGroup))]`, after `BeginSimulationEntityCommandBufferSystem`. `DotsGameLoopBridge` toggles its `Enabled` flag so pause-aware gameplay systems freeze with the game. Systems that should keep running regardless live in other groups: `ApplyDamageSystem` and `DeathSystem` (`SimulationSystemGroup, OrderLast = true`), `ScreenBounceSystem` (`FixedStepSimulationSystemGroup` after `PhysicsSystemGroup`), `InAirCollisionSystem` (`PhysicsSystemGroup` after `PhysicsSimulationGroup`), `WallSectionInitSystem` (`InitializationSystemGroup`).
 
 ### Scene Workflow System
 
@@ -50,7 +50,7 @@ All simulation runs inside `GameLoopSystemGroup` (extends `SimulationSystemGroup
 
 - **`RunConfiguration`** (SO, `Resources/SceneRunConfigurations/`) — pairs a `SceneChain` with a list of `StateOverride`s. Flags: `IsDefault` (one per chain, editor default) and `IsBuildConfig` (one global, used in builds).
 - **`SceneChain`** (SO) — ordered list of scenes loaded additively. Each element stores name + path (synced from `SceneAsset` in editor).
-- **`StateOverride`** — abstract async action applied after all scenes are loaded. Concrete subclass: `GameLoopStateOverride` (Start / Pause / Finish).
+- **`StateOverride`** — abstract async action applied after all scenes are loaded. Concrete subclasses: `GameLoopStateOverride` (Start / Pause / Finish), `ActiveCameraOverride` (fires `EventManager.Input.SceneChangeRequest` to toggle bird-view/battle cam).
 - **Runtime**: In builds, loads the `IsBuildConfig` config from Resources and loads scenes in order, waiting for each scene's `ISceneFlow.WaitForInit()` before loading the next.
 - **Editor**: `SceneWorkflowToolbox` (`BarkingBird/Scenes/Scene Workflow`, `Ctrl+Shift+W`) writes the selected config to `SessionState`; runner picks it up on Play.  Single Scene Mode loads Bootstrap + current scene only.
 
@@ -65,19 +65,21 @@ All simulation runs inside `GameLoopSystemGroup` (extends `SimulationSystemGroup
 
 ### Configuration Pipeline
 
-JSON configs are loaded at bootstrap via `AssetService` (Resources), parsed with Newtonsoft.Json into `ConfigContainer`, then baked into DOTS Blob Assets by `BlobContainer` / `BlobConfigConverter` for Burst-safe access inside systems.
+JSON configs are loaded at bootstrap via `AssetService` (Resources), parsed with Newtonsoft.Json into `ConfigContainer`. `BlobContainer.Initialize()` then builds a `BlobAssetReference<TargetProfilesBlob>` on a singleton entity for Burst-safe target scoring.
+
+**Caveat:** `BlobContainer` currently sources `EnemyProfiles`/`AllyProfiles` from `PrototypeConfigSetter` (a MonoBehaviour in the Bootstrap scene) — the `ConfigContainer.Battle.*Profiles` path is commented out. Editing `Config.json` does **not** currently change AI behaviour. The generic `BlobConfigConverter` helper exists but is not invoked anywhere yet.
 
 ### Authoring / Baker Pattern
 
 Every ECS component has a corresponding `*Authoring` MonoBehaviour with a nested `Baker` class. Authoring lives in `Components/`. The baker converts inspector-configured data into component data at bake time.
 
-Enableable components (`IEnableableComponent`) are used extensively for conditional behavior: `IsDead`, `UnableToAct`, `Grabbed`, `SteeringEnabled`, `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp`.
+Enableable components (`IEnableableComponent`) are used extensively for conditional behavior: `IsDead`, `UnableToAct`, `Grabbed`, `InAir`, `SteeringEnabled`, `UnitMover`, `UnitRegisteredTag`, `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp`.
 
 ### MonoWorld Systems
 
-**Input** (`MonoWorld/Input/`): `InteractController` raycasts for grabbable units → `GrabbingInteractor` freezes physics and moves the entity → `PowerHitController` releases with force. `CursorMovementCalculations` tracks velocity for throw power.
+**Input** (`MonoWorld/Input/`): `InteractController` raycasts (LMB) for grabbable units → `GrabbingInteractor.Grab(entity)` freezes physics (`PhysicsMass.InverseMass = 0`) and enables `Grabbed`. `GrabbedEntityMover` snaps the entity to mouse-world-projection each frame, with ground and viewport clamping. `CursorMovementCalculations` tracks `velocity` and `acceleration` for throw power. On LMB up, `InteractController.OnCanceled` → `GrabbingInteractor.Release()` → `ReleaseCoordinator.HandleRelease(...)` decides between direct launch, `OverlapResolver` (slow-throw displacement) or `TunnelTeleporter` (fast-throw tunneling through obstacles). `ThrowTrajectoryPredictor` (registered before `GrabbingInteractor`) draws a predicted arc + impact circle while held. `PowerHitController` (RMB) is wired but currently a no-op placeholder.
 
-**Camera** (`MonoWorld/Camera/`): `BattleCameraMovement` handles drag with border constraints. `CameraInputHandler` → `CameraDragHandler` → `CameraBorderHandler` chain. `BattleCameraBorderSyncBridge` syncs camera frustum bounds into a physics collider for ECS border queries.
+**Camera** (`MonoWorld/Camera/`): `BattleCameraMovement` handles drag with border constraints. `CameraInputHandler` → `CameraDragHandler` → `CameraBorderHandler` chain. `BattleCameraBorderSyncBridge` writes a `CameraFrustumData` ECS singleton (`worldToCameraMatrix`, FOV, aspect, IsLive) each frame; `ScreenBounceSystem` and `ThrowTrajectoryPredictor` read it for screen-edge bounce math.
 
 ### Key Packages
 
@@ -97,6 +99,6 @@ Enableable components (`IEnableableComponent`) are used extensively for conditio
 
 | Task                         | Skill                   | Overview                                                                 |
 |------------------------------|-------------------------|--------------------------------------------------------------------------|
-| **write code for Unity**     | /unity-coding-standards | Enforce BarkingBierd studio development standards                        |
+| **write code for Unity**     | /unity-coding-standards | Enforce BarkingBird studio development standards                         |
 | **review**                   | /code-review-unity      | Review Unity C# code against Unity's official style guide                |
 | **write code for inspector** | /odin-visual-designer   | Configure Unity inspectors, attributes, layout, and Odin Visual Designer |

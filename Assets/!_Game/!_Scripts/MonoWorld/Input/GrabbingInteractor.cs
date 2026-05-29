@@ -10,18 +10,20 @@ namespace Game.Feature.Input
         private readonly ThrowSettingsSetter _throwSettingsSetter;
         private readonly GrabbedEntityMover _grabbedEntityMover;
         private readonly ReleaseCoordinator _releaseCoordinator;
+        private readonly ThrowTrajectoryPredictor _trajectoryPredictor;
 
         private readonly EntityManager _entityManager;
 
         private Entity _grabbedEntity;
         private PhysicsMass _originalMass;
 
-        public GrabbingInteractor(CursorMovementCalculations cursorMovementCalculations, ThrowSettingsSetter throwSettingsSetter, GrabbedEntityMover grabbedEntityMover, ReleaseCoordinator releaseCoordinator)
+        public GrabbingInteractor(CursorMovementCalculations cursorMovementCalculations, ThrowSettingsSetter throwSettingsSetter, GrabbedEntityMover grabbedEntityMover, ReleaseCoordinator releaseCoordinator, ThrowTrajectoryPredictor trajectoryPredictor)
         {
             _cursorMovementCalculations = cursorMovementCalculations;
             _throwSettingsSetter = throwSettingsSetter;
             _grabbedEntityMover = grabbedEntityMover;
             _releaseCoordinator = releaseCoordinator;
+            _trajectoryPredictor = trajectoryPredictor;
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         }
 
@@ -32,6 +34,7 @@ namespace Game.Feature.Input
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, true);
             _entityManager.SetComponentEnabled<InAir>(_grabbedEntity, false);
             _grabbedEntityMover.StartMoving(_grabbedEntity);
+            _trajectoryPredictor.StartTracking(_grabbedEntity, _originalMass);
         }
 
         public void Release()
@@ -40,6 +43,7 @@ namespace Game.Feature.Input
             if (!_entityManager.Exists(_grabbedEntity))
             {
                 _grabbedEntityMover.StopMoving();
+                _trajectoryPredictor.StopTracking();
                 _grabbedEntity = Entity.Null;
                 return;
             }
@@ -47,12 +51,13 @@ namespace Game.Feature.Input
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, false);
             _entityManager.SetComponentEnabled<InAir>(_grabbedEntity, true);
 
-            var vel = _cursorMovementCalculations.velocity;
+            var vel = _cursorMovementCalculations.Velocity;
             var rawPower = vel.magnitude;
             var isFastSpeed = rawPower > _throwSettingsSetter.ThrowThreshold;
             var impulse = new float3(vel.normalized.x, vel.normalized.y, 0f) * (rawPower * _throwSettingsSetter.ThrowScale);
 
             _grabbedEntityMover.StopMoving();
+            _trajectoryPredictor.StopTracking();
             _releaseCoordinator.HandleRelease(_grabbedEntity, impulse, isFastSpeed, _originalMass);
             _throwSettingsSetter.OnThrow(_grabbedEntity, rawPower);
 
