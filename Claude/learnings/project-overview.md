@@ -6,10 +6,12 @@ High-level orientation map so future Claude doesn't need to re-derive folder str
 "Bust and Build" — physics-based throw-em-up by BarkingBird Studio. Player grabs units/objects (cursor), flings them with mouse velocity → they fly, bounce off screen edges, damage enemies on impact. Battle is a unit RTS where allies and enemies path toward each other; player intervenes by physically throwing pieces.
 
 ## Project Root
-- `Assets/!_Game/` — all studio-authored content (note `!_` prefix sorts to top).
-- `Assets/!_Game/!_Scripts/` — all C#. Sub-organization: `Components/` (ECS authoring + structs), `Systems/` (ISystem), `Core/` (DI/GameLoop/Events/Utilities), `MonoWorld/` (non-ECS gameplay), `Scenes/` (ISceneFlow), `Settings/` (configs + state overrides), `Editor/`.
-- `Assets/!_Game/Resources/` — runtime-loadable: `Config.json`, `Cursors/Textures/*`, `SceneRunConfigurations/*.asset`, `TrajectoryPredictorSettings.asset`.
-- `Assets/!_Game/Scenes/` — `0.Bootstrap`, `1.Loading`, `2.World`, `3.BattleGroundScene`, `4.City`. Indexed prefixes are load order.
+- `Assets/!_Game/` — all studio-authored content (note `!_` prefix sorts to top). Two asmdefs: `Runtime.asmdef` at the root and `Editor/Editor.asmdef`.
+- `Assets/!_Game/Editor/` — editor-only C#, namespace `BarkingBird.Editor` (`ConfigGenerator`, `EditorConstants`, `EditorSceneUtils`, `SceneChainEditor`, `ToolBox`, `SceneWorkflow/{EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox}`).
+- `Assets/!_Game/Runtime/Gameplay/!_Scripts/` — gameplay C#. `Components/` (ECS authoring + structs, root files in **global namespace**; `Components/AI/` subfolder in `Gameplay.AI`), `Systems/` (ISystem, root files in **global namespace**; `Systems/AI/` subfolder in `Gameplay.AI`), `_MonoWorld/` (non-ECS — `Camera/`, `Cursor/`, `DaylightCycle/`, `Input/` (+`GrabAndThrow/`), `Scenes/` (ISceneFlow + installers), `Settings/` (+`StateOverrides/`)).
+- `Assets/!_Game/Runtime/Infrastructure/` — framework services. Root files (`EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride`) are `BarkingBird.Runtime.Infrastructure`; subfolders `GameLoop/`, `SceneWorkflow/`, `Settings/`, `Utilities/` get their own subnamespaces.
+- `Assets/!_Game/Runtime/Gameplay/Resources/` — runtime-loadable. `Cursors/Textures/*` + `Cursors/Sprites/*`, plus `Settings/{Config.json, SceneCollections/*, SceneRunConfigurations/*, TrajectoryPredictorSettings.asset}` and asset folders (Audio/Materials/Models/Prefabs/Shaders/Textures).
+- `Assets/!_Game/Runtime/Gameplay/Scenes/` — `0.Bootstrap`, `1.Loading`, `2.World`, `3.Battleground`, `4.City` (+ legacy `3.BattleGroundScene.unity`, `WorldECS.unity`, `BattleGroundSceneECS.unity`). Indexed prefixes are load order.
 
 ## Build/Runtime Stack
 - Unity DOTS/ECS (Unity.Entities + Unity.Physics + Burst) for battle simulation.
@@ -32,8 +34,12 @@ High-level orientation map so future Claude doesn't need to re-derive folder str
 - ECS systems: `{Concern}System : ISystem` (struct, `[BurstCompile]` when possible).
 - Job structs: `{Concern}Job : IJobEntity` (or `IJob`/`ICollisionEventsJob`).
 
+## Namespaces (post v0.1.0 reorg)
+All runtime code lives under `BarkingBird.Runtime.*` (except root-level ECS files, see below); all editor code under `BarkingBird.Editor`. The split mirrors folder layout — `Gameplay.AI` (only `Components/AI/` and `Systems/AI/` subfolders), `Gameplay.{Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Scenes|Settings}`, and `Infrastructure` root + `Infrastructure.{GameLoop|SceneWorkflow|Settings|Utilities}`. There are no longer any `Game.*` / `GameEngine.*` / `GameManagement` / `Game.Configs` namespaces — those were collapsed during the v0.1.0 reorganization.
+
+**ECS root-namespace convention:** files directly in `Components/` and `Systems/` (root, not the `AI/` subfolder) have **no namespace** — they live in the global/root namespace. This is intentional: it follows Unity DOTS norms so `Health`, `Castle`, `Beacon`, `WallSection`, `ApplyDamageSystem`, etc. stay short and unqualified. AI-pipeline scripts (brain, steering, targeting, pathfinding, unit movement & registration) sit in `Components/AI/` + `Systems/AI/` under `BarkingBird.Runtime.Gameplay.AI`. When adding a new ECS file, decide which bucket it belongs to — if it's part of the AI pipeline, place it in `AI/` and namespace it accordingly; otherwise leave it in root with no namespace.
+
 ## Code Style Quirks Observed
-- Mixed namespaces — many root-level types (no namespace) for ECS components; `GameEngine.*`, `Game.*`, `GameManagement`, `Game.Configs`, `Game.Feature.Input`, `Game.Feature.Camera`, `Game.SceneWorkflow`, `Game.Editor`.
 - `#nullable enable` used in newer files but inconsistently across the codebase.
 - Tab indentation in some older files (e.g. `GameLoopManager`, `DayNightCycle`); spaces elsewhere. Match the file you're editing.
 - Private serialized fields use `_camelCase`; public fields use plain `camelCase`/`PascalCase`. ECS struct fields use `PascalCase` (newer) or `camelCase` (older — `moveSpeed`, `turnSpeed`).

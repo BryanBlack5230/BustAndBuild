@@ -33,7 +33,7 @@ MonoBehaviour in Bootstrap scene, registered as `IGameUpdateListener`. Exposes i
 
 ## Shared Boundary Helpers — BoundaryConstraints + EntityPhysicsHelper
 **Context:** `ThrowTrajectoryPredictor`, `OverlapResolver`, and `GrabbedEntityMover` all had duplicated ground-raycast and AABB-read logic.  
-**Finding:** Extracted to two `internal static` helpers in `MonoWorld/Input/` (same namespace as consumers, matching `PhysicsOverlapHelper` precedent):
+**Finding:** Extracted to two `internal static` helpers. `BoundaryConstraints` lives in `Runtime/Gameplay/!_Scripts/_MonoWorld/Input/` (namespace `BarkingBird.Runtime.Gameplay.Input`, same as its consumers); `EntityPhysicsHelper` lives under `Runtime/Infrastructure/Utilities/` (`BarkingBird.Runtime.Infrastructure.Utilities`), matching `PhysicsOverlapHelper` precedent:
 - `BoundaryConstraints.GetGroundY(float3, in PhysicsWorldSingleton)` — raycasts ±200 relative to position; ground `CollisionFilter` is lazily initialized via `CollisionFilter? _groundFilter ??=` (safe after Unity scene load).
 - `BoundaryConstraints.ClampToViewport(float3 pos, quaternion rot, float2 halfExtents, Camera cam, bool clampBottom)` — returns clamped `float3`; `clampBottom: false` for `GrabbedEntityMover` (drag-to-floor is valid), `clampBottom: true` for `OverlapResolver` (release clamp is absolute).
 - `EntityPhysicsHelper.GetEntityHalfExtentsXY(Entity, EntityManager)` — one AABB read returning `float2(hw, hh)`, fallback `(0.5, 0.5)`.  
@@ -76,4 +76,4 @@ Hold ground for `config.timeToHold` (1s default, configurable via `ConfigContain
 Scroll up/down → `EventManager.Input.SceneChangeRequest(bool up)`. `WorldCameraHandler` (in World scene) toggles bird-view GO active. Used to switch between top-down strategic and tilted battle view. `ActiveCameraOverride` (a `StateOverride`) can fire the same event from a `RunConfiguration` startup.
 
 ## Cursor Textures
-`CursorSetter` (ILoadUnit) preloads textures from `Resources/Cursors/Textures/{OpenHandCursor, HoldingObjectCursor, HoldingGroundCursor}` and subscribes to `EventManager.Input.*` to switch cursor via `Cursor.SetCursor(..., CursorMode.ForceSoftware)`.
+`CursorSetter` (ILoadUnit, namespace `BarkingBird.Runtime.Gameplay.Cursor`) preloads textures from `Cursors/Textures/{OpenHandCursor, HoldingObjectCursor, HoldingGroundCursor}` (relative to `Runtime/Gameplay/Resources/`) and subscribes to `EventManager.Input.*` to switch cursor via `Cursor.SetCursor(..., CursorMode.ForceSoftware)`.

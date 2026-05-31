@@ -37,6 +37,13 @@ To query while ignoring the enabled flag: `[WithOptions(EntityQueryOptions.Ignor
 - `Faction` enum: Unknown/Ally/Enemy. `EnemyType: byte` and `AllyType: byte` indexed into blob arrays.
 - `Unit.faction` discriminates global allies vs enemies lists held by `BattleCoordinator`.
 
+## ECS Folder/Namespace Split (post-reorg)
+`Components/` and `Systems/` each have an `AI/` subfolder. Two namespace tiers:
+- **Root files in global namespace (no `namespace` declaration):** `Health`, `Castle`, `Beacon`, `WallSection`, `WallChild`, `BattleCenter`, `BattleCoordinator`, `BounceDamage`, `Spawn`, `Attack`, `Grabbed`, `InAir`, `CameraFrustumData`, `ThrowVelocitySettings` (Components), and `ApplyDamageSystem`, `AttackSystem`, `BattleCoordinatorSystem`, `BattleDirectorCleanupSystem`, `CastleBreachSystem`, `DeathSystem`, `GizmoDrawSystem`, `InAirCollisionSystem`, `ScreenBounceSystem`, `SpawningSystem`, `WallSectionInitSystem` (Systems).
+- **`AI/` subfolder in `BarkingBird.Runtime.Gameplay.AI`:** brain/steering/targeting/pathfinding/unit-movement/unit-registration/ability-evaluation — `Ally`, `Enemy`, `Unit`, `UnitMover`, `UnableToAct`, `Target`, `BrainAi`, `BaseArea`, `Pathfinder`, `FakePathfinderResult`, `SteeringContext`, `MovementIntent`, `CombatState`, `UnitRegisteredTag` (Components); `BattleBrainSystem`, `Steer_*`, `TargetScorerJob`, `TargetSearchSystem`, `PathfindingDummySystem`, `UnitMoverSystem`, `BattleUnitRegistrationSystem`, `AbleToActEvaluationSystem` (Systems).
+
+**Why it matters:** When code in root-namespace files references AI types it must `using BarkingBird.Runtime.Gameplay.AI;`; the reverse (AI files referencing root types like `Health`, `Castle`, `WallSection`) needs no using directive because root types are globally accessible. When adding a new file, decide bucket first — AI-pipeline → `AI/` + namespace; shared building block → root + no namespace.
+
 ## BattleCoordinator (Singleton)
 Single entity bakes `BattleCoordinator` + `FactionBases` + buffers `EnemyUnitReference`/`AllyUnitReference`. `BattleCoordinatorSystem` initialises `FactionBases.AllyBaseBounds`/`EnemyBaseBounds` once it finds 2+ `BaseArea` entities with colliders. `FactionBases.IsInitialized` flag guards subsequent ticks.
 

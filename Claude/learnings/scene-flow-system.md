@@ -28,7 +28,7 @@ The class lives in runtime assembly; `UnityEditor.*` API calls (SessionState, As
 
 Both flags are `[ReadOnly]` + `[ShowIf("_flagName")]` so they only render when true (cleaner inspector). `Set Default` / `Set Build Config` buttons (Odin, editor-only) clear the flag on all sibling configs.
 
-Resources directory: `Assets/!_Game/Resources/SceneRunConfigurations/` — `CityDev`, `BattleDev`, `NormalDev`, `NormalProd`.
+Resources directory: `Assets/!_Game/Runtime/Gameplay/Resources/Settings/SceneRunConfigurations/` — `CityDev`, `BattleDev`, `NormalDev`, `NormalProd`. (Sibling `Settings/SceneCollections/` holds `SceneChain` assets.)
 
 ## SceneChain (ScriptableObject)
 List of `SceneChainElement` — each holds `_sceneAsset` (UnityEditor-only `SceneAsset` ref) and cached `SceneName` / `ScenePath` properties synced via `OnValidate` → `SyncFromAsset()`. Custom inspector (`SceneChainEditor`) adds "Open Chain" / per-element "Open additively"/"Open single" buttons.

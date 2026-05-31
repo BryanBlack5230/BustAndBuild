@@ -20,6 +20,40 @@ ECS GameLoopSystemGroup (DOTS simulation — AI, combat, movement)
 GameLoopManager (Reflex DI — game state machine)
 ```
 
+### Assemblies & Namespaces
+
+Two assemblies, both rooted under `Assets/!_Game/`:
+
+| Assembly | asmdef | Root namespace |
+|---|---|---|
+| `Runtime` | `!_Game/Runtime.asmdef` (covers everything except `Editor/`) | `BarkingBird.Runtime.*` |
+| `Editor` | `!_Game/Editor/Editor.asmdef` | `BarkingBird.Editor` |
+
+Runtime code is split into two trees:
+
+| Folder | Namespace |
+|---|---|
+| `Runtime/Gameplay/!_Scripts/Components/` (root files) | _(global, no namespace)_ |
+| `Runtime/Gameplay/!_Scripts/Components/AI/` | `BarkingBird.Runtime.Gameplay.AI` |
+| `Runtime/Gameplay/!_Scripts/Systems/` (root files) | _(global, no namespace)_ |
+| `Runtime/Gameplay/!_Scripts/Systems/AI/` | `BarkingBird.Runtime.Gameplay.AI` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Camera/` | `BarkingBird.Runtime.Gameplay.Camera` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Cursor/` | `BarkingBird.Runtime.Gameplay.Cursor` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/DaylightCycle/` | `BarkingBird.Runtime.Gameplay.Daylight` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Input/` (root) | `BarkingBird.Runtime.Gameplay.Input` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Input/GrabAndThrow/` | `BarkingBird.Runtime.Gameplay.Input.GrabAndThrow` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Scenes/` | `BarkingBird.Runtime.Gameplay.Scenes` |
+| `Runtime/Gameplay/!_Scripts/_MonoWorld/Settings/` (+ `StateOverrides/`) | `BarkingBird.Runtime.Gameplay.Settings` |
+| `Runtime/Infrastructure/` (root files only) | `BarkingBird.Runtime.Infrastructure` |
+| `Runtime/Infrastructure/GameLoop/` | `BarkingBird.Runtime.Infrastructure.GameLoop` |
+| `Runtime/Infrastructure/SceneWorkflow/` | `BarkingBird.Runtime.Infrastructure.SceneWorkflow` |
+| `Runtime/Infrastructure/Settings/` | `BarkingBird.Runtime.Infrastructure.Settings` |
+| `Runtime/Infrastructure/Utilities/` | `BarkingBird.Runtime.Infrastructure.Utilities` |
+
+**ECS namespace split:** root-level `Components/` and `Systems/` files (shared building blocks — `Health`, `Castle`, `Beacon`, `WallSection`, `Attack`, `InAir`, `Grabbed`, `Spawn`, `BattleCenter`, `BattleCoordinator`, `BounceDamage`, `CameraFrustumData`, `ThrowVelocitySettings`, `ApplyDamageSystem`, `AttackSystem`, `BattleCoordinatorSystem`, `BattleDirectorCleanupSystem`, `CastleBreachSystem`, `DeathSystem`, `GizmoDrawSystem`, `InAirCollisionSystem`, `ScreenBounceSystem`, `SpawningSystem`, `WallSectionInitSystem`) live in the **global namespace** — typical Unity-DOTS convention so component/system type names stay short. AI-pipeline code (Brain/Steering/Targeting/Pathfinding/Movement/Unit registration & ability evaluation) lives in `Components/AI/` and `Systems/AI/` under `BarkingBird.Runtime.Gameplay.AI`.
+
+`Runtime/Infrastructure/` root holds the cross-cutting services that aren't part of any subdomain: `EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride` (abstract base — concrete overrides live in `Gameplay.Settings`).
+
 ### Dependency Injection (Reflex)
 
 | Installer | Scope | Binds |
@@ -29,11 +63,11 @@ GameLoopManager (Reflex DI — game state machine)
 | `WorldSceneInstaller` | World scene | `WorldFlow`, `DayNightCycle`, `WorldSceneData`, `ScrollController`, `WorldCameraHandler` |
 | `BattleGroundSceneInstaller` | Battle scene | `BattleSceneData`, `BattleGroundSceneFlow`, `MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `TrajectoryPredictorSettings`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge` (registration order matters — `ThrowTrajectoryPredictor` must precede `GrabbingInteractor`) |
 
-Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesAndSelf<T>()` and `NonLazy<T>()` extensions defined in `Core/DI/`.
+Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesAndSelf<T>()` and `NonLazy<T>()` extensions defined in `Runtime/Infrastructure/ReflexExtensions.cs` (namespace `BarkingBird.Runtime.Infrastructure`).
 
 ### Game Loop State Machine
 
-`GameLoopManager` owns game state (Start / Pause / Resume / Finish). Classes opt in by implementing listener interfaces from `Core/GameLoop/GameListeners.cs`:
+`GameLoopManager` owns game state (Start / Pause / Resume / Finish). Classes opt in by implementing listener interfaces from `Runtime/Infrastructure/GameLoop/GameListeners.cs` (namespace `BarkingBird.Runtime.Infrastructure.GameLoop`):
 
 - `IGameStartListener`, `IGamePauseListener`, `IGameResumeListener`, `IGameFinishListener`
 - `IGameUpdateListener`, `IGameFixedUpdateListener`, `IGameLateUpdateListener`
@@ -48,13 +82,13 @@ Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesA
 
 `SceneWorkflowRunner` bootstraps the full scene chain at runtime via `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]`.
 
-- **`RunConfiguration`** (SO, `Resources/SceneRunConfigurations/`) — pairs a `SceneChain` with a list of `StateOverride`s. Flags: `IsDefault` (one per chain, editor default) and `IsBuildConfig` (one global, used in builds).
-- **`SceneChain`** (SO) — ordered list of scenes loaded additively. Each element stores name + path (synced from `SceneAsset` in editor).
-- **`StateOverride`** — abstract async action applied after all scenes are loaded. Concrete subclasses: `GameLoopStateOverride` (Start / Pause / Finish), `ActiveCameraOverride` (fires `EventManager.Input.SceneChangeRequest` to toggle bird-view/battle cam).
+- **`RunConfiguration`** (SO, `Runtime/Gameplay/Resources/Settings/SceneRunConfigurations/`) — pairs a `SceneChain` with a list of `StateOverride`s. Flags: `IsDefault` (one per chain, editor default) and `IsBuildConfig` (one global, used in builds). Lives in `BarkingBird.Runtime.Infrastructure.SceneWorkflow`.
+- **`SceneChain`** (SO, assets in `Resources/Settings/SceneCollections/`) — ordered list of scenes loaded additively. Each element stores name + path (synced from `SceneAsset` in editor).
+- **`StateOverride`** — abstract async action applied after all scenes are loaded. Base class at `Runtime/Infrastructure/StateOverride.cs`; concrete subclasses in `Runtime/Gameplay/!_Scripts/_MonoWorld/Settings/StateOverrides/`: `GameLoopStateOverride` (Start / Pause / Finish), `ActiveCameraOverride` (fires `EventManager.Input.SceneChangeRequest` to toggle bird-view/battle cam).
 - **Runtime**: In builds, loads the `IsBuildConfig` config from Resources and loads scenes in order, waiting for each scene's `ISceneFlow.WaitForInit()` before loading the next.
-- **Editor**: `SceneWorkflowToolbox` (`BarkingBird/Scenes/Scene Workflow`, `Ctrl+Shift+W`) writes the selected config to `SessionState`; runner picks it up on Play.  Single Scene Mode loads Bootstrap + current scene only.
+- **Editor**: `SceneWorkflowToolbox` (`BarkingBird/Scenes/Scene Workflow`, `Ctrl+Shift+W`) writes the selected config to `SessionState`; runner picks it up on Play. Single Scene Mode loads Bootstrap + current scene only.
 
-**Configs in `Resources/SceneRunConfigurations/`:**
+**Configs in `Runtime/Gameplay/Resources/Settings/SceneRunConfigurations/`:**
 
 | Asset | Purpose |
 |---|---|
@@ -71,15 +105,17 @@ JSON configs are loaded at bootstrap via `AssetService` (Resources), parsed with
 
 ### Authoring / Baker Pattern
 
-Every ECS component has a corresponding `*Authoring` MonoBehaviour with a nested `Baker` class. Authoring lives in `Components/`. The baker converts inspector-configured data into component data at bake time.
+Every ECS component has a corresponding `*Authoring` MonoBehaviour with a nested `Baker` class. Authoring lives in `Runtime/Gameplay/!_Scripts/Components/` (root authoring in global namespace; AI-pipeline authoring in `Components/AI/` under `BarkingBird.Runtime.Gameplay.AI`). The baker converts inspector-configured data into component data at bake time.
 
 Enableable components (`IEnableableComponent`) are used extensively for conditional behavior: `IsDead`, `UnableToAct`, `Grabbed`, `InAir`, `SteeringEnabled`, `UnitMover`, `UnitRegisteredTag`, `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp`.
 
 ### MonoWorld Systems
 
-**Input** (`MonoWorld/Input/`): `InteractController` raycasts (LMB) for grabbable units → `GrabbingInteractor.Grab(entity)` freezes physics (`PhysicsMass.InverseMass = 0`) and enables `Grabbed`. `GrabbedEntityMover` snaps the entity to mouse-world-projection each frame, with ground and viewport clamping. `CursorMovementCalculations` tracks `velocity` and `acceleration` for throw power. On LMB up, `InteractController.OnCanceled` → `GrabbingInteractor.Release()` → `ReleaseCoordinator.HandleRelease(...)` decides between direct launch, `OverlapResolver` (slow-throw displacement) or `TunnelTeleporter` (fast-throw tunneling through obstacles). `ThrowTrajectoryPredictor` (registered before `GrabbingInteractor`) draws a predicted arc + impact circle while held. `PowerHitController` (RMB) is wired but currently a no-op placeholder.
+Non-ECS gameplay code lives under `Runtime/Gameplay/!_Scripts/_MonoWorld/`. Each subfolder maps 1:1 to a namespace under `BarkingBird.Runtime.Gameplay.*`.
 
-**Camera** (`MonoWorld/Camera/`): `BattleCameraMovement` handles drag with border constraints. `CameraInputHandler` → `CameraDragHandler` → `CameraBorderHandler` chain. `BattleCameraBorderSyncBridge` writes a `CameraFrustumData` ECS singleton (`worldToCameraMatrix`, FOV, aspect, IsLive) each frame; `ScreenBounceSystem` and `ThrowTrajectoryPredictor` read it for screen-edge bounce math.
+**Input** (`_MonoWorld/Input/` → `BarkingBird.Runtime.Gameplay.Input`, with `GrabAndThrow/` subnamespace): `InteractController` raycasts (LMB) for grabbable units → `GrabbingInteractor.Grab(entity)` freezes physics (`PhysicsMass.InverseMass = 0`) and enables `Grabbed`. `GrabbedEntityMover` snaps the entity to mouse-world-projection each frame, with ground and viewport clamping. `CursorMovementCalculations` (in `_MonoWorld/Cursor/`) tracks `velocity` and `acceleration` for throw power. On LMB up, `InteractController.OnCanceled` → `GrabbingInteractor.Release()` → `ReleaseCoordinator.HandleRelease(...)` decides between direct launch, `OverlapResolver` (slow-throw displacement) or `TunnelTeleporter` (fast-throw tunneling through obstacles). `ThrowTrajectoryPredictor` (registered before `GrabbingInteractor`) draws a predicted arc + impact circle while held. `PowerHitController` (RMB) is wired but currently a no-op placeholder.
+
+**Camera** (`_MonoWorld/Camera/` → `BarkingBird.Runtime.Gameplay.Camera`): `BattleCameraMovement` handles drag with border constraints. `CameraInputHandler` → `CameraDragHandler` → `CameraBorderHandler` chain. `BattleCameraBorderSyncBridge` writes a `CameraFrustumData` ECS singleton (`worldToCameraMatrix`, FOV, aspect, IsLive) each frame; `ScreenBounceSystem` and `ThrowTrajectoryPredictor` read it for screen-edge bounce math.
 
 ### Key Packages
 

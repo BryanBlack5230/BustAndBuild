@@ -3,7 +3,7 @@
 ## State Machine
 `GameLoopManager.State`: `Unknown → Start → Pause ↔ Resume → Finish`. `Update`/`FixedUpdate`/`LateUpdate` only tick when state is `Start` or `Resume` (`CanUpdate()` check).
 
-## Listener Interfaces (`Core/GameLoop/GameListeners.cs`)
+## Listener Interfaces (`Runtime/Infrastructure/GameLoop/GameListeners.cs`, ns `BarkingBird.Runtime.Infrastructure.GameLoop`)
 Base marker: `IGameListener`. Concrete:
 - `IGameStartListener.OnStartGame()` — called when `GameManager.StartGame()` runs (after 3-sec countdown).
 - `IGameFinishListener.OnFinishGame()`
