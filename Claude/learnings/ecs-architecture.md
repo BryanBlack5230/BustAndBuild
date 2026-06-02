@@ -28,8 +28,56 @@
 Used as flags whose state changes frequently without restructuring chunks:
 - `Grabbed`, `InAir`, `IsDead`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`
 - `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp` — combine timestamp data + enabled bit. System checks `IsComponentEnabled` to skip ready-to-act entities; if `Value > elapsedTime` keep enabled, else disable.
+- `SpawnEnemies` — gates all spawn queries; toggled by `SpawningStateSystem` driven by `EventManager.Daylight` events.
 
 To query while ignoring the enabled flag: `[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]` on `IJobEntity` or in `WithOptions()` on the iterator.
+
+**Critical gotcha — default queries exclude disabled `IEnableableComponent` entities.**  
+Both `SystemAPI.Query<>().WithAll<T>()` and `EntityManager.CreateEntityQuery(ComponentType.ReadWrite<T>())` only match entities where `T` is *enabled*. If you need to operate on entities regardless of current enabled state (e.g., to bulk-enable them from disabled), you **must** use `IgnoreComponentEnabledState`:
+```csharp
+_query = new EntityQueryBuilder(Allocator.Temp)
+    .WithAll<SpawnEnemies>()
+    .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
+    .Build(world.EntityManager);
+world.EntityManager.SetComponentEnabled<SpawnEnemies>(_query, true); // now works on disabled entities
+```
+Without this, calling `SetComponentEnabled` to enable a component on baked-disabled entities silently does nothing because the query is empty.
+
+## Subscene Baking Timing — Entities May Not Exist When Managed Events Fire
+**Context:** Tried to call `EntityManager.SetComponentEnabled` from a managed bridge on `EventManager.Daylight.DayStarted`.  
+**Finding:** Subscenes bake asynchronously. Managed events (e.g. `DayStarted`) can fire *before* any subscene entities exist. A one-shot event handler that calls `SetComponentEnabled` on a freshly built query will silently succeed against an empty result set.  
+**Why it matters:** Always assume entities from subscenes may not be available when the first managed event fires, even if the world is created.
+
+## Pattern — Wake-On-Demand Managed System for Deferred ECS State
+When a managed bridge needs to set ECS component state but entities may not be loaded yet, use a `SystemBase` that sleeps until needed:
+```csharp
+[UpdateInGroup(typeof(SimulationSystemGroup))]
+public partial class SpawningStateSystem : SystemBase
+{
+    private EntityQuery _query;
+    private bool _desiredState;
+
+    protected override void OnCreate()
+    {
+        _query = GetEntityQuery(new EntityQueryDesc
+        {
+            All = new[] { ComponentType.ReadWrite<SpawnEnemies>() },
+            Options = EntityQueryOptions.IgnoreComponentEnabledState
+        });
+        Enabled = false; // sleep until needed
+    }
+
+    public void SetDesiredState(bool isDay) { _desiredState = isDay; Enabled = true; }
+
+    protected override void OnUpdate()
+    {
+        if (_query.IsEmpty) return; // entities not baked yet — retry next frame
+        EntityManager.SetComponentEnabled<SpawnEnemies>(_query, _desiredState);
+        Enabled = false; // go back to sleep
+    }
+}
+```
+Bridge calls `world.GetOrCreateSystemManaged<SpawningStateSystem>().SetDesiredState(enabled)`. The system retries each frame until entities appear, then applies and sleeps. No polling overhead when idle.
 
 ## Component Naming/Layout Conventions
 - One file per authoring; struct(s) live in same file below the MonoBehaviour.
@@ -52,7 +100,9 @@ Single entity bakes `BattleCoordinator` + `FactionBases` + buffers `EnemyUnitRef
 **`NativeDisableContainerSafetyRestriction`** on `TargetLookup` is used so the job can read other entities' Target component (for `AggroBonus` cross-check).
 
 ## Spawning Strategies
-`SpawnAuthoring.strategy`: Point / Area / Radius / Attached → adds one of `SpawnByPoint`/`SpawnByArea`/`SpawnByRadius`/`SpawnByAttached`. `SpawningSystem.OnUpdate` has 4 parallel `foreach`es, one per type. `Spawn()` is declared as a **local method inside `OnUpdate`** because Burst sometimes complains about non-inlined helpers — see the inline comment.
+`SpawnAuthoring.strategy`: Point / Area / Radius / Attached → adds one of `SpawnByPoint`/`SpawnByArea`/`SpawnByRadius`/`SpawnByAttached`. Baker also adds `SpawnEnemies : IComponentData, IEnableableComponent` **disabled by default**. `SpawningSystem.OnUpdate` has 4 parallel `foreach`es, each with `.WithAll<SpawnEnemies>()` so only day-active spawners tick. `Spawn()` is declared as a **local method inside `OnUpdate`** because Burst sometimes complains about non-inlined helpers — see the inline comment.
+
+Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/DayEnded` → `DaylightSpawningBridge` → `SpawningStateSystem.SetDesiredState(bool)` → `EntityManager.SetComponentEnabled<SpawnEnemies>(query, bool)` on next frame once entities exist.
 
 ## Wall System
 - `WallSectionAuthoring` bakes `WallSection { CastleEntity }` + `Health` + `IsDead`. Child wall pieces use `WallChildAuthoring` → `WallReference { ParentWallEntity }` (parent lookup).

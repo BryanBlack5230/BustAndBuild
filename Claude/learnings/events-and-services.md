@@ -1,13 +1,62 @@
-# Events, Services, Utilities
+# Events, Commands, Services, Utilities
 
-## EventManager — Static Event Hub
-`BarkingBird.Runtime.Infrastructure.EventManager` (at `Runtime/Infrastructure/EventManager.cs`) exposes static `Action`s:
-- `OnEnemyDied(float3 pos)` — gameplay event for FX/score.
-- `Input.ObjectGrabbed`, `Input.GroundGrabbed(bool actuallyHolding)`, `Input.Release`, `Input.SceneChangeRequest(bool isDown)`.
+## EventBus — Static Notification Hub With Priorities
+`BarkingBird.Runtime.Infrastructure.EventBus` (at `Runtime/Infrastructure/EventBus/EventBus.cs`) is a static, type-keyed event hub for **past-tense notifications** ("X happened"). Replaced the old `EventManager` (which exposed loose `Action`s grouped by nested static classes).
 
-These are **not Reflex-injected** — anyone can subscribe by importing the namespace. `CursorSetter`, `BattleCameraMovement`, `WorldCameraHandler` all hook directly. Pattern: subscribe in ctor or `Register()`, unsubscribe in `Dispose()`.
+**API:**
+- `EventBus.Subscribe<T>(EventHandler<T> handler, int priority = 0) → IDisposable` — higher priority runs earlier; equal-priority listeners run in subscription order. Returns a token that unsubscribes on `Dispose()`.
+- `EventBus.Unsubscribe<T>(EventHandler<T> handler)` — for code that prefers `+= / -=` style over IDisposable tokens.
+- `EventBus.Raise<T>(in T evt)` — dispatches to all listeners in priority order. `in` to avoid copying struct payloads.
+- `EventHandler<T>` is `void(in T evt) where T : IEvent` — handlers take an `in` parameter so struct events don't copy on invocation.
 
-`EnemyDiedEvent : IBufferElementData` is the ECS-side analogue (buffer on coordinator entity), but no producer in current code uses it — the Action is the active path.
+**Events** are `readonly struct ... : IEvent`, marker interface in `BarkingBird.Runtime.Infrastructure`. Live in the owner's namespace. Current events:
+- `Gameplay.Input/Input_EventsAndCommands.cs`: `ObjectGrabbedEvent`, `GroundGrabbedEvent { bool ActuallyHolding }`, `ReleaseEvent` (no single owner — consolidated by namespace; see file-grouping convention below).
+- `Gameplay.Daylight/DayNightCycle_EventsAndCommands.cs`: `DayStartedEvent`, `DayEndedEvent` (consolidated with related commands).
+
+**Not Reflex-injected** (intentional). Static access lets ECS systems and MonoBehaviours raise/subscribe with no DI plumbing or per-scope bridge. Consumers: `CursorSetter`, `DummyCursorSetter`, `BattleCameraMovement`, `CameraInputHandler`, `InteractController`, `DayNightCycle`, `DaylightSpawningBridge`.
+
+**Implementation invariants** (why we built our own instead of `GenericEventBus`):
+- *Allocation-free Raise.* Listener lists live in per-type `static class Listeners<T>` (C# static-generic-class trick) — no dictionary lookup, no per-Raise list copy. Designed for 100+ units raising events per frame.
+- *Re-entrant raise is queued via depth counter.* Calling `Raise(B)` from a handler of `A` defers `B` until `A`'s dispatch loop unwinds. No nested-dispatch stack blowups.
+- *Subscribe/Unsubscribe during dispatch is queued, not applied mid-iteration.* When `_depth > 0`, ops append to a per-type `PendingOp` list and apply in the depth-0 drain. New subscribers join *after* the in-flight event. Allocation-free (no closure capture, no list-copy).
+- *Cross-play-mode-reload safety.* `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]` clears every `Listeners<T>` on play mode enter — works even with "Disable Domain Reload" enabled. Each `Listeners<T>` registers itself with the bus's clearer list via its static ctor.
+- *Stable equal-priority ordering.* `FindInsertIndex` inserts new equal-priority listeners *after* older ones (binary search with `>=` on the left half).
+- *No consume / stop-propagation feature.* Deliberately omitted — add when input layering needs it.
+- *Per-handler `try/catch` with `Log.Default.E(e)`.* One bad listener doesn't kill the rest.
+
+**Pattern:** subscribe in ctor or `Register()`, unsubscribe in `Dispose()`. Either retain the `IDisposable` from `Subscribe` or call `Unsubscribe` with the same method reference (delegate equality matches target+method, so `obj.Method` re-resolved later still removes correctly).
+
+## CommandDispatcher — Reflex-Injected Request Hub
+`BarkingBird.Runtime.Infrastructure.Commands.CommandDispatcher` (at `Runtime/Infrastructure/Commands/`) is the **request side**: imperative "do X" calls. Bound as a project-scoped concrete singleton in `ProjectInstaller` and **injected via Reflex** (no static access from runtime code).
+
+- `Send<T>(in T command)` — dispatches synchronously, exceptions per-handler logged via `Log.Default.E`.
+- `Register<T>(Action<T> handler)` → returns `IDisposable` token; dispose to unsubscribe (no need to keep the delegate reference).
+
+Commands are `readonly struct ... : ICommand` (marker interface). Live next to their semantic owner (e.g. `Gameplay.Scenes/Commands/ChangeSceneCommand.cs`, `Gameplay.Daylight/DayNightCycle_EventsAndCommands.cs`), not in a central commands folder.
+
+### File-grouping convention for commands and events
+Decide where a command/event file lives by counting how many sibling types share its owner:
+
+1. **One command/event for the owner** → its own file, named after the type (e.g. `ChangeSceneCommand.cs`). Placed next to the owner class.
+2. **Multiple commands/events for the same owner class** → consolidate into a single file `<OwnerClass>_EventsAndCommands.cs` next to that class.
+   - Example: `DayNightCycle` raises `DayStartedEvent`/`DayEndedEvent` and handles `StartDayCommand`/`ForceFinishDayCommand` → `DaylightCycle/DayNightCycle_EventsAndCommands.cs` (namespace `BarkingBird.Runtime.Gameplay.Daylight`).
+3. **No single owner class, but the types share a domain** (raised/handled by multiple unrelated classes in the same area) → consolidate into `<NamespaceLastSegment>_EventsAndCommands.cs` at the area-folder root.
+   - Example: `ObjectGrabbedEvent`/`GroundGrabbedEvent`/`ReleaseEvent` are raised by both `InteractController` and `CameraInputHandler`, consumed by Cursor/Camera/etc. → `Input/Input_EventsAndCommands.cs` (namespace `BarkingBird.Runtime.Gameplay.Input`).
+
+Don't use `Commands/` or `Events/` subfolders — the consolidated file or sibling file lives flat next to its owner class. Multiple `readonly struct`s per file is fine; these are short marker types.
+
+**Apply this convention to any new commands and events going forward.** When a second sibling shows up next to a single-type file, that's the moment to fold both into `<OwnerClass>_EventsAndCommands.cs`.
+
+**SO-side access (`StateOverride` and other `SerializeReference` types):** these can't be Reflex-injected, so resolve via `Reflex.Core.Container.ProjectContainer.Resolve<CommandDispatcher>()` inside `Apply()`. This is the official Reflex static; see `UnityInjector.cs` in the package. **Do not** use this escape hatch from constructor-injectable code — get the dispatcher via DI.
+
+## Notifications vs. Commands — When to Use Which
+The split is intentional: each tool fits one half of the request/notify pair.
+- **"X happened" → `EventBus.Raise(new XEvent(...))`.** Broadcasting facts after the producer's own logic runs. Past tense. Multiple subscribers may care. Example: `DayStartedEvent` fires after `DayNightCycle` has set up its loop.
+- **"Do X" → `CommandDispatcher.Send(new XCommand(...))`.** External code asking a service to act. Imperative. Typically one handler. Example: `ChangeSceneCommand` from scroll input → handled by `WorldCameraHandler`.
+
+**Why it matters:** lets external code drive a service without holding a reference — important for pure-C# Reflex singletons that aren't `FindObjectByType`-able — while keeping the service's public surface narrow. Both halves give you type-safe payloads and `IDisposable` subscription tokens that avoid the "must hold exact delegate reference to unsubscribe" footgun.
+
+**Migration history:** `Input.SceneChangeRequest`, `Daylight.StartDayRequest`, `Daylight.ForceFinishRequest` were originally `Action`s in the old `EventManager`. They moved to `ChangeSceneCommand`, `StartDayCommand`, `ForceFinishDayCommand` when the split was formalized. Notification `Action`s (`DayStarted`, `ObjectGrabbed`, etc.) later moved to the typed `EventBus` (struct events + priorities) when `EventManager` was retired.
 
 ## Log Tags
 `Log.Default`, `Log.Loading`, `Log.Battle`, `Log.World`, `Log.City`, `Log.Boot` — each a `TagLog` instance with category prefix. Methods: `D` (debug, stripped under `PROD` define via `[Conditional("DUMMY_UNUSED_DEFINE")]` trick), `W` (warning), `E` (error/exception), `ThrowException`. All marked `[HideInCallstack]` so the stack frame skips the TagLog layer.

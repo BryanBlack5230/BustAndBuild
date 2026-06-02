@@ -22,6 +22,15 @@ builder.NonLazy<T>();                    // forces resolution on container built
 ```
 `NonLazy` is used for `GameManager` — without it `GameManager` would never be instantiated (no one injects it explicitly).
 
+## NonLazy Required for Self-Sufficient Singletons
+**Rule:** Any singleton that is **not injected into anything else** (no other class takes it as a constructor parameter) must be registered with `.NonLazy<T>()`, otherwise Reflex never constructs it and it stays dormant.  
+**Example:** `DaylightSpawningBridge` subscribes to `EventManager` events in its constructor and is never injected anywhere, so without `NonLazy` it would never be created and spawning would never toggle.
+```csharp
+builder.AddSingleton(typeof(DaylightSpawningBridge), typeof(DaylightSpawningBridge), typeof(IDisposable))
+       .NonLazy<DaylightSpawningBridge>();
+```
+**How to spot the pattern:** If a class's only job is to subscribe to events or hook into external systems at construction time, it needs `NonLazy`. Classes that are injected will be constructed on first demand; classes that construct themselves for side-effects will not.
+
 ## Listener Auto-Collection
 Any singleton tagged with `typeof(IGameListener)` in its registration list is picked up by `GameLoopManager.Construct(IEnumerable<IGameListener>)`. Pattern is `builder.AddSingleton(typeof(X), typeof(X), typeof(IGameListener), typeof(IDisposable))`.
 **Why it matters:** To make a new service tick or pause/resume, register it as `IGameListener` in the appropriate installer — no manual wiring needed.

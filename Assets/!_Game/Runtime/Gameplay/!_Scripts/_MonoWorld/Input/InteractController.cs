@@ -54,7 +54,7 @@ namespace BarkingBird.Runtime.Gameplay.Input
 
         private void OnCanceled(InputAction.CallbackContext obj)
         {
-            EventManager.Input.Release?.Invoke();
+            EventBus.Raise(new ReleaseEvent());
             _grabbingInteractor.Release();
         }
 
@@ -76,12 +76,12 @@ namespace BarkingBird.Runtime.Gameplay.Input
             {
                 if (_entityManager.HasComponent<Grabbed>(raycastHit.Entity))
                 {
-                    EventManager.Input.ObjectGrabbed?.Invoke();
+                    EventBus.Raise(new ObjectGrabbedEvent());
                     _grabbingInteractor.Grab(raycastHit.Entity);
                 }
                 else
                 {
-                    EventManager.Input.GroundGrabbed?.Invoke(false);
+                    EventBus.Raise(new GroundGrabbedEvent(false));
                 }
             }
         }

@@ -51,26 +51,26 @@ namespace BarkingBird.Runtime.Gameplay.Cursor
 
         private void Subscribe()
         {
-            EventManager.Input.ObjectGrabbed += SetHoldingObjectCursor;
-            EventManager.Input.GroundGrabbed += SetHoldingGroundCursor;
-            EventManager.Input.Release += SetOpenHandCursor;
+            EventBus.Subscribe<ObjectGrabbedEvent>(SetHoldingObjectCursor);
+            EventBus.Subscribe<GroundGrabbedEvent>(SetHoldingGroundCursor);
+            EventBus.Subscribe<ReleaseEvent>(SetOpenHandCursor);
         }
 
-        private void SetOpenHandCursor() => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.Open];
+        private void SetOpenHandCursor(in ReleaseEvent _) => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.Open];
 
-        private void SetHoldingObjectCursor() => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.ObjectHold];
+        private void SetHoldingObjectCursor(in ObjectGrabbedEvent _) => _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.ObjectHold];
 
-        private void SetHoldingGroundCursor(bool actuallyHolding)
+        private void SetHoldingGroundCursor(in GroundGrabbedEvent evt)
         {
-            if (actuallyHolding) _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.GroundHold];
+            if (evt.ActuallyHolding) _dummyCursorRenderer.sprite = _textures[RuntimeConstants.Cursors.GroundHold];
         }
 
         public void Dispose()
         {
-            EventManager.Input.ObjectGrabbed -= SetHoldingObjectCursor;
-            EventManager.Input.GroundGrabbed -= SetHoldingGroundCursor;
-            EventManager.Input.Release -= SetOpenHandCursor;
-            
+            EventBus.Unsubscribe<ObjectGrabbedEvent>(SetHoldingObjectCursor);
+            EventBus.Unsubscribe<GroundGrabbedEvent>(SetHoldingGroundCursor);
+            EventBus.Unsubscribe<ReleaseEvent>(SetOpenHandCursor);
+
             GameObject.Destroy(_dummyCursorTransform.gameObject);
         }
     }

@@ -46,6 +46,11 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             public static readonly string[] All = {Open, ObjectHold, GroundHold};
         }
 
+        public static class Daylight
+        {
+            public const int MinutesInDay = 1440;
+        }
+
         public static class SceneWorkflow
         {
             public const string RunConfigurationsPath = "Settings/SceneRunConfigurations";

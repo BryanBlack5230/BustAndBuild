@@ -1,3 +1,4 @@
+using BarkingBird.Runtime.Infrastructure.Utilities;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -25,8 +26,11 @@ public class SpawnAuthoring : MonoBehaviour
                 prefab = GetEntity(authoring.prefab, TransformUsageFlags.Dynamic),
                 spawnInterval = authoring.timeBetweenSpawns
             });
-            
+
             AddComponent(entity, new SpawnPosition());
+            AddComponent<SpawnEnemies>(entity);
+            SetComponentEnabled<SpawnEnemies>(entity, false);
+            Log.Boot.D($"Baker, Set spawn enemies to false");
 
             switch (authoring.strategy)
             {
@@ -102,3 +106,5 @@ public struct SpawnAttached : IComponentData
     public Entity targetEntity;
     public float3 offset;
 }
+
+public struct SpawnEnemies : IComponentData, IEnableableComponent { }

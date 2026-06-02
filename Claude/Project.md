@@ -52,7 +52,7 @@ Runtime code is split into two trees:
 
 **ECS namespace split:** root-level `Components/` and `Systems/` files (shared building blocks — `Health`, `Castle`, `Beacon`, `WallSection`, `Attack`, `InAir`, `Grabbed`, `Spawn`, `BattleCenter`, `BattleCoordinator`, `BounceDamage`, `CameraFrustumData`, `ThrowVelocitySettings`, `ApplyDamageSystem`, `AttackSystem`, `BattleCoordinatorSystem`, `BattleDirectorCleanupSystem`, `CastleBreachSystem`, `DeathSystem`, `GizmoDrawSystem`, `InAirCollisionSystem`, `ScreenBounceSystem`, `SpawningSystem`, `WallSectionInitSystem`) live in the **global namespace** — typical Unity-DOTS convention so component/system type names stay short. AI-pipeline code (Brain/Steering/Targeting/Pathfinding/Movement/Unit registration & ability evaluation) lives in `Components/AI/` and `Systems/AI/` under `BarkingBird.Runtime.Gameplay.AI`.
 
-`Runtime/Infrastructure/` root holds the cross-cutting services that aren't part of any subdomain: `EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride` (abstract base — concrete overrides live in `Gameplay.Settings`).
+`Runtime/Infrastructure/` root holds the cross-cutting services that aren't part of any subdomain: `EventBus` (in `EventBus/` subfolder), `InputManager`, `ReflexExtensions`, `StateOverride` (abstract base — concrete overrides live in `Gameplay.Settings`).
 
 ### Dependency Injection (Reflex)
 
@@ -84,7 +84,7 @@ Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesA
 
 - **`RunConfiguration`** (SO, `Runtime/Gameplay/Resources/Settings/SceneRunConfigurations/`) — pairs a `SceneChain` with a list of `StateOverride`s. Flags: `IsDefault` (one per chain, editor default) and `IsBuildConfig` (one global, used in builds). Lives in `BarkingBird.Runtime.Infrastructure.SceneWorkflow`.
 - **`SceneChain`** (SO, assets in `Resources/Settings/SceneCollections/`) — ordered list of scenes loaded additively. Each element stores name + path (synced from `SceneAsset` in editor).
-- **`StateOverride`** — abstract async action applied after all scenes are loaded. Base class at `Runtime/Infrastructure/StateOverride.cs`; concrete subclasses in `Runtime/Gameplay/!_Scripts/_MonoWorld/Settings/StateOverrides/`: `GameLoopStateOverride` (Start / Pause / Finish), `ActiveCameraOverride` (fires `EventManager.Input.SceneChangeRequest` to toggle bird-view/battle cam).
+- **`StateOverride`** — abstract async action applied after all scenes are loaded. Base class at `Runtime/Infrastructure/StateOverride.cs`; concrete subclasses in `Runtime/Gameplay/!_Scripts/_MonoWorld/Settings/StateOverrides/`: `GameLoopStateOverride` (Start / Pause / Finish), `ActiveCameraOverride` (sends `ChangeSceneCommand` via `CommandDispatcher` to toggle bird-view/battle cam), `DayCycleStateOverride` (sends `StartDayCommand` / `ForceFinishDayCommand`).
 - **Runtime**: In builds, loads the `IsBuildConfig` config from Resources and loads scenes in order, waiting for each scene's `ISceneFlow.WaitForInit()` before loading the next.
 - **Editor**: `SceneWorkflowToolbox` (`BarkingBird/Scenes/Scene Workflow`, `Ctrl+Shift+W`) writes the selected config to `SessionState`; runner picks it up on Play. Single Scene Mode loads Bootstrap + current scene only.
 

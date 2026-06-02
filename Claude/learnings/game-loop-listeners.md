@@ -36,3 +36,12 @@ A service that needs to "do per-frame work that pauses with the game" should:
 4. Optionally `IDisposable` for cleanup.
 
 `InteractController`, `PowerHitController`, `BattleCameraMovement` all follow this pattern: `OnStartGame()` and `OnResume()` register input callbacks; `OnPause()` and `Dispose()` unregister.
+
+## Pause-Aware UniTask Loops (CTS + Phase Preservation)
+When the work isn't a per-frame tick but a **long-running async loop** that must halt on pause (e.g. `DayNightCycle`'s day progression), `IGameUpdateListener` is the wrong tool — `GameLoopManager.Update()` will just skip the tick during pause, which makes per-frame `Time.deltaTime` accumulation drift if you also need the loop's internal scheduling. Use the CTS pattern instead:
+1. `OnPause()` → cancel the CTS.
+2. `OnResume()` → relaunch the loop with **preserved progress state** (`_elapsedSeconds`, current phase, etc.).
+3. `Dispose()` → cancel CTS + unsubscribe events.
+4. The `await UniTask.Yield(PlayerLoopTiming.Update, ct)` + `try / catch (OperationCanceledException) {}` shape matches `Countdown.cs` in `Runtime/Infrastructure/Utilities/`.
+
+When the service has **multiple phases** that can be active when pause hits (e.g. normal day loop vs. sundown tween), track a `_phase` enum and have `OnResume()` switch on it to relaunch the right loop. Don't try to model "is sundown in progress" with a second bool alongside `_dayInProgress` — the enum keeps state transitions explicit and exhaustive.

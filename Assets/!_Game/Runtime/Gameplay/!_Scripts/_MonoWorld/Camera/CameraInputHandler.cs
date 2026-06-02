@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
+using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
@@ -29,9 +30,9 @@ namespace BarkingBird.Runtime.Gameplay.Camera
             _holdCts = null;
         }
 
-        public void HandleGrabEvent(bool alreadyHolding)
+        public void HandleGrabEvent(in GroundGrabbedEvent evt)
         {
-            if (alreadyHolding)
+            if (evt.ActuallyHolding)
             {
                 CancelHold();
                 DragStarted?.Invoke();
@@ -47,7 +48,7 @@ namespace BarkingBird.Runtime.Gameplay.Camera
             WaitForHoldAsync(_holdCts.Token).Forget();
         }
 
-        public void HandleRelease()
+        public void HandleRelease(in ReleaseEvent _)
         {
             CancelHold();
             DragEnded?.Invoke();
@@ -67,7 +68,7 @@ namespace BarkingBird.Runtime.Gameplay.Camera
                     await UniTask.Yield(PlayerLoopTiming.Update, token);
                 }
 
-                EventManager.Input.GroundGrabbed?.Invoke(true);
+                EventBus.Raise(new GroundGrabbedEvent(true));
             }
             catch { }
         }

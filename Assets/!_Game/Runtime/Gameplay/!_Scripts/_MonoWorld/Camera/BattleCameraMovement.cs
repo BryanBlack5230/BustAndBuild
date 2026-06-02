@@ -63,21 +63,21 @@ namespace BarkingBird.Runtime.Gameplay.Camera
 
         private void Register()
         {
-            EventManager.Input.GroundGrabbed += _input.HandleGrabEvent;
-            EventManager.Input.Release += _input.HandleRelease;
-            
+            EventBus.Subscribe<GroundGrabbedEvent>(_input.HandleGrabEvent);
+            EventBus.Subscribe<ReleaseEvent>(_input.HandleRelease);
+
             _input.DragStarted += OnDragStarted;
             _input.DragEnded += OnDragEnded;
         }
 
         private void Unregister()
         {
-            EventManager.Input.GroundGrabbed -= _input.HandleGrabEvent;
-            EventManager.Input.Release -= _input.HandleRelease;
-            
+            EventBus.Unsubscribe<GroundGrabbedEvent>(_input.HandleGrabEvent);
+            EventBus.Unsubscribe<ReleaseEvent>(_input.HandleRelease);
+
             _input.DragStarted -= OnDragStarted;
             _input.DragEnded -= OnDragEnded;
-            
+
             _input.Dispose();
             _border.Dispose();
         }

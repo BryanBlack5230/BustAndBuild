@@ -21,23 +21,23 @@ public partial struct SpawningSystem : ISystem
         var dt = SystemAPI.Time.DeltaTime;
 
         // --- SpawnByPoint ---
-        foreach (var (spawnSettings, point) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByPoint>>())
+        foreach (var (spawnSettings, point) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByPoint>>()
+            .WithAll<SpawnEnemies>())
         {
-            // Debug.Log("Huh, point");
             // you can convert it to a method and it will work, but Burst will crap errors from time to time because it wants it to be inlined
             spawnSettings.ValueRW.timer -= dt;
             if (spawnSettings.ValueRO.timer > 0f) continue;
             spawnSettings.ValueRW.timer = spawnSettings.ValueRO.spawnInterval;
-            
+
             var prefab = spawnSettings.ValueRO.prefab;
             var spawnPos = point.ValueRO.position;
             Spawn(prefab, spawnPos);
         }
 
         // --- SpawnByArea ---
-        foreach (var (spawnSettings, area) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByArea>>())
+        foreach (var (spawnSettings, area) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByArea>>()
+            .WithAll<SpawnEnemies>())
         {
-            // Debug.Log("Huh, area");
             spawnSettings.ValueRW.timer -= dt;
             if (spawnSettings.ValueRO.timer > 0f) continue;
             spawnSettings.ValueRW.timer = spawnSettings.ValueRO.spawnInterval;
@@ -49,9 +49,9 @@ public partial struct SpawningSystem : ISystem
         }
 
         // --- SpawnByRadius ---
-        foreach (var (spawnSettings, radius) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByRadius>>())
+        foreach (var (spawnSettings, radius) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnByRadius>>()
+            .WithAll<SpawnEnemies>())
         {
-            // Debug.Log("Huh, radius");
             spawnSettings.ValueRW.timer -= dt;
             if (spawnSettings.ValueRO.timer > 0f) continue;
             spawnSettings.ValueRW.timer = spawnSettings.ValueRO.spawnInterval;
@@ -63,7 +63,8 @@ public partial struct SpawningSystem : ISystem
         }
 
         // --- SpawnAttached (spawn relative to another entity's LocalTransform) ---
-        foreach (var (spawnSettings, attached) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnAttached>>())
+        foreach (var (spawnSettings, attached) in SystemAPI.Query<RefRW<SpawnSettings>, RefRO<SpawnAttached>>()
+            .WithAll<SpawnEnemies>())
         {
             // Debug.Log("Huh, attached");
             spawnSettings.ValueRW.timer -= dt;

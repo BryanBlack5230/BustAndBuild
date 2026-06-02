@@ -41,10 +41,15 @@ List of `SceneChainElement` — each holds `_sceneAsset` (UnityEditor-only `Scen
 
 ## StateOverride (Polymorphic, [SerializeReference])
 Abstract base with `UniTask Apply()`. Concrete:
-- `GameLoopStateOverride` — finds `GameLoopManager` and calls `StartGame/PauseGame/FinishGame`. Useful for "start in pause state" dev runs.
-- `ActiveCameraOverride` — fires `EventManager.Input.SceneChangeRequest(_switchUp)` to flip between battle/world cams.
+- `GameLoopStateOverride` — finds `GameLoopManager` (MonoBehaviour) via `FindFirstObjectByType` and calls `StartGame/PauseGame/FinishGame`. Useful for "start in pause state" dev runs.
+- `ActiveCameraOverride` — sends `ChangeSceneCommand(_switchUp)` via `CommandDispatcher` to flip between battle/world cams.
+- `DayCycleStateOverride` — sends `StartDayCommand` or `ForceFinishDayCommand` based on its `TargetAction` enum.
 
 To add a new override: subclass `StateOverride`, mark `[Serializable]`, implement `Apply()`. The Odin/Unity SerializeReference picker in `RunConfiguration` inspector exposes it.
+
+**Targeting MonoBehaviours vs. DI-bound services:**
+- Target is a scene MonoBehaviour → `FindFirstObjectByType<T>()` is fine (see `GameLoopStateOverride`).
+- Target is a pure-C# Reflex singleton (e.g. `DayNightCycle`, `WorldCameraHandler`) → it can't be found via `FindObjectByType`. **Don't** dig the Reflex container out of the active scene. **Do** define a `readonly struct XCommand : ICommand`, resolve `CommandDispatcher` from `Reflex.Core.Container.ProjectContainer` inside `Apply()`, and `Send` the command. The service registers a handler via `dispatcher.Register<XCommand>(...)` in its constructor and stores the returned `IDisposable`. See `ActiveCameraOverride` / `DayCycleStateOverride` for the sender pattern and [[events-and-services]] for the notifications-vs-commands split.
 
 ## Open-In-Editor Toolbox
 `ToolBox.cs` exposes Alt+1..5 shortcuts to open individual scenes single-mode (`BarkingBird/Scenes/Bootstrap &1` etc.). Uses `EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()` before swap.

@@ -73,7 +73,7 @@ Access `lineRenderer.material` once at construction and store it; modifying `.co
 Hold ground for `config.timeToHold` (1s default, configurable via `ConfigContainer.Battle.CameraConfig`) → `Countdown` ticks while waiting → `CameraInputHandler` fires `EventManager.Input.GroundGrabbed(true)` once → drag starts. `CameraDragHandler` reads mouse delta, scales by `moveSpeed`, applies to `CinemachineTransposer.m_FollowOffset`. `CameraBorderHandler` applies soft resistance via `borderPushCurve` when offset is outside `BorderRange` (derived from `BattleSceneData.sceneBoundary*` transforms). Release → snap back if outside bounds via `returnCurve`.
 
 ## ScrollController — Bird's-Eye Switch
-Scroll up/down → `EventManager.Input.SceneChangeRequest(bool up)`. `WorldCameraHandler` (in World scene) toggles bird-view GO active. Used to switch between top-down strategic and tilted battle view. `ActiveCameraOverride` (a `StateOverride`) can fire the same event from a `RunConfiguration` startup.
+Scroll up/down → `CommandDispatcher.Send(new ChangeSceneCommand(bool switchUp))`. `WorldCameraHandler` (in World scene) registers a handler that toggles bird-view GO active. Used to switch between top-down strategic and tilted battle view. `ActiveCameraOverride` (a `StateOverride`) sends the same command from a `RunConfiguration` startup. See [[events-and-services]] for the notifications-vs-commands split.
 
 ## Cursor Textures
 `CursorSetter` (ILoadUnit, namespace `BarkingBird.Runtime.Gameplay.Cursor`) preloads textures from `Cursors/Textures/{OpenHandCursor, HoldingObjectCursor, HoldingGroundCursor}` (relative to `Runtime/Gameplay/Resources/`) and subscribes to `EventManager.Input.*` to switch cursor via `Cursor.SetCursor(..., CursorMode.ForceSoftware)`.

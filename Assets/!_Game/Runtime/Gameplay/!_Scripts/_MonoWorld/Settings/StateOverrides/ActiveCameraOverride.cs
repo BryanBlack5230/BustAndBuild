@@ -2,9 +2,12 @@
 
 using System;
 using Cysharp.Threading.Tasks;
+using Reflex.Core;
 using UnityEngine;
 
+using BarkingBird.Runtime.Gameplay.Scenes;
 using BarkingBird.Runtime.Infrastructure;
+using BarkingBird.Runtime.Infrastructure.Commands;
 
 namespace BarkingBird.Runtime.Gameplay.Settings
 {
@@ -15,7 +18,8 @@ namespace BarkingBird.Runtime.Gameplay.Settings
 
         public override UniTask Apply()
         {
-            EventManager.Input.SceneChangeRequest?.Invoke(_switchUp);
+            var dispatcher = Container.ProjectContainer.Resolve<CommandDispatcher>();
+            dispatcher.Send(new ChangeSceneCommand(_switchUp));
             return UniTask.CompletedTask;
         }
     }
