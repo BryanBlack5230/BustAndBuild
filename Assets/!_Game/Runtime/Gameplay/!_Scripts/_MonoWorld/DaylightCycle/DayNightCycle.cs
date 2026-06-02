@@ -1,140 +1,177 @@
+#nullable enable
+
 using System;
-using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
+using BarkingBird.Runtime.Infrastructure;
+using BarkingBird.Runtime.Infrastructure.Commands;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
+using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.Daylight
 {
-	public class DayNightCycle : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener, IGameUpdateListener
-	{
-		[SerializeField] private float _dayLength;
-		[SerializeField] private float _dayPercent;
-		[SerializeField] private DaylightHandler _daylight;
+    public sealed class DayNightCycle : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener, IDisposable
+    {
+        private enum Phase { Idle, Day, Sundown }
 
-		public static event Action OnDayStarted;
-		public static event Action OnDayEnded;
+        private readonly DayNightSetting _setting;
+        private readonly DaylightHandler _daylight;
 
-		private int _minutesInDay = 1440; // 24 hours
-		private float _minuteLenght => _dayLength / _minutesInDay;
-		private TimeSpan _currentTime;
-		[SerializeField] private bool _dayInProgress;
-		private int _elapsedMinutes;
+        private Phase _phase = Phase.Idle;
+        private float _elapsedSeconds;
+        private int _elapsedMinutes;
+        private TimeSpan _currentTime;
+        private float _dayPercent;
 
+        private float _sundownStartPercent;
+        private float _sundownElapsed;
 
-		private void Awake() 
-		{ 
-			// GameStateManager.OnBrazierDestroyed += OnBrazierDestroyed;
-			// GameStateManager.GameRestarted += Reset;
-		}
+        private CancellationTokenSource? _cts;
 
-		private void OnDestroy() 
-		{
-			// GameStateManager.OnBrazierDestroyed -= OnBrazierDestroyed;
-			// GameStateManager.GameRestarted -= Reset;
-		}
+        private readonly IDisposable _startDaySub;
+        private readonly IDisposable _forceFinishSub;
 
-		private void Reset()
-		{
-			_dayInProgress = false;
-			StopAllCoroutines();
-			_currentTime += TimeSpan.FromMinutes(_minutesInDay - _currentTime.TotalMinutes % _minutesInDay);
-			_daylight.SetDaylightTo(0);
-		}
+        public DayNightCycle(DayNightSetting setting, DaylightHandler daylight, CommandDispatcher dispatcher)
+        {
+            _setting = setting;
+            _daylight = daylight;
 
-		public void StartDay()
-		{
-			if (!_dayInProgress) StartCoroutine(StartClock());
-		}
+            _startDaySub = dispatcher.Register<StartDayCommand>(OnStartDayCommand);
+            _forceFinishSub = dispatcher.Register<ForceFinishDayCommand>(OnForceFinishCommand);
+        }
 
-		private IEnumerator StartClock()
-		{
-			_dayInProgress = true;
-			OnDayStarted?.Invoke();
-			for (int i = 0; i < _minutesInDay; i++)
-			{
-				yield return AddMinute();
-				_dayPercent = PercentOfDay();
-				_daylight.SetDaylightTo(_dayPercent);
-			}
-			OnDayEnded?.Invoke();
-			_dayInProgress = false;
-		}
+        public void Dispose()
+        {
+            _startDaySub.Dispose();
+            _forceFinishSub.Dispose();
+            CancelLoop();
+        }
 
-		private IEnumerator AddMinute()
-		{
-			_currentTime += TimeSpan.FromMinutes(1);
-			yield return new WaitForSeconds(_minuteLenght);
-		}
+        private void OnStartDayCommand(StartDayCommand _) => StartDay();
+        private void OnForceFinishCommand(ForceFinishDayCommand _) => ForceFinishDay();
 
-		private float PercentOfDay()
-		{
-			return (float) _currentTime.TotalMinutes % _minutesInDay / _minutesInDay;
-		}
+        public void OnStartGame() => StartDay();
+        public void OnFinishGame() { CancelLoop(); ResetState(); }
+        public void OnPause() => CancelLoop();
+        public void OnResume()
+        {
+            switch (_phase)
+            {
+                case Phase.Day:     LaunchDayLoop();     break;
+                case Phase.Sundown: LaunchSundownLoop(); break;
+            }
+        }
 
-		private void OnBrazierDestroyed()
-		{
-			var beforeEvening = 0.95f;
-			if (_dayPercent < beforeEvening || !Mathf.Approximately(_dayPercent, 0))
-			{
-				_currentTime += TimeSpan.FromMinutes(beforeEvening * _minutesInDay - _currentTime.TotalMinutes % _minutesInDay);
-				StopAllCoroutines();
-				StartCoroutine(SunGoesDown());
-			}
-		}
+        public void StartDay()
+        {
+            if (_phase != Phase.Idle) return;
 
-	    private IEnumerator SunGoesDown()
-	    {
-	        var minutesLeft = Mathf.CeilToInt((float)(_minutesInDay - _currentTime.TotalMinutes % _minutesInDay));
-			for (var i = 0; i < minutesLeft; i++)
-			{
-				yield return AddMinute();
-				_dayPercent = PercentOfDay();
-				_daylight.SetDaylightTo(_dayPercent);
-			}
-			OnDayEnded?.Invoke();
-			_dayInProgress = false;
-	    }
+            ResetState();
+            _phase = Phase.Day;
+            EventBus.Raise(new DayStartedEvent());
+            LaunchDayLoop();
+        }
 
-	    public void OnStartGame()
-	    {
-		    _dayInProgress = true;
-		    OnDayStarted?.Invoke();
-	    }
+        public void ForceFinishDay()
+        {
+            if (_phase != Phase.Day) return;
 
-	    public void OnPause()
-	    {
-		    _dayInProgress = false;
-	    }
+            CancelLoop();
+            _phase = Phase.Sundown;
+            _sundownStartPercent = _dayPercent;
+            _sundownElapsed = 0f;
+            LaunchSundownLoop();
+        }
 
-	    public void OnResume()
-	    {
-		    _dayInProgress = true;
-	    }
+        private void ResetState()
+        {
+            _phase = Phase.Idle;
+            _elapsedSeconds = 0f;
+            _elapsedMinutes = 0;
+            _currentTime = TimeSpan.Zero;
+            _dayPercent = 0f;
+            _daylight.SetDaylightTo(0f);
+        }
 
-	    public void OnFinishGame()
-	    {
-		    _dayInProgress = false;
-	    }
+        private void LaunchDayLoop()
+        {
+            CancelLoop();
+            _cts = new CancellationTokenSource();
+            RunDayAsync(_cts.Token).Forget();
+        }
 
-	    public void OnUpdate(float deltaTime)
-	    {
-		    _elapsedMinutes = (_elapsedMinutes + 1 ) % _minutesInDay;
-		    if (_elapsedMinutes >= _minutesInDay)
-		    {
-			    OnDayEnded?.Invoke();
-			    _currentTime += TimeSpan.FromMinutes(_minutesInDay - _currentTime.TotalMinutes % _minutesInDay);
-			    _daylight.SetDaylightTo(0);
-			    OnDayStarted?.Invoke();
-		    }
-		    else
-		    {
-			    _currentTime += TimeSpan.FromMinutes(1);
-			    _dayPercent = PercentOfDay();
-			    _daylight.SetDaylightTo(_dayPercent);
-		    }
-		    
-	    }
-	}
+        private void LaunchSundownLoop()
+        {
+            CancelLoop();
+            _cts = new CancellationTokenSource();
+            RunSundownAsync(_cts.Token).Forget();
+        }
+
+        private void CancelLoop()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+        }
+
+        private async UniTask RunDayAsync(CancellationToken ct)
+        {
+            try
+            {
+                var minuteLength = _setting.DayLength / RuntimeConstants.Daylight.MinutesInDay;
+
+                while (_elapsedSeconds < _setting.DayLength)
+                {
+                    await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                    _elapsedSeconds += Time.deltaTime;
+
+                    var newMinute = (int)(_elapsedSeconds / minuteLength);
+                    if (newMinute > _elapsedMinutes)
+                    {
+                        _currentTime += TimeSpan.FromMinutes(newMinute - _elapsedMinutes);
+                        _elapsedMinutes = newMinute;
+                    }
+
+                    _dayPercent = Mathf.Clamp01(_elapsedSeconds / _setting.DayLength);
+                    _daylight.SetDaylightTo(_dayPercent);
+                }
+
+                CompleteDay();
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private async UniTask RunSundownAsync(CancellationToken ct)
+        {
+            try
+            {
+                while (_sundownElapsed < _setting.SunDownDuration)
+                {
+                    await UniTask.Yield(PlayerLoopTiming.Update, ct);
+                    _sundownElapsed += Time.deltaTime;
+                    var t = Mathf.Clamp01(_sundownElapsed / _setting.SunDownDuration);
+                    _dayPercent = Mathf.Lerp(_sundownStartPercent, 1f, t);
+                    _daylight.SetDaylightTo(_dayPercent);
+                }
+
+                _dayPercent = 1f;
+                _daylight.SetDaylightTo(1f);
+                CompleteDay();
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private void CompleteDay()
+        {
+            _phase = Phase.Idle;
+            EventBus.Raise(new DayEndedEvent());
+
+            if (_setting.IsLooping)
+            {
+                StartDay();
+            }
+        }
+    }
 }
-
