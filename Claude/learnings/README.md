@@ -20,6 +20,7 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 
 ### C# / Unity Patterns
 - [Unity C# Patterns](unity-csharp-patterns.md) — fake-null with #nullable, ScriptableObject settings pattern, required SerializeField guard
+- [Play Mode & Hot Reload](play-mode-and-hot-reload.md) — domain/scene reload OFF, static-state reset pattern, Hot Reload limitations (DOTS, Reflex, ScriptableObjects)
 
 ### Editor Tooling
 - [Custom Inspector Patterns](custom-inspector-patterns.md) — `SceneChain` inspector, `FindPropertyRelative`, scene-open guards
