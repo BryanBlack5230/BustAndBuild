@@ -4,7 +4,6 @@ using System;
 using Unity.Entities;
 
 using BarkingBird.Runtime.Infrastructure;
-using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Daylight
 {
@@ -12,7 +11,6 @@ namespace BarkingBird.Runtime.Gameplay.Daylight
     {
         public DaylightSpawningBridge()
         {
-            Log.Boot.D("DaylightSpawningBridge created");
             EventBus.Subscribe<DayStartedEvent>(OnDayStarted);
             EventBus.Subscribe<DayEndedEvent>(OnDayEnded);
         }
@@ -22,7 +20,6 @@ namespace BarkingBird.Runtime.Gameplay.Daylight
 
         private void SetSpawning(bool enabled)
         {
-            Log.Battle.D($"SetSpawning: {enabled}");
             var world = World.DefaultGameObjectInjectionWorld;
             if (world == null || !world.IsCreated) return;
             world.GetOrCreateSystemManaged<SpawningStateSystem>().SetDesiredState(enabled);

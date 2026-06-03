@@ -24,19 +24,19 @@
 
 ## OverlapResolver Details
 - `_nonGroundFilter` = everything except ground. Ground filter is now owned by `BoundaryConstraints` (lazily initialized static).
-- `CheckOverlap(entity)` → AABB overlap query with `_nonGroundFilter`, then XY-AABB overlap test (`PhysicsOverlapHelper.AabbsOverlapXY`, ignores Z because game plane is XY).
+- `CheckOverlap(entity)` → AABB overlap query with `_nonGroundFilter`, then XY-AABB overlap test (`PhysicsUtility.AabbsOverlapXY`, ignores Z because game plane is XY).
 - `DisplaceStep` averages "away" direction from all overlapping bodies, falls back to perpendicular if vectors cancel (`(-y, x)` rotation). Moves at `DisplaceSpeed = 15f`.
 
 ## ThrowSettingsSetter (inspector-driven)
 MonoBehaviour in Bootstrap scene, registered as `IGameUpdateListener`. Exposes inspector knobs: `ThrowScale`, `ThrowThreshold`, `MinMaxVelocity` (with `[MinMaxSlider]`), `_velocityPowerCurve`, `Gravity`. Writes a `ThrowVelocitySettings` singleton each frame (64 curve samples baked) and updates `PhysicsStep.Gravity`.
 **Why it matters:** Any system needing velocity-power scaling should `TryGetSingleton<ThrowVelocitySettings>` and use its `MinVelocity / MaxVelocity / CurveSamples`. `ScreenBounceSystem` and `InAirCollisionSystem` both do this.
 
-## Shared Boundary Helpers — BoundaryConstraints + EntityPhysicsHelper
+## Shared Boundary Helpers — BoundaryConstraints + PhysicsUtility
 **Context:** `ThrowTrajectoryPredictor`, `OverlapResolver`, and `GrabbedEntityMover` all had duplicated ground-raycast and AABB-read logic.  
-**Finding:** Extracted to two `internal static` helpers. `BoundaryConstraints` lives in `Runtime/Gameplay/!_Scripts/_MonoWorld/Input/` (namespace `BarkingBird.Runtime.Gameplay.Input`, same as its consumers); `EntityPhysicsHelper` lives under `Runtime/Infrastructure/Utilities/` (`BarkingBird.Runtime.Infrastructure.Utilities`), matching `PhysicsOverlapHelper` precedent:
+**Finding:** Extracted to shared static helpers. `BoundaryConstraints` lives in `Runtime/Gameplay/!_Scripts/_MonoWorld/Input/` (namespace `BarkingBird.Runtime.Gameplay.Input`, same as its consumers); collider/overlap helpers live in `PhysicsUtility` under `Runtime/Infrastructure/Utilities/` (`BarkingBird.Runtime.Infrastructure.Utilities`):
 - `BoundaryConstraints.GetGroundY(float3, in PhysicsWorldSingleton)` — raycasts ±200 relative to position; ground `CollisionFilter` is lazily initialized via `CollisionFilter? _groundFilter ??=` (safe after Unity scene load).
 - `BoundaryConstraints.ClampToViewport(float3 pos, quaternion rot, float2 halfExtents, Camera cam, bool clampBottom)` — returns clamped `float3`; `clampBottom: false` for `GrabbedEntityMover` (drag-to-floor is valid), `clampBottom: true` for `OverlapResolver` (release clamp is absolute).
-- `EntityPhysicsHelper.GetEntityHalfExtentsXY(Entity, EntityManager)` — one AABB read returning `float2(hw, hh)`, fallback `(0.5, 0.5)`.  
+- `PhysicsUtility.GetEntityHalfExtentsXY(Entity, EntityManager)` — one AABB read returning `float2(hw, hh)`, fallback `(0.5, 0.5)`.  
 **Why it matters:** The ray-distance was inconsistent before (±500 / ±100 depending on file). Always use `BoundaryConstraints` — don't write inline ground raycasts again.
 
 ## ThrowTrajectoryPredictor — Screen Boundary Checks Must Use Entity Edges

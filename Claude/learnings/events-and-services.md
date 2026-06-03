@@ -26,11 +26,13 @@
 
 **Pattern:** subscribe in ctor or `Register()`, unsubscribe in `Dispose()`. Either retain the `IDisposable` from `Subscribe` or call `Unsubscribe` with the same method reference (delegate equality matches target+method, so `obj.Method` re-resolved later still removes correctly).
 
-## CommandDispatcher — Reflex-Injected Request Hub
+## CommandDispatcher — Reflex-Injected Request Hub (1-to-1)
 `BarkingBird.Runtime.Infrastructure.Commands.CommandDispatcher` (at `Runtime/Infrastructure/Commands/`) is the **request side**: imperative "do X" calls. Bound as a project-scoped concrete singleton in `ProjectInstaller` and **injected via Reflex** (no static access from runtime code).
 
-- `Send<T>(in T command)` — dispatches synchronously, exceptions per-handler logged via `Log.Default.E`.
-- `Register<T>(Action<T> handler)` → returns `IDisposable` token; dispose to unsubscribe (no need to keep the delegate reference).
+- `Send<T>(in T command)` — dispatches synchronously to the one registered handler. Exception is caught and logged via `Log.Default.E`. No handler → silent no-op (intentional: removes coupling on registration order).
+- `Register<T>(Action<T> handler)` → returns `IDisposable` token; dispose to unsubscribe. **Throws `InvalidOperationException` on duplicate registration for the same command type** — the contract is strictly 1-to-1. For fan-out, raise an event via `EventBus` instead.
+- Storage is `Dictionary<Type, object>` holding a single `Action<T>` per type (not a list). The type-system enforces the 1-to-1 invariant; "the rule is the code", not a convention.
+- Dispose-only-if-still-mine: `Unregister` re-checks delegate equality before removing, so disposing a stale `IDisposable` won't clobber a newer registration for the same command type.
 
 Commands are `readonly struct ... : ICommand` (marker interface). Live next to their semantic owner (e.g. `Gameplay.Scenes/Commands/ChangeSceneCommand.cs`, `Gameplay.Daylight/DayNightCycle_EventsAndCommands.cs`), not in a central commands folder.
 
@@ -49,12 +51,41 @@ Don't use `Commands/` or `Events/` subfolders — the consolidated file or sibli
 
 **SO-side access (`StateOverride` and other `SerializeReference` types):** these can't be Reflex-injected, so resolve via `Reflex.Core.Container.ProjectContainer.Resolve<CommandDispatcher>()` inside `Apply()`. This is the official Reflex static; see `UnityInjector.cs` in the package. **Do not** use this escape hatch from constructor-injectable code — get the dispatcher via DI.
 
-## Notifications vs. Commands — When to Use Which
-The split is intentional: each tool fits one half of the request/notify pair.
-- **"X happened" → `EventBus.Raise(new XEvent(...))`.** Broadcasting facts after the producer's own logic runs. Past tense. Multiple subscribers may care. Example: `DayStartedEvent` fires after `DayNightCycle` has set up its loop.
-- **"Do X" → `CommandDispatcher.Send(new XCommand(...))`.** External code asking a service to act. Imperative. Typically one handler. Example: `ChangeSceneCommand` from scroll input → handled by `WorldCameraHandler`.
+## Decision Guide — Direct Inject vs. CommandDispatcher vs. EventBus
+Three mechanisms for "A wants B to do something / know something." Pick by **who-knows-whom** and **what's the message's lifetime**, not by reflex.
 
-**Why it matters:** lets external code drive a service without holding a reference — important for pure-C# Reflex singletons that aren't `FindObjectByType`-able — while keeping the service's public surface narrow. Both halves give you type-safe payloads and `IDisposable` subscription tokens that avoid the "must hold exact delegate reference to unsubscribe" footgun.
+### 1. Direct DI inject (the default)
+**Use when** the sender can hold the service via Reflex and just wants the thing done.
+- Reads as a normal method call: `_weapon.Fire(target)`.
+- Cheapest. Most debuggable (find-references works). No allocation, no indirection.
+- **Cost:** sender's class compile-depends on the service's interface — that's *fine* within the same architectural layer.
+- **Rule of thumb:** if removing the abstraction wouldn't violate a layering boundary or lose a queue/log/replay/network benefit, inject the class directly. A `CommandDispatcher.Send` that immediately resolves to one handler in the same layer is ceremony — delete it and inject.
+
+### 2. CommandDispatcher.Send (imperative, 1-to-1)
+**Use when** at least one of these is true; otherwise prefer direct inject:
+- **Layering boundary** — sender lives in a layer that shouldn't reference the handler's layer (Input → Gameplay, UI → Domain, SO/`SerializeReference` → runtime service). The command type is shared, the implementation isn't.
+- **Reify intent as data** — you want to queue, defer, log, replay, network-sync, or undo the request. A method call vanishes after it runs; a command is an object you can store.
+- **Pure-C# Reflex singleton with no scene reference** — sender can't `FindObjectByType` and shouldn't take a constructor dep (e.g. one-shot input handlers, editor-time invokers).
+
+Past examples in this project: `ChangeSceneCommand` (input layer → scene/camera layer), `StartDayCommand` / `ForceFinishDayCommand` (gameplay code & `StateOverride` SO → `DayNightCycle`). All cross a boundary or come from a non-injectable site.
+
+### 3. EventBus.Raise (notification, 1-to-many)
+**Use when** the producer is announcing a *fact* after its own logic ran, and zero-or-more unknown subscribers may care.
+- Past tense names: `DayStartedEvent`, `ObjectGrabbedEvent`.
+- No required receiver — unhandled is normal, not a bug.
+- Subscribers from unrelated systems (UI, cursor, camera, audio) can listen without the producer knowing they exist.
+
+### Quick contrast: Command vs. Event
+| | `CommandDispatcher.Send` | `EventBus.Raise` |
+|---|---|---|
+| Mood | Imperative — *"do X"* | Indicative — *"X happened"* |
+| Tense | `FireWeapon`, `ChangeScene` | `WeaponFired`, `DayStarted` |
+| Handlers | 1 (enforced — throws on duplicate) | N (priorities, ordering) |
+| Unhandled | Silent no-op (debug-log noise if needed) | Normal |
+| Sender's expectation | Someone owns this command | Whoever cares can listen |
+
+### Why the split is worth keeping
+Both buses give you type-safe payloads and `IDisposable` subscription tokens (no "must hold exact delegate reference" footgun). The *names* in your codebase are the type system for humans — `Send(new Fire())` reads as a request, `Raise(new Fired())` reads as a notification, even though the wires look similar. Mixing the two scrambles that signal.
 
 **Migration history:** `Input.SceneChangeRequest`, `Daylight.StartDayRequest`, `Daylight.ForceFinishRequest` were originally `Action`s in the old `EventManager`. They moved to `ChangeSceneCommand`, `StartDayCommand`, `ForceFinishDayCommand` when the split was formalized. Notification `Action`s (`DayStarted`, `ObjectGrabbed`, etc.) later moved to the typed `EventBus` (struct events + priorities) when `EventManager` was retired.
 
@@ -82,7 +113,11 @@ Wraps `ILoadUnit.Load()` and `ILoadUnit<T>.Load(param)` with stopwatch timing + 
 - `GetForwardFromHeading(float heading)` — `(sin, 0, cos)` unit vector.
 
 ## PhysicsUtility
-- `GetRandomPointInsideCollider(em, entity, ref Random)` — samples a random point inside an AABB of a `PhysicsCollider` (transformed to world). Used by `SpawningSystem` area spawner.
+Single static class collecting collider-geometry reads and PhysicsWorld overlap queries (previously split across `EntityPhysicsHelper` / `PhysicsOverlapHelper` / `PhysicsUtility` — merged because the dividing lines were too thin for 4 methods).
+- `GetRandomPointInsideCollider(em, entity, ref Random)` *(public)* — samples a random point inside the AABB of a `PhysicsCollider` (transformed to world). Used by `SpawningSystem` area spawner.
+- `GetEntityHalfExtentsXY(entity, em)` *(internal)* — returns `float2(hw, hh)` from one AABB read with rotation but zero translation; fallback `(0.5, 0.5)` if no `PhysicsCollider`. Used by grab-and-throw consumers (`GrabbedEntityMover`, `OverlapResolver`, `ThrowTrajectoryPredictor`).
+- `CollectHitBodies(in PhysicsWorldSingleton, Aabb, CollisionFilter, Entity selfEntity)` *(internal)* — runs `OverlapAabb`, skips self and uncreated colliders, returns a `NativeList<RigidBody>` (caller disposes). Used by `OverlapResolver` and `TunnelTeleporter`.
+- `AabbsOverlapXY(Aabb, Aabb)` *(internal)* — XY-only overlap test; ignores Z because the game plane is XY.
 
 ## Config Pipeline
 1. `BarkingBird/Generate Configs` (editor menu) — `ConfigGenerator.Generate()` writes a hardcoded `ConfigContainer` to `Assets/!_Game/Runtime/Gameplay/Resources/Settings/Config.json` via Newtonsoft.
