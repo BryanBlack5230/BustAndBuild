@@ -33,7 +33,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         public void StartMoving(Entity entity)
         {
             _entity = entity;
-            var halfExtents = EntityPhysicsHelper.GetEntityHalfExtentsXY(entity, _entityManager);
+            var halfExtents = PhysicsUtility.GetEntityHalfExtentsXY(entity, _entityManager);
             _entityHalfHeight = halfExtents.y;
             _entityHalfWidth  = halfExtents.x;
         }

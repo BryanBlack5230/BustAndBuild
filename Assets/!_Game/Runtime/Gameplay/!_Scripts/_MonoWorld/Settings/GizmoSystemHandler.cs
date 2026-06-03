@@ -46,6 +46,12 @@ namespace BarkingBird.Runtime.Gameplay.Settings
         public static GizmoSystemHandler Handler => _handler != null ? _handler : (_handler = findOrCreateHandler());
         private static GizmoSystemHandler _handler;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetOnPlayModeEnter()
+        {
+            _handler = null;
+        }
+
         private static GizmoSystemHandler findOrCreateHandler()
         {
             var existing = UnityEngine.Object.FindFirstObjectByType<GizmoSystemHandler>();

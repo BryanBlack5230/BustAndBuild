@@ -14,7 +14,14 @@ namespace BarkingBird.Runtime.Infrastructure.Utilities
                 return _mainCamera;
             }
         }
-        
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetOnPlayModeEnter()
+        {
+            _mainCamera = null;
+            _waitDictionary.Clear();
+        }
+
         private static readonly Dictionary<float, WaitForSeconds> _waitDictionary = new();
         public static WaitForSeconds GetWait(float time)
         {

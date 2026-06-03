@@ -43,13 +43,13 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             var collider = _entityManager.GetComponentData<PhysicsCollider>(entity);
             var entityAabb = collider.Value.Value.CalculateAabb(new RigidTransform(localTransform.Rotation, localTransform.Position));
 
-            var bodies = PhysicsOverlapHelper.CollectHitBodies(physicsWorld, entityAabb, _nonGroundFilter, entity);
+            var bodies = PhysicsUtility.CollectHitBodies(physicsWorld, entityAabb, _nonGroundFilter, entity);
             try
             {
                 for (var i = 0; i < bodies.Length; i++)
                 {
                     var bodyAabb = bodies[i].Collider.Value.CalculateAabb(bodies[i].WorldFromBody);
-                    if (PhysicsOverlapHelper.AabbsOverlapXY(entityAabb, bodyAabb)) return true;
+                    if (PhysicsUtility.AabbsOverlapXY(entityAabb, bodyAabb)) return true;
                 }
                 return false;
             }
@@ -87,7 +87,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         public void ClampToViewportAndGround(Entity entity)
         {
             var localTransform = _entityManager.GetComponentData<LocalTransform>(entity);
-            var halfExtents = EntityPhysicsHelper.GetEntityHalfExtentsXY(entity, _entityManager);
+            var halfExtents = PhysicsUtility.GetEntityHalfExtentsXY(entity, _entityManager);
             var physicsWorld = _physicsWorldQuery.GetSingleton<PhysicsWorldSingleton>();
 
             var groundY = BoundaryConstraints.GetGroundY(localTransform.Position, in physicsWorld);
@@ -112,7 +112,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             var entityAabb = collider.Value.Value.CalculateAabb(new RigidTransform(localTransform.Rotation, localTransform.Position));
             var entityCenter = localTransform.Position;
 
-            var bodies = PhysicsOverlapHelper.CollectHitBodies(physicsWorld, entityAabb, _nonGroundFilter, entity);
+            var bodies = PhysicsUtility.CollectHitBodies(physicsWorld, entityAabb, _nonGroundFilter, entity);
             try
             {
                 var pushDir = float3.zero;
@@ -122,7 +122,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
                 for (var i = 0; i < bodies.Length; i++)
                 {
                     var bodyAabb = bodies[i].Collider.Value.CalculateAabb(bodies[i].WorldFromBody);
-                    if (!PhysicsOverlapHelper.AabbsOverlapXY(entityAabb, bodyAabb)) continue;
+                    if (!PhysicsUtility.AabbsOverlapXY(entityAabb, bodyAabb)) continue;
 
                     var bodyCenter = (bodyAabb.Min + bodyAabb.Max) * 0.5f;
                     var awayDir = entityCenter - bodyCenter;

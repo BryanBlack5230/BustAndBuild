@@ -42,7 +42,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             var pos = localTransform.Position;
             var maxExit = 0f;
 
-            var bodies = PhysicsOverlapHelper.CollectHitBodies(physicsWorld, entityAabb, _queryFilter, entity);
+            var bodies = PhysicsUtility.CollectHitBodies(physicsWorld, entityAabb, _queryFilter, entity);
             try
             {
                 for (var i = 0; i < bodies.Length; i++)
@@ -90,13 +90,13 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             var collider = _entityManager.GetComponentData<PhysicsCollider>(entity);
             var entityAabb = collider.Value.Value.CalculateAabb(new RigidTransform(localTransform.Rotation, localTransform.Position));
 
-            var bodies = PhysicsOverlapHelper.CollectHitBodies(physicsWorld, entityAabb, _queryFilter, entity);
+            var bodies = PhysicsUtility.CollectHitBodies(physicsWorld, entityAabb, _queryFilter, entity);
             try
             {
                 for (var i = 0; i < bodies.Length; i++)
                 {
                     var bodyAabb = bodies[i].Collider.Value.CalculateAabb(bodies[i].WorldFromBody);
-                    if (PhysicsOverlapHelper.AabbsOverlapXY(entityAabb, bodyAabb)) return true;
+                    if (PhysicsUtility.AabbsOverlapXY(entityAabb, bodyAabb)) return true;
                 }
                 return false;
             }

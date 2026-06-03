@@ -89,7 +89,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             _bounceElasticity = _entityManager.HasComponent<BounceDamage>(entity)
                 ? _entityManager.GetComponentData<BounceDamage>(entity).BounceElasticity
                 : DefaultBounceElasticity;
-            var halfExtents = EntityPhysicsHelper.GetEntityHalfExtentsXY(entity, _entityManager);
+            var halfExtents = PhysicsUtility.GetEntityHalfExtentsXY(entity, _entityManager);
             _entityHalfHeight = halfExtents.y;
             _entityHalfWidth  = halfExtents.x;
             _trajectoryLine.enabled = true;
