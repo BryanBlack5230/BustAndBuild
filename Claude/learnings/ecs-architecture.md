@@ -128,9 +128,37 @@ Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/Day
 - Vertical extent compressed by camera tilt: `ehh = halfHeight * abs(camUp.y)`.
 - `vel.z` is preserved across reflections (depth velocity untouched).
 - Damage on bounce = `0.5 * BaseDamage * velocityPower` (velocity-curve-based 0..1 scaling from `ThrowVelocitySettings`).
+- **Allies are exempt from wall-bounce damage** *and* their `BounceCount` does not increment on wall bounces — physics reflection still applies. Checked via `ComponentLookup<Unit>` + `unit.faction == Faction.Ally`.
+
+## InAirCollisionSystem Specifics
+Three collision-event branches, dispatched in `Execute(CollisionEvent)`:
+1. **Both entities `InAir`** → mutual `Bounce(entity, normal)` — reflects velocity, applies `BounceElasticity`, increments `BounceCount`, queues damage = `0.5 * BaseDamage * velocityPower`. Skips if `dot(vel, normal) >= 0f` (already separating).
+2. **One flying, one grounded but both *have* `InAir` component** → `SoftLand(flyer, grounded)`:
+   - **Skips entirely if `length(flyerVel) < 2f`** — physics resolves the contact naturally.
+   - Damage split 80/20 between flyer/grounded (each individually scaled by 0.25× if ally).
+   - Flyer bounces back at `-originalLinear * 0.25f` and **keeps `InAir` enabled** (critical — see "UnitMoverSystem velocity override" below). Flyer's `BounceCount++`.
+   - Grounded receives `horizontalDir * (flyerSpeed * 0.2f)` + upward `flyerSpeed * 0.1f`, and **`InAir` is enabled** so it actually flies (otherwise UnitMoverSystem would override the push).
+3. **One flying, other is non-`InAir`** → either `Landed(entity)` (if `other` has `GroundLayerBit` in its `CollisionFilter.BelongsTo`) or `Bounce` (wall/obstacle).
+
+`Landed` damage = `BaseDamage * velocityPower + velocityPower * BounceCount * BounceDamageMultiplier`. Allies scale `Landed` and air-`Bounce` damage by 0.25×; `SoftLand` does the 0.25× per-entity since flyer and grounded may have different factions.
+
+## UnitMoverSystem Velocity Override — Why Pushes Get Eaten
+`UnitMoverSystem` has `[WithDisabled(typeof(UnableToAct))]` and **rewrites `PhysicsVelocity.Linear.xz`** every frame from `Destination` (`Y` is preserved). If you write a push velocity to a unit but `UnableToAct` is still disabled, the push gets clobbered next frame.
+
+`AbleToActEvaluationSystem` (runs `[UpdateBefore(UnitMoverSystem)]` in `GameLoopSystemGroup`) sets `UnableToAct = Grabbed || InAir || IsDead`. So the contract is: **to preserve a physics push on a unit, you must also enable `InAir` (or `Grabbed`/`IsDead`)** so `UnableToAct` flips on next frame.
+
+Discovered when SoftLand-cascade bug looked like the grounded unit's knock-back was being ignored — it was being overridden by `UnitMoverSystem`. Fix: enable `InAir` on the grounded entity alongside the velocity write.
 
 ## ThrowVelocitySettings
 `FixedList512Bytes<float>` of curve samples used by `ScreenBounceSystem` and `InAirCollisionSystem` for unified velocity-power calculation. Built each frame from `_velocityPowerCurve.Evaluate(t)` in `ThrowSettingsSetter.SyncVelocitySettings()` (64 samples). Min/Max velocity bounds also synced.
+
+## ThrowSettingsSetter Entity-Tracking Pitfall
+`ThrowSettingsSetter` holds a `_trackedEntity` across throws to display live debug stats. The cleanup check **must** be `Exists && HasComponent<InAir> && IsComponentEnabled<InAir>` — `EntityManager.IsComponentEnabled<T>` throws `ArgumentException("A component with type:T has not been added to the entity")` if the entity exists but lacks T. This trips when a non-unit grabbable (only `InAirAuthoring`-less prefab) becomes the tracked entity, or generally whenever the assumed archetype is not guaranteed.
+
+Pattern: any cross-frame tracked `Entity` that's enabled-state-checked needs `HasComponent` guards because the archetype contract isn't enforced by the field type.
+
+## Where `InAir` Comes From (Baking)
+`InAir : IComponentData, IEnableableComponent` is added by **three** authoring scripts: `InAirAuthoring` (standalone, for non-unit grabbables), `AllyAuthoring`, `EnemyAuthoring`. All three add it **disabled**. Anything thrown via `GrabbingInteractor.Release` has its `InAir` enabled there. **A grabbable that uses neither `InAirAuthoring` nor a unit-authoring will never have `InAir`** — `InAirCollisionSystem` and `ScreenBounceSystem` won't process it, and `ThrowSettingsSetter` will throw without the `HasComponent` guard above.
 
 ## Gravity Sync
 `ThrowSettingsSetter.SyncGravity()` writes `PhysicsStep.Gravity = (0, -Gravity, 0)` every frame. Lets you tune throw arcs from a `MonoBehaviour` inspector field.

@@ -6,17 +6,21 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
 
+using BarkingBird.Runtime.Gameplay.AI;
+
 [BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
 public partial struct ScreenBounceSystem : ISystem
 {
     private BufferLookup<DamageBufferElement> _damageLookup;
+    private ComponentLookup<Unit> _unitLookup;
 
     // OnCreate is not [BurstCompile] — managed calls for RequireForUpdate setup
     public void OnCreate(ref SystemState state)
     {
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
+        _unitLookup = state.GetComponentLookup<Unit>(true);
 
         state.RequireForUpdate<CameraFrustumData>();
         state.RequireForUpdate<BattleScreenCenter>();
@@ -30,6 +34,7 @@ public partial struct ScreenBounceSystem : ISystem
         if (!SystemAPI.TryGetSingleton<BattleScreenCenter>(out var battleCenter)) return;
 
         _damageLookup.Update(ref state);
+        _unitLookup.Update(ref state);
 
         var minVel = 5f;
         var maxVel = 10f;
@@ -120,11 +125,15 @@ public partial struct ScreenBounceSystem : ISystem
             {
                 vel *= bounceDmg.ValueRO.BounceElasticity;
 
-                var dmg = 0.5f * bounceDmg.ValueRO.BaseDamage * velocityPower;
-                if (_damageLookup.HasBuffer(entity))
-                    _damageLookup[entity].Add(new DamageBufferElement { Value = dmg });
+                var isAlly = _unitLookup.TryGetComponent(entity, out var unit) && unit.faction == Faction.Ally;
+                if (!isAlly)
+                {
+                    var dmg = 0.5f * bounceDmg.ValueRO.BaseDamage * velocityPower;
+                    if (_damageLookup.HasBuffer(entity))
+                        _damageLookup[entity].Add(new DamageBufferElement { Value = dmg });
 
-                bounceDmg.ValueRW.BounceCount++;
+                    bounceDmg.ValueRW.BounceCount++;
+                }
             }
 
             vel.z = velZ; // screen bounce only affects x/y; preserve depth velocity

@@ -6,7 +6,9 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using UnityEngine;
 
+using BarkingBird.Runtime.Gameplay.AI;
 using BarkingBird.Runtime.Infrastructure.Settings;
+using BarkingBird.Runtime.Infrastructure.Utilities;
 
 [BurstCompile]
 [UpdateInGroup(typeof(PhysicsSystemGroup))]
@@ -17,6 +19,7 @@ public partial struct InAirCollisionSystem : ISystem
     private ComponentLookup<PhysicsVelocity> _velocityLookup;
     private ComponentLookup<PhysicsCollider> _colliderLookup;
     private ComponentLookup<BounceDamage> _bounceDamageLookup;
+    private ComponentLookup<Unit> _unitLookup;
     private BufferLookup<DamageBufferElement> _damageLookup;
     private uint _groundLayerBit;
 
@@ -27,6 +30,7 @@ public partial struct InAirCollisionSystem : ISystem
         _velocityLookup = state.GetComponentLookup<PhysicsVelocity>(true);
         _colliderLookup = state.GetComponentLookup<PhysicsCollider>(true);
         _bounceDamageLookup = state.GetComponentLookup<BounceDamage>(true);
+        _unitLookup = state.GetComponentLookup<Unit>(true);
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
 
         _groundLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground);
@@ -46,6 +50,7 @@ public partial struct InAirCollisionSystem : ISystem
         _velocityLookup.Update(ref state);
         _colliderLookup.Update(ref state);
         _bounceDamageLookup.Update(ref state);
+        _unitLookup.Update(ref state);
         _damageLookup.Update(ref state);
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
@@ -67,6 +72,7 @@ public partial struct InAirCollisionSystem : ISystem
             VelocityLookup = _velocityLookup,
             ColliderLookup = _colliderLookup,
             BounceDamageLookup = _bounceDamageLookup,
+            UnitLookup = _unitLookup,
             DamageLookup = _damageLookup,
             GroundLayerBit = _groundLayerBit,
             MinVelocity = minVel,
@@ -84,6 +90,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
     [ReadOnly] public ComponentLookup<PhysicsVelocity> VelocityLookup;
     [ReadOnly] public ComponentLookup<PhysicsCollider> ColliderLookup;
     [ReadOnly] public ComponentLookup<BounceDamage> BounceDamageLookup;
+    [ReadOnly] public ComponentLookup<Unit> UnitLookup;
     public BufferLookup<DamageBufferElement> DamageLookup;
     public EntityCommandBuffer Ecb;
     public uint GroundLayerBit;
@@ -148,6 +155,8 @@ public struct InAirCollisionJob : ICollisionEventsJob
         var finalDamage = bounceDmg.BaseDamage * velocityPower
                           + velocityPower * bounceDmg.BounceCount * bounceDmg.BounceDamageMultiplier;
 
+        if (IsAlly(entity)) finalDamage *= 0.25f;
+
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = finalDamage });
 
@@ -172,6 +181,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
         Ecb.SetComponent(entity, velocity);
 
         var dmg = 0.5f * bounceDmg.BaseDamage * velocityPower;
+        if (IsAlly(entity)) dmg *= 0.25f;
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = dmg });
 
@@ -182,33 +192,50 @@ public struct InAirCollisionJob : ICollisionEventsJob
 
     private void SoftLand(Entity flyingEntity, Entity groundedEntity)
     {
-        Ecb.SetComponentEnabled<InAir>(flyingEntity, false);
-
         if (!VelocityLookup.TryGetComponent(flyingEntity, out var flyingVelocity)) return;
         if (!BounceDamageLookup.TryGetComponent(flyingEntity, out var bounceDmg)) return;
 
-        var velocityPower = ComputeVelocityPower(flyingVelocity.Linear);
+        var originalLinear = flyingVelocity.Linear;
+        var flyingSpeed    = math.length(originalLinear);
+        if (flyingSpeed < 2f) return;
+
+        Log.Battle.D($"{flyingEntity} has soft-landed on {groundedEntity}. Velocity: {flyingSpeed}");
+
+        var velocityPower = ComputeVelocityPower(originalLinear);
         var finalDamage = bounceDmg.BaseDamage * velocityPower
                           + velocityPower * bounceDmg.BounceCount * bounceDmg.BounceDamageMultiplier;
 
+        var flyingDamage   = finalDamage * 0.8f;
+        var groundedDamage = finalDamage * 0.2f;
+        if (IsAlly(flyingEntity))   flyingDamage   *= 0.25f;
+        if (IsAlly(groundedEntity)) groundedDamage *= 0.25f;
+
         if (DamageLookup.HasBuffer(flyingEntity))
-            DamageLookup[flyingEntity].Add(new DamageBufferElement { Value = finalDamage * 0.8f });
+            DamageLookup[flyingEntity].Add(new DamageBufferElement { Value = flyingDamage });
 
         if (DamageLookup.HasBuffer(groundedEntity))
-            DamageLookup[groundedEntity].Add(new DamageBufferElement { Value = finalDamage * 0.2f });
+            DamageLookup[groundedEntity].Add(new DamageBufferElement { Value = groundedDamage });
 
-        bounceDmg.BounceCount = 0;
+        // Flyer bounces off at 15% reversed velocity — stays airborne so UnitMoverSystem won't override it
+        flyingVelocity.Linear = -originalLinear * 0.15f;
+        Ecb.SetComponent(flyingEntity, flyingVelocity);
+
+        bounceDmg.BounceCount++;
         Ecb.SetComponent(flyingEntity, bounceDmg);
 
-        var knockMagnitude = math.length(flyingVelocity.Linear) * 0.2f;
-        var horizontalDir  = math.normalizesafe(new float3(flyingVelocity.Linear.x, 0f, flyingVelocity.Linear.z));
+        var knockMagnitude = flyingSpeed * 0.5f;
+        var horizontalDir  = math.normalizesafe(new float3(originalLinear.x, 0f, originalLinear.z));
 
         if (VelocityLookup.TryGetComponent(groundedEntity, out var groundedVelocity))
         {
-            groundedVelocity.Linear += horizontalDir * knockMagnitude;
+            groundedVelocity.Linear += horizontalDir * knockMagnitude + new float3(0f, knockMagnitude * 0.5f, 0f);
             Ecb.SetComponent(groundedEntity, groundedVelocity);
+            Ecb.SetComponentEnabled<InAir>(groundedEntity, true);
         }
     }
+
+    private bool IsAlly(Entity entity)
+        => UnitLookup.TryGetComponent(entity, out var unit) && unit.faction == Faction.Ally;
 
     private float ComputeVelocityPower(float3 velocity)
     {

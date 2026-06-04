@@ -79,7 +79,9 @@ namespace BarkingBird.Runtime.Gameplay.Settings
 
             if (_trackedEntity == Entity.Null) return;
 
-            if (!_entityManager.Exists(_trackedEntity) || !_entityManager.IsComponentEnabled<InAir>(_trackedEntity))
+            if (!_entityManager.Exists(_trackedEntity)
+                || !_entityManager.HasComponent<InAir>(_trackedEntity)
+                || !_entityManager.IsComponentEnabled<InAir>(_trackedEntity))
             {
                 _currentEntitySpeed = 0f;
                 _computedVelocityPower = 0f;
