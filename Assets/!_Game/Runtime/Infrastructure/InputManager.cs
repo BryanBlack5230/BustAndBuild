@@ -1,4 +1,5 @@
 using System;
+using BarkingBird.Runtime.Gameplay.Input;
 
 namespace BarkingBird.Runtime.Infrastructure
 {
