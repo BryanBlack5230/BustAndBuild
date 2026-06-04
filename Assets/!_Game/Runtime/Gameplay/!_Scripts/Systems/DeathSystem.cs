@@ -3,7 +3,7 @@ using Unity.Entities;
 
 [BurstCompile]
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderLast = true)]
-[UpdateAfter(typeof(ApplyDamageSystem))] 
+[UpdateAfter(typeof(ApplyDamageSystem))]
 public partial struct DeathSystem : ISystem
 {
     [BurstCompile]
@@ -19,30 +19,10 @@ public partial struct DeathSystem : ISystem
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        new MarkDeathJob
-        {
-            ECB = ecb
-        }.ScheduleParallel();
-
         new DestroyDeadJob
         {
             ECB = ecb
         }.ScheduleParallel();
-    }
-}
-
-[BurstCompile]
-[WithDisabled(typeof(IsDead))]
-public partial struct MarkDeathJob : IJobEntity
-{
-    public EntityCommandBuffer.ParallelWriter ECB;
-
-    public void Execute(Entity entity, [EntityIndexInQuery] int sortKey, in Health health)
-    {
-        if (health.Value <= 0)
-        {
-            ECB.SetComponentEnabled<IsDead>(sortKey, entity, true);
-        }
     }
 }
 

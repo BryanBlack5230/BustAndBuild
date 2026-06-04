@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Entities;
 
-using BarkingBird.Runtime.Gameplay.AI;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 namespace BarkingBird.Runtime.Gameplay.AI
@@ -28,16 +27,15 @@ namespace BarkingBird.Runtime.Gameplay.AI
             _inAirLookup.Update(ref state);
             var em = state.EntityManager;
 
-            foreach (var (unableToAct, health, entity)
-                     in SystemAPI.Query<
-                             EnabledRefRW<UnableToAct>,
-                             RefRO<Health>>()
+            foreach (var (unableToAct, isDeadRef, entity)
+                     in SystemAPI.Query<EnabledRefRW<UnableToAct>, EnabledRefRO<IsDead>>()
                          .WithEntityAccess()
                          .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState))
             {
                 var isGrabbed     = _grabbedLookup.HasComponent(entity) && _grabbedLookup.IsComponentEnabled(entity);
                 var isInAir       = _inAirLookup.HasComponent(entity)   && _inAirLookup.IsComponentEnabled(entity);
-                var isUnableToAct = isGrabbed || isInAir || health.ValueRO.IsDead;
+                var isDead        = isDeadRef.ValueRO;
+                var isUnableToAct = isGrabbed || isInAir || isDead;
 
                 em.SetComponentEnabled<UnableToAct>(entity, isUnableToAct);
             }

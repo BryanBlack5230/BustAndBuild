@@ -22,11 +22,11 @@
 11. `AttackSystem` — when in range and cooldown elapsed, appends to target's `DamageBufferElement` buffer (parallel writer).
 12. After physics step: `InAirCollisionSystem` → bounces/landings.
 13. After PhysicsSystemGroup: `ScreenBounceSystem` reflects off camera frustum edges using 4-corner check.
-14. Last: `ApplyDamageSystem` (sums DamageBuffer, decrements Health) → `DeathSystem` (marks IsDead, destroys).
+14. Last: `ApplyDamageSystem` schedules `ApplyDamageJob` which calls `HealthAspect.DrainBufferedDamage()` (sums DamageBuffer, decrements Health, flips `IsDead` *or* `IsInvulnerable`). `DeathSystem.DestroyDeadJob` follows immediately and destroys entities with `IsDead` enabled — same frame as the flip, not next.
 
 ## Enableable Components Pattern
 Used as flags whose state changes frequently without restructuring chunks:
-- `Grabbed`, `InAir`, `IsDead`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`
+- `Grabbed`, `InAir`, `IsDead`, `IsInvulnerable`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`
 - `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp` — combine timestamp data + enabled bit. System checks `IsComponentEnabled` to skip ready-to-act entities; if `Value > elapsedTime` keep enabled, else disable.
 - `SpawnEnemies` — gates all spawn queries; toggled by `SpawningStateSystem` driven by `EventManager.Daylight` events.
 
@@ -115,11 +115,13 @@ Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/Day
 `CameraFrustumData` is a single entity created by `BattleCameraBorderSyncBridge.Initialize()`. Bridge runs as `IGameUpdateListener` and writes `WorldToCameraMatrix / Fov / Aspect / IsLive` each frame from Cinemachine main camera. ECS systems (`ScreenBounceSystem`, `ThrowTrajectoryPredictor`) read it as singleton.
 `BattleScreenCenter` (`BattleCenterAuthoring`) provides `HalfWidthOffset` / `HalfHeightOffset` that **shrink** the effective play area inside the camera frustum.
 
-## Damage Pipeline
-- `DamageBufferElement` (capacity 8) on any health-bearing entity.
-- Producers append: `Ecb.AppendToBuffer(sortKey, targetEntity, new DamageBufferElement{Value=dmg})` from parallel jobs.
-- `ApplyDamageSystem` uses `[WithChangeFilter]` on the buffer, sums and zeroes it, decrements `Health.Value`.
-- `DeathSystem` runs immediately after: flips `IsDead` enabled flag, then destroys.
+## Damage Pipeline (HealthAspect-driven)
+- `Health` + `DamageBufferElement` (capacity 8) + `IsDead` (enableable) on any health-bearing entity. Optional `IsInvulnerable` (enableable) opts an entity into death-save behavior.
+- Producers append damage via `Ecb.AppendToBuffer(sortKey, targetEntity, new DamageBufferElement{Value=dmg})` from parallel jobs (`AttackSystem`, `InAirCollisionSystem`, `ScreenBounceSystem`).
+- `ApplyDamageJob` iterates `HealthAspect` with `[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]` and calls `hp.DrainBufferedDamage()`. The aspect owns the full invariant: sums the buffer, clamps `Health.Value`, flips `IsDead` on death — OR clamps at 1 and flips `IsInvulnerable` (trip-wire) if the entity has that component and damage would have killed it.
+- `DeathSystem.DestroyDeadJob` runs after (`UpdateAfter(ApplyDamageSystem)`), queries `WithAll(IsDead)`, destroys via ECB. The aspect's direct enableable write means destroy happens same-frame as death (old ECB-based flip deferred this by one frame).
+- **`Health` no longer carries a value-based `IsDead` getter.** The enableable is the single source of truth. Consumers read via `EnabledRefRO<IsDead>` in a query (preferred) or `ComponentLookup<IsDead>.IsComponentEnabled(entity)` (only when not also writing concurrently — see Aspect section).
+- **IsInvulnerable opt-in:** Currently baked only by `AllyAuthoring` (disabled by default). `BattleBrainSystem` reads `ComponentLookup<IsInvulnerable>` and routes the unit to its base when enabled (`Emotion.Scared || isInvulnerable` branch). **No off-switch system exists yet** — once flipped, an ally permanently flees. Recovery condition (timer? heal threshold? cinematic?) is intentionally unspecified; the comment on `IsInvulnerable` declares "Cleared by an external recovery system" as a placeholder.
 
 ## ScreenBounceSystem Specifics (see [[input-system]])
 - Checks all four entity corners against camera frustum (not center).
@@ -132,6 +134,21 @@ Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/Day
 
 ## Gravity Sync
 `ThrowSettingsSetter.SyncGravity()` writes `PhysicsStep.Gravity = (0, -Gravity, 0)` every frame. Lets you tune throw arcs from a `MonoBehaviour` inspector field.
+
+## Aspects (IAspect) — Patterns and Gotchas
+First aspect added: `HealthAspect` (Components/HealthAspect.cs). Use sparingly — only when the same multi-component access repeats in 3+ systems, OR there's an invariant between components worth enforcing in one place. Otherwise it's overhead with no payoff.
+
+**Not OOP.** Aspects Burst-inline to the same code as `RefRW<T>` field plumbing. No data, no polymorphism. Components stay pure `IComponentData`.
+
+**Optional fields:** `[Optional] private readonly EnabledRefRW<T> _field;` — entity matches even when T is absent. Check `_field.IsValid` before reading `.ValueRO` / writing `.ValueRW`. Used in `HealthAspect` for `IsInvulnerable` (only Ally bakes it).
+
+**`EnabledRefRW<T>` field auto-registers T in the query with *default enabled-state matching*** — meaning the query only matches entities where T is **enabled**. For a "you-flip-it" enableable like `IsDead`, that's wrong: living entities have it disabled, so they'd be skipped. Symptom in this project: damage queued in buffer but never drained for living units. Fix: `[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]` on the IJobEntity + an early-return guard inside the aspect method (`if (_isDead.ValueRO) return;`).
+
+**Attribute conflict:** Cannot combine an aspect with `EnabledRefRW<T>` and `[WithDisabled(typeof(T))]` / `[WithAll(typeof(T))]` on the same job — Unity throws `EntityQueryDescValidationException: duplicate component type name T`. The aspect already registered T; the attribute tries to re-register. Move the conditional into the aspect method instead.
+
+**IJobEntity Execute signature:** Aspects work directly as Execute parameters: `void Execute(HealthAspect hp) => hp.DoThing();`. Burst-compiled, parallel-safe.
+
+**Aspect writes + main-thread reads of the same component — dependency sync:** `ComponentLookup<T>.Update(ref state)` refreshes caches but does **not** sync against pending writer jobs. If main-thread code reads via lookup while another job writes T (e.g. via aspect's `EnabledRefRW<T>`), you get `InvalidOperationException: writes to the ComponentLookup<T>... must call JobHandle.Complete`. `SystemAPI.Query<EnabledRefRO<T>>` **does** sync via state.Dependency. Fix pattern: pull T into the query as an `EnabledRefRO<T>` field instead of using a lookup. Heavy-handed alternative: `state.CompleteDependency()` before the foreach, but it stalls workers. See `AbleToActEvaluationSystem` for the query-based fix.
 
 ## Random in Jobs
 `Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 10007)` is the pattern used in `SpawningSystem`. Multiplier is a magic prime to spread the seed.

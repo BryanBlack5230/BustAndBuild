@@ -31,6 +31,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
                 UnableToActLookup = SystemAPI.GetComponentLookup<UnableToAct>(true),
                 CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(true),
+                IsInvulnerableLookup = SystemAPI.GetComponentLookup<IsInvulnerable>(true),
             };
             state.Dependency = brainJob.ScheduleParallel(state.Dependency);
         }
@@ -43,6 +44,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
         [ReadOnly] public ComponentLookup<UnableToAct> UnableToActLookup;
         [ReadOnly] public ComponentLookup<AttackCooldownExpirationTimestamp> CooldownLookup;
+        [ReadOnly] public ComponentLookup<IsInvulnerable> IsInvulnerableLookup;
         [ReadOnly] public FactionBases Bases;
 
         
@@ -69,11 +71,13 @@ namespace BarkingBird.Runtime.Gameplay.AI
             
             var myWorldPos = worldTransform.Position;
             steerEnabled.ValueRW = true;
-            
-            if (emotion.Value == Emotion.Scared)
+
+            var isInvulnerable = IsInvulnerableLookup.HasComponent(entity) && IsInvulnerableLookup.IsComponentEnabled(entity);
+
+            if (emotion.Value == Emotion.Scared || isInvulnerable)
             {
                 var baseBounds = unit.faction == Faction.Ally ? Bases.AllyBaseBounds : Bases.EnemyBaseBounds;
-                
+
                 action.Value = ActionType.Moving;
                 // unitMover.moveSpeed = config.moveSpeed * config.scaredMoveMultiplier; // this should be handled in emotion system at switch time
                 finalDestination.Value = baseBounds.ClosestPoint(myWorldPos);

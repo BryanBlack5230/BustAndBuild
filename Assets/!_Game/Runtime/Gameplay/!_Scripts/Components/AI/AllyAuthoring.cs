@@ -39,14 +39,16 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new Grabbed());
                 AddComponent(entity, new InAir());
                 AddComponent(entity, new IsDead());
+                AddComponent(entity, new IsInvulnerable());
                 AddComponent(entity, new AttackCooldownExpirationTimestamp());
                 AddComponent(entity, new TargetSearchCooldownExpirationTimestamp());
                 AddComponent(entity, new SteeringEnabled());
-                
+
                 SetComponentEnabled<UnableToAct>(entity, false);
                 SetComponentEnabled<Grabbed>(entity, false);
                 SetComponentEnabled<InAir>(entity, false);
                 SetComponentEnabled<IsDead>(entity, false);
+                SetComponentEnabled<IsInvulnerable>(entity, false);
                 SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
                 SetComponentEnabled<TargetSearchCooldownExpirationTimestamp>(entity, false);
                 SetComponentEnabled<SteeringEnabled>(entity, true);
