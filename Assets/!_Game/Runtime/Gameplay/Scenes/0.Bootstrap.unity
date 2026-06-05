@@ -256,7 +256,7 @@ MonoBehaviour:
     CheckInterval: 0.5
     WeightEnemy: 80
     WeightAlly: 0
-    WeightWall: 25
+    WeightWall: 30
     WeightBeacon: 50
     DistanceWeight: 30
     LowHealthBonus: 0
@@ -1316,13 +1316,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6398fd65a5784044878cdb4e998603c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::GizmoSystemHandler
-  showUnitState: 1
+  showUnitState: 0
   showAttackRange: 0
   showTarget: 0
   showDestination: 0
   showSteeringContext: 0
   showSteerObstacle: 0
-  showFinalDestination: 0
+  showFinalDestination: 1
 --- !u!4 &1763959282
 Transform:
   m_ObjectHideFlags: 0

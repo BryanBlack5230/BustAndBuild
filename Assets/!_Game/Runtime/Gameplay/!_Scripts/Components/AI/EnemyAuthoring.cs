@@ -26,6 +26,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public float ScanInterval = 0.5f;
         public LayerMask ObstacleLayer;
         public Curve ObstacleDangerCurve = Curve.Quadratic;
+
         
         public class Baker : Baker<EnemyAuthoring>
         {
@@ -41,6 +42,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new AttackCooldownExpirationTimestamp());
                 AddComponent(entity, new TargetSearchCooldownExpirationTimestamp());
                 AddComponent(entity, new SteeringEnabled());
+                AddComponent(entity, new HasLeftBase());
+                AddComponent(entity, new Escaped());
 
                 SetComponentEnabled<UnableToAct>(entity, false);
                 SetComponentEnabled<Grabbed>(entity, false);
@@ -49,6 +52,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 SetComponentEnabled<AttackCooldownExpirationTimestamp>(entity, false);
                 SetComponentEnabled<TargetSearchCooldownExpirationTimestamp>(entity, false);
                 SetComponentEnabled<SteeringEnabled>(entity, true);
+                SetComponentEnabled<HasLeftBase>(entity, false);
+                SetComponentEnabled<Escaped>(entity, false);
 
                 // components
                 AddComponent(entity, new Unit { faction = authoring.faction, });
@@ -87,6 +92,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 
                 AddComponent(entity, new PathTarget());
                 AddComponent(entity, new FinalDestination());
+
             }
         }
     }

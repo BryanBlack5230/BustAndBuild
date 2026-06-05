@@ -13,6 +13,7 @@
 2. `BattleUnitRegistrationSystem` — newly-spawned units get added to `BattleCoordinator`'s `EnemyUnitReference`/`AllyUnitReference` buffers.
 3. `BattleDirectorCleanupSystem` — removes dead entities from those buffers.
 4. `BattleCoordinatorSystem` — caches faction base AABBs, tracks `IsBattleActive` and `WasCastleBreached`.
+4a. `EnemyEscapeSystem` — for each enemy: flips `HasLeftBase` on first frame outside `EnemyBaseBounds`; once left, ticks `HasLeftBase.DwellTimer` while back inside AND (`!IsDayPhaseActive` OR `Scared`); at 2s, enables `Escaped` + `ECB.DestroyEntity`. Just-spawned enemies never escape because `HasLeftBase` starts disabled.
 5. `TargetSearchSystem` → schedules `TargetScorerJob` (parallel, blob-config-driven scoring).
 6. `BattleBrainSystem` → schedules `BrainDecisionJob`: decides `ActionState` (Stunned/Moving/Attacking/Evading) + `FinalDestination`.
 7. `PathfindingDummySystem` — raycasts toward `FinalDestination` through `Obstacle` layer; falls back to fixed gate point if blocked.
@@ -26,9 +27,19 @@
 
 ## Enableable Components Pattern
 Used as flags whose state changes frequently without restructuring chunks:
-- `Grabbed`, `InAir`, `IsDead`, `IsInvulnerable`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`
+- `Grabbed`, `InAir`, `IsDead`, `IsInvulnerable`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`, `Escaped`, `HasLeftBase`
 - `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp` — combine timestamp data + enabled bit. System checks `IsComponentEnabled` to skip ready-to-act entities; if `Value > elapsedTime` keep enabled, else disable.
+- `HasLeftBase` — same pattern: enableable bit ("has the enemy ever been outside its base") + data field `DwellTimer` (seconds accumulated while back inside under escape conditions). When the timer's relevance is gated by the enableable, fold them into one struct instead of adding a sibling component.
 - `SpawnEnemies` — gates all spawn queries; toggled by `SpawningStateSystem` driven by `EventManager.Daylight` events.
+
+## Mark-Then-Destroy Pattern (Alternative to IsDead → DeathSystem)
+When a destruction path is semantically distinct from "killed by damage" (e.g., escape), use a dedicated enableable tag + same-frame `EndSimulationECB.DestroyEntity`. Single system handles both: `escaped.ValueRW = true; ECB.DestroyEntity(sortKey, entity);` — the tag exists for the rest of the frame so other systems (analytics, events) can observe before playback. Reuses the IsDead model without conflating semantics. `EnemyEscapeSystem` is the reference: tag is `Escaped`, lives in the same component file (`Components/AI/Escape.cs`) as the state component that drives it (`HasLeftBase`).
+
+## `[WithPresent]` vs `[WithOptions(IgnoreComponentEnabledState)]`
+Two ways to make an IJobEntity match disabled enableables — but they're not interchangeable:
+- `[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]` — query-level. Affects **all** components in the query.
+- `[WithPresent(typeof(A), typeof(B))]` — per-component override. Required when using `EnabledRefRW<T>` parameters, which otherwise auto-register T as match-enabled-only. Multiple types in one attribute work (`params Type[]`).
+Example in `EnemyEscapeJob`: `[WithPresent(typeof(HasLeftBase), typeof(Escaped))]` — both have `EnabledRefRW` parameters and need to match regardless of state so the system can flip them. Also see `BrainDecisionJob` for the single-type form.
 
 To query while ignoring the enabled flag: `[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]` on `IJobEntity` or in `WithOptions()` on the iterator.
 

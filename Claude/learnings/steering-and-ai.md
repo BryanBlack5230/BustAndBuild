@@ -33,6 +33,8 @@ When `DayEndedEvent` fires, `DaylightEcsBridge` flips `BattleCoordinator.IsDayPh
 
 **Only enemies retreat.** Allies are not gated by `IsDayPhaseActive`. Pattern: only one writer of `FinalDestination` exists (the brain) — confirmed by grep — so adding new global behavior gates here is safe; no downstream system overrides.
 
+**Enemies that successfully reach the base are removed by `EnemyEscapeSystem`** (see ecs-architecture pipeline §4a). It gates on `HasLeftBase` so just-spawned enemies aren't culled, and waits 2s of continuous dwell inside `EnemyBaseBounds` under (`!IsDayPhaseActive` OR `Scared`) before flipping `Escaped` + destroying. Uses `LocalToWorld.Position` against `Aabb.Contains` — center-based is correct here because it matches the brain's `baseBounds.ClosestPoint(myWorldPos)` retreat goal (the screen-frustum edge-check rule from `feedback_boundary_checks` does **not** apply to navigation-goal AABB tests).
+
 ## AbleToActEvaluationSystem
 Centralized "should I be active?" check: flips `UnableToAct` enabled whenever `Grabbed || InAir || IsDead` changes. Other systems just check `UnableToAct` enabled state. Runs `[WithOptions(IgnoreComponentEnabledState)]` to see all entities, regardless of their UnableToAct state.
 
