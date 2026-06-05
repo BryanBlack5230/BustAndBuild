@@ -13,7 +13,7 @@
 - `Gameplay.Input/Input_EventsAndCommands.cs`: `ObjectGrabbedEvent`, `GroundGrabbedEvent { bool ActuallyHolding }`, `ReleaseEvent` (no single owner — consolidated by namespace; see file-grouping convention below).
 - `Gameplay.Daylight/DayNightCycle_EventsAndCommands.cs`: `DayStartedEvent`, `DayEndedEvent` (consolidated with related commands).
 
-**Not Reflex-injected** (intentional). Static access lets ECS systems and MonoBehaviours raise/subscribe with no DI plumbing or per-scope bridge. Consumers: `CursorSetter`, `DummyCursorSetter`, `BattleCameraMovement`, `CameraInputHandler`, `InteractController`, `DayNightCycle`, `DaylightSpawningBridge`.
+**Not Reflex-injected** (intentional). Static access lets ECS systems and MonoBehaviours raise/subscribe with no DI plumbing or per-scope bridge. Consumers: `CursorSetter`, `DummyCursorSetter`, `BattleCameraMovement`, `CameraInputHandler`, `InteractController`, `DayNightCycle`, `DaylightEcsBridge`.
 
 **Implementation invariants** (why we built our own instead of `GenericEventBus`):
 - *Allocation-free Raise.* Listener lists live in per-type `static class Listeners<T>` (C# static-generic-class trick) — no dictionary lookup, no per-Raise list copy. Designed for 100+ units raising events per frame.

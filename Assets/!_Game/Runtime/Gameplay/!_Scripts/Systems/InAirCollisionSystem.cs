@@ -199,8 +199,6 @@ public struct InAirCollisionJob : ICollisionEventsJob
         var flyingSpeed    = math.length(originalLinear);
         if (flyingSpeed < 2f) return;
 
-        Log.Battle.D($"{flyingEntity} has soft-landed on {groundedEntity}. Velocity: {flyingSpeed}");
-
         var velocityPower = ComputeVelocityPower(originalLinear);
         var finalDamage = bounceDmg.BaseDamage * velocityPower
                           + velocityPower * bounceDmg.BounceCount * bounceDmg.BounceDamageMultiplier;
@@ -216,7 +214,6 @@ public struct InAirCollisionJob : ICollisionEventsJob
         if (DamageLookup.HasBuffer(groundedEntity))
             DamageLookup[groundedEntity].Add(new DamageBufferElement { Value = groundedDamage });
 
-        // Flyer bounces off at 15% reversed velocity — stays airborne so UnitMoverSystem won't override it
         flyingVelocity.Linear = -originalLinear * 0.15f;
         Ecb.SetComponent(flyingEntity, flyingVelocity);
 

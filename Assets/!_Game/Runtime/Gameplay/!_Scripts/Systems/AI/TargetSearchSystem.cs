@@ -77,7 +77,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 ElapsedTime = elapsedTime,
                 IsBattleActive = coord.IsBattleActive,
                 ForceUpdate = coord.ForceGlobalReevaluation,
-                CastleIsBreached = coord.WasCastleBreached
+                CastleIsBreached = coord.WasCastleBreached,
+                IsDayPhaseActive = coord.IsDayPhaseActive,
             };
         
             if (coord.ForceGlobalReevaluation)

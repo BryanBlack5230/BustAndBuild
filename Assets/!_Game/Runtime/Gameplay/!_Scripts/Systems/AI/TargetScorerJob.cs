@@ -36,12 +36,21 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [ReadOnly] public bool IsBattleActive;
         [ReadOnly] public bool ForceUpdate;
         [ReadOnly] public bool CastleIsBreached;
+        [ReadOnly] public bool IsDayPhaseActive;
 
         private void Execute(Entity entity, ref Target target, in LocalTransform transform, EnabledRefRW<TargetSearchCooldownExpirationTimestamp> cooldownEnabled, ref TargetSearchCooldownExpirationTimestamp cooldownTimestamp, in LocalToWorld worldTransform)
         {
+            var faction = UnitLookup[entity].faction;
+
+            if (!IsDayPhaseActive && faction == Faction.Enemy)
+            {
+                target.TargetEntity = Entity.Null;
+                target.Type = TargetType.None;
+                return;
+            }
+
             var shouldSearch = ForceUpdate || (IsBattleActive && !cooldownEnabled.ValueRO);
             if (!shouldSearch) return;
-            var faction = UnitLookup[entity].faction;
         
             ref var globalProfiles = ref ProfilesBlob.Value;
             ref var settings = ref globalProfiles.EnemyProfiles[0];

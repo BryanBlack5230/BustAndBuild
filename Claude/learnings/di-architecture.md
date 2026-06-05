@@ -24,10 +24,10 @@ builder.NonLazy<T>();                    // forces resolution on container built
 
 ## NonLazy Required for Self-Sufficient Singletons
 **Rule:** Any singleton that is **not injected into anything else** (no other class takes it as a constructor parameter) must be registered with `.NonLazy<T>()`, otherwise Reflex never constructs it and it stays dormant.  
-**Example:** `DaylightSpawningBridge` subscribes to `EventManager` events in its constructor and is never injected anywhere, so without `NonLazy` it would never be created and spawning would never toggle.
+**Example:** `DaylightEcsBridge` subscribes to `EventManager` events in its constructor and is never injected anywhere, so without `NonLazy` it would never be created and spawning would never toggle.
 ```csharp
-builder.AddSingleton(typeof(DaylightSpawningBridge), typeof(DaylightSpawningBridge), typeof(IDisposable))
-       .NonLazy<DaylightSpawningBridge>();
+builder.AddSingleton(typeof(DaylightEcsBridge), typeof(DaylightEcsBridge), typeof(IDisposable))
+       .NonLazy<DaylightEcsBridge>();
 ```
 **How to spot the pattern:** If a class's only job is to subscribe to events or hook into external systems at construction time, it needs `NonLazy`. Classes that are injected will be constructed on first demand; classes that construct themselves for side-effects will not.
 

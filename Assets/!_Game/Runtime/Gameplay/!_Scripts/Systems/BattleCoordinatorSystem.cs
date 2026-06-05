@@ -1,5 +1,7 @@
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Transforms;
 
 using BarkingBird.Runtime.Gameplay.AI;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
@@ -42,32 +44,37 @@ public partial struct BattleCoordinatorSystem : ISystem
     {
     
         var baseQuery = SystemAPI.QueryBuilder()
-            .WithAll<BaseArea, PhysicsCollider>() 
+            .WithAll<BaseArea, PhysicsCollider, LocalToWorld>()
             .Build();
 
         if (baseQuery.CalculateEntityCount() < 2) return;
-    
+
         var entities = baseQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
         var areas = baseQuery.ToComponentDataArray<BaseArea>(Unity.Collections.Allocator.Temp);
         var colliders = baseQuery.ToComponentDataArray<PhysicsCollider>(Unity.Collections.Allocator.Temp);
+        var transforms = baseQuery.ToComponentDataArray<LocalToWorld>(Unity.Collections.Allocator.Temp);
 
         for (var i = 0; i < entities.Length; i++)
         {
+            var worldTransform = new RigidTransform(transforms[i].Rotation, transforms[i].Position);
+            var worldAabb = colliders[i].Value.Value.CalculateAabb(worldTransform);
+
             switch (areas[i].Faction)
             {
                 case Faction.Ally:
-                    bases.AllyBaseBounds = colliders[i].Value.Value.CalculateAabb();
+                    bases.AllyBaseBounds = worldAabb;
                     break;
                 case Faction.Enemy:
-                    bases.EnemyBaseBounds = colliders[i].Value.Value.CalculateAabb();
+                    bases.EnemyBaseBounds = worldAabb;
                     break;
             }
         }
 
         bases.IsInitialized = true;
-            
+
         entities.Dispose();
         areas.Dispose();
         colliders.Dispose();
+        transforms.Dispose();
     }
 }

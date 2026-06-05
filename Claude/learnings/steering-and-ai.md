@@ -15,11 +15,23 @@ This avoids the managed heap allocation that a `static readonly float3[]` field 
 NOTE: diagonal values are already unit-length — don't normalize again.
 
 ## Brain Decision Tree
+Branches in evaluation order — first match wins, all set `CanAttack = false` unless noted:
 - **`UnableToAct` enabled** → Stunned. `SteeringEnabled = false`. Brain returns early.
-- **`emotion.Value == Scared`** → Moving toward closest point of own faction's `baseBounds` (retreat). `CanAttack = false`.
+- **`!IsDayPhaseActive && faction == Enemy`** → Moving toward closest point of `EnemyBaseBounds`. Retreat home at night. See "Day Phase Retreat" below.
+- **`emotion.Value == Scared || IsInvulnerable enabled`** → Moving toward closest point of own faction's `baseBounds` (retreat).
 - **No target** → Moving toward closest point of own `baseBounds`.
 - **Has target + on cooldown (Evading)** → If `distSq <= attackRangeSq * 32` (TODO: temporary), retreat 3m from target. Else move toward target.
 - **Has target + cooldown ready (Attacking)** → If in range, stop (`finalDest = myPos`, `steerEnabled = false`, `CanAttack = true`). Else move toward target.
+
+## Day Phase Retreat (Belt-and-Suspenders)
+When `DayEndedEvent` fires, `DaylightEcsBridge` flips `BattleCoordinator.IsDayPhaseActive = false`. Two independent paths route enemies home, so a single failure (stale Burst, missed singleton write) doesn't break the behavior:
+
+1. **`BattleBrainSystem` reads the singleton** in `OnUpdate`, passes `IsDayPhaseActive` into `BrainDecisionJob`. Branch fires per-frame, no cooldown — immediate retreat.
+2. **`TargetSearchSystem` passes the flag into `TargetScorerJob`.** At the top of `Execute`, before the cooldown gate: `if (!IsDayPhaseActive && faction == Enemy) { target.TargetEntity = Null; target.Type = None; return; }`. Per-frame clearing — also defangs `AttackSystem` since `Target.TargetEntity == Null`.
+
+**Why both:** brain branch ensures correct destination even with a stale target; scorer short-circuit ensures correct behavior even if the brain branch fails AND prevents target re-acquisition. The brain's "no target" branch is the natural fallback.
+
+**Only enemies retreat.** Allies are not gated by `IsDayPhaseActive`. Pattern: only one writer of `FinalDestination` exists (the brain) — confirmed by grep — so adding new global behavior gates here is safe; no downstream system overrides.
 
 ## AbleToActEvaluationSystem
 Centralized "should I be active?" check: flips `UnableToAct` enabled whenever `Grabbed || InAir || IsDead` changes. Other systems just check `UnableToAct` enabled state. Runs `[WithOptions(IgnoreComponentEnabledState)]` to see all entities, regardless of their UnableToAct state.

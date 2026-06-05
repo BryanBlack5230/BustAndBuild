@@ -15,6 +15,7 @@ public class BattleCoordinatorAuthoring : MonoBehaviour
                 IsBattleActive = false,
                 ForceGlobalReevaluation = false,
                 WasCastleBreached = false,
+                IsDayPhaseActive = true,
             });
             AddComponent(entity, new FactionBases());
 
@@ -29,6 +30,7 @@ public struct BattleCoordinator : IComponentData
     public bool IsBattleActive;
     public bool ForceGlobalReevaluation;
     public bool WasCastleBreached;
+    public bool IsDayPhaseActive;
 }
 
 public struct FactionBases : IComponentData

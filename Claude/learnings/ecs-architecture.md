@@ -95,6 +95,24 @@ Bridge calls `world.GetOrCreateSystemManaged<SpawningStateSystem>().SetDesiredSt
 ## BattleCoordinator (Singleton)
 Single entity bakes `BattleCoordinator` + `FactionBases` + buffers `EnemyUnitReference`/`AllyUnitReference`. `BattleCoordinatorSystem` initialises `FactionBases.AllyBaseBounds`/`EnemyBaseBounds` once it finds 2+ `BaseArea` entities with colliders. `FactionBases.IsInitialized` flag guards subsequent ticks.
 
+Fields:
+- `IsBattleActive` — set by coordinator each tick from `EnemyUnitReference.Length > 0`.
+- `ForceGlobalReevaluation` — see Castle Breach section.
+- `WasCastleBreached` — mirrors `Castle.hasBeenBreached`.
+- `IsDayPhaseActive` — baked `true`. Flipped by `DaylightEcsBridge` on `DayStartedEvent`/`DayEndedEvent`. Read by `BattleBrainSystem` and `TargetSearchSystem` to route enemies home at night (see [[steering-and-ai]] — Day Phase Retreat).
+
+## PhysicsCollider AABB — Local vs World (Critical Gotcha)
+**Context:** `BattleCoordinatorSystem.SetBases` originally called `colliders[i].Value.Value.CalculateAabb()` to cache base AABBs. Enemy retreat destinations landed at world-space coords near `(-7, 0.5, -6)` — i.e. on the world origin instead of inside the actual base.
+
+**Finding:** `PhysicsCollider.Value.Value.CalculateAabb()` returns the AABB in the **collider's local space**, including the box `Center` offset baked into the geometry. To get a world-space AABB, use the overload `CalculateAabb(RigidTransform)` and pass the entity's world pose:
+```csharp
+var worldTransform = new RigidTransform(transforms[i].Rotation, transforms[i].Position);
+var worldAabb = colliders[i].Value.Value.CalculateAabb(worldTransform);
+```
+Requires `using Unity.Mathematics;` (RigidTransform) and `using Unity.Transforms;` (LocalToWorld for `.Rotation`/`.Position`).
+
+**Why it matters:** Anything that consumes a `PhysicsCollider`'s AABB for spatial queries (`ClosestPoint`, overlap, frustum check) and assumes world space will silently use local space. `PhysicsUtility.GetRandomPointInsideCollider` is already correct (it transforms); ad-hoc reads at call sites are not. Pattern: when reading collider AABBs, always pair with a `LocalToWorld` query.
+
 ## TargetScorerJob (Blob-Driven Scoring)
 `TargetProfilesBlob` is a `BlobAssetReference<TargetProfilesBlob>` containing two `BlobArray<TargetProfileBlob>` — enemy and ally profile lookups indexed by `EnemyType`/`AllyType` enum. Built by `BlobContainer.Initialize()` from `PrototypeConfigSetter.EnemyProfiles`/`AllyProfiles` (List<TargetProfile>) on bootstrap. Walls and beacon scored separately by reading `WallEntities`/`BeaconEntity` from system.
 **`NativeDisableContainerSafetyRestriction`** on `TargetLookup` is used so the job can read other entities' Target component (for `AggroBonus` cross-check).
@@ -102,7 +120,7 @@ Single entity bakes `BattleCoordinator` + `FactionBases` + buffers `EnemyUnitRef
 ## Spawning Strategies
 `SpawnAuthoring.strategy`: Point / Area / Radius / Attached → adds one of `SpawnByPoint`/`SpawnByArea`/`SpawnByRadius`/`SpawnByAttached`. Baker also adds `SpawnEnemies : IComponentData, IEnableableComponent` **disabled by default**. `SpawningSystem.OnUpdate` has 4 parallel `foreach`es, each with `.WithAll<SpawnEnemies>()` so only day-active spawners tick. `Spawn()` is declared as a **local method inside `OnUpdate`** because Burst sometimes complains about non-inlined helpers — see the inline comment.
 
-Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/DayEnded` → `DaylightSpawningBridge` → `SpawningStateSystem.SetDesiredState(bool)` → `EntityManager.SetComponentEnabled<SpawnEnemies>(query, bool)` on next frame once entities exist.
+Day/night toggle flow: `DayNightCycle` → `EventManager.Daylight.DayStarted/DayEnded` → `DaylightEcsBridge` → `SpawningStateSystem.SetDesiredState(bool)` → `EntityManager.SetComponentEnabled<SpawnEnemies>(query, bool)` on next frame once entities exist.
 
 ## Wall System
 - `WallSectionAuthoring` bakes `WallSection { CastleEntity }` + `Health` + `IsDead`. Child wall pieces use `WallChildAuthoring` → `WallReference { ParentWallEntity }` (parent lookup).

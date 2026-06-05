@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 using BarkingBird.Runtime.Infrastructure.GameLoop;
+using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
@@ -24,10 +25,13 @@ namespace BarkingBird.Runtime.Gameplay.AI
         {
             var bases = SystemAPI.GetSingletonRW<FactionBases>().ValueRO;
             if (!bases.IsInitialized) return;
-            
+
+            var coordinator = SystemAPI.GetSingleton<BattleCoordinator>();
+
             var brainJob = new BrainDecisionJob
             {
                 Bases = bases,
+                IsDayPhaseActive = coordinator.IsDayPhaseActive,
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
                 UnableToActLookup = SystemAPI.GetComponentLookup<UnableToAct>(true),
                 CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(true),
@@ -46,6 +50,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [ReadOnly] public ComponentLookup<AttackCooldownExpirationTimestamp> CooldownLookup;
         [ReadOnly] public ComponentLookup<IsInvulnerable> IsInvulnerableLookup;
         [ReadOnly] public FactionBases Bases;
+        public bool IsDayPhaseActive;
 
         
         private void Execute(
@@ -71,6 +76,14 @@ namespace BarkingBird.Runtime.Gameplay.AI
             
             var myWorldPos = worldTransform.Position;
             steerEnabled.ValueRW = true;
+
+            if (!IsDayPhaseActive && unit.faction == Faction.Enemy)
+            {
+                action.Value = ActionType.Moving;
+                finalDestination.Value = Bases.EnemyBaseBounds.ClosestPoint(myWorldPos);
+                brain.CanAttack = false;
+                return;
+            }
 
             var isInvulnerable = IsInvulnerableLookup.HasComponent(entity) && IsInvulnerableLookup.IsComponentEnabled(entity);
 
@@ -133,7 +146,6 @@ namespace BarkingBird.Runtime.Gameplay.AI
                     finalDestination.Value = targetWorldPos;
                     brain.CanAttack = false;
                 }
-                
             }
         }
     }

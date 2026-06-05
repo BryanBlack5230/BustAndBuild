@@ -22,7 +22,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(_dayNightSetting, typeof(DayNightSetting));
             builder.AddSingleton(_daylightHandler, typeof(DaylightHandler));
             builder.AddSingleton(typeof(DayNightCycle), typeof(DayNightCycle), typeof(IGameListener), typeof(IDisposable));
-            builder.AddSingleton(typeof(DaylightSpawningBridge), typeof(DaylightSpawningBridge), typeof(IDisposable)).NonLazy<DaylightSpawningBridge>();
+            builder.AddSingleton(typeof(DaylightEcsBridge), typeof(DaylightEcsBridge), typeof(IDisposable)).NonLazy<DaylightEcsBridge>();
             builder.AddSingleton(_worldSceneData, typeof(WorldSceneData));
             builder.AddSingleton(typeof(ScrollController), typeof(ScrollController), typeof(IDisposable));
             builder.AddSingleton(typeof(WorldCameraHandler), typeof(WorldCameraHandler), typeof(IGameListener));
