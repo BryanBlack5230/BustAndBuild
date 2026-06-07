@@ -289,7 +289,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4653761851325888072, guid: 447416afbf4d9d547afc020c87d5eab9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -681,6 +681,61 @@ Transform:
   - {fileID: 1451012200}
   m_Father: {fileID: 95380096}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &998977663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 998977664}
+  - component: {fileID: 998977665}
+  m_Layer: 0
+  m_Name: PearlSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &998977664
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998977663}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1208950491}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &998977665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998977663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ab508c75fdf9943a104bf6bbe3b637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::PearlSpawnerAuthoring
+  pearlPrefab: {fileID: 468609492767552385, guid: e6650b1976f3d504cb62de776c6a2954, type: 3}
+  lifetime: 10
+  blinkPercent: 0.15
+  blinkInterval: 0.15
+  pickupRadius: 2.5
+  scatter: 1
+  spawnHeight: 0.2
+  floatAmplitude: 1
+  floatPeriod: 2.5
+  restSpeedThreshold: 0.6
+  restDuration: 0.03
 --- !u!1 &1131338001
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,6 +877,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 660854262}
+  - {fileID: 998977664}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1403941024
@@ -1274,7 +1330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4653761851325888072, guid: 447416afbf4d9d547afc020c87d5eab9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1617,11 +1673,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2676591817897990144, guid: acfc79c6108758b48a7bb3aab01dcdb8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.35
+      value: 2.18
       objectReference: {fileID: 0}
     - target: {fileID: 2676591817897990144, guid: acfc79c6108758b48a7bb3aab01dcdb8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 27.76
+      value: 23.02
       objectReference: {fileID: 0}
     - target: {fileID: 2676591817897990144, guid: acfc79c6108758b48a7bb3aab01dcdb8, type: 3}
       propertyPath: m_LocalRotation.w

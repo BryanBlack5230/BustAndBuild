@@ -35,6 +35,8 @@ When `DayEndedEvent` fires, `DaylightEcsBridge` flips `BattleCoordinator.IsDayPh
 
 **Enemies that successfully reach the base are removed by `EnemyEscapeSystem`** (see ecs-architecture pipeline §4a). It gates on `HasLeftBase` so just-spawned enemies aren't culled, and waits 2s of continuous dwell inside `EnemyBaseBounds` under (`!IsDayPhaseActive` OR `Scared`) before flipping `Escaped` + destroying. Uses `LocalToWorld.Position` against `Aabb.Contains` — center-based is correct here because it matches the brain's `baseBounds.ClosestPoint(myWorldPos)` retreat goal (the screen-frustum edge-check rule from `feedback_boundary_checks` does **not** apply to navigation-goal AABB tests).
 
+`HasLeftBase` carries `LastOutsidePosition` (written each frame while outside the base). Used by the **Scared-escape pearl drop** branch: when an enemy escapes via `EmotionalState == Scared`, half the rolled pearl count is spawned at `LastOutsidePosition` (= the position just before crossing back into the enemy base), not at the unit's current pos. Otherwise the drop would happen deep inside the inaccessible enemy base. Day-end escapes (non-Scared) drop nothing. See [[ecs-architecture]] "Capture Boundary-Crossing Position via Per-Frame Field Write" for the general pattern.
+
 ## AbleToActEvaluationSystem
 Centralized "should I be active?" check: flips `UnableToAct` enabled whenever `Grabbed || InAir || IsDead` changes. Other systems just check `UnableToAct` enabled state. Runs `[WithOptions(IgnoreComponentEnabledState)]` to see all entities, regardless of their UnableToAct state.
 

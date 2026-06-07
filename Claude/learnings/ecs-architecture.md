@@ -5,6 +5,7 @@
 - **`SteeringSystemGroup`** (custom, inside `GameLoopSystemGroup`, after `BattleBrainSystem`, before `UnitMoverSystem`): Steering reset → seek/obstacle behaviors → resolve. `Steer_ResetSystem` is `OrderFirst = true`; `Steer_ResolveSystem` is `OrderLast = true`.
 - **`FixedStepSimulationSystemGroup`**: `ScreenBounceSystem` runs here, after `PhysicsSystemGroup` — physics step has already integrated velocity by then.
 - **`PhysicsSystemGroup`**: `InAirCollisionSystem` runs here, after `PhysicsSimulationGroup` (consumes `CollisionEvent`s).
+- **`AfterPhysicsSystemGroup`** (Unity.Physics.Systems): `PearlFloatSystem` runs here — see "Unity Physics — Post-Physics System Placement" below for when this matters vs. `[UpdateAfter(PhysicsSimulationGroup)]`.
 - **`SimulationSystemGroup, OrderLast = true`**: `ApplyDamageSystem`, `DeathSystem` — run after everything in the frame, including paused state.
 - **`InitializationSystemGroup`**: `WallSectionInitSystem` (one-shot setup of `WallCleanupTag`).
 
@@ -209,3 +210,98 @@ First aspect added: `HealthAspect` (Components/HealthAspect.cs). Use sparingly �
 
 ## Random in Jobs
 `Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 10007)` is the pattern used in `SpawningSystem`. Multiplier is a magic prime to spread the seed.
+
+## ECB Playback Failure: `AssertEntityHasComponent` Almost Always Means a Stale Prefab
+**Context:** `PearlSpawnOnDeathSystem` ECB threw `ArgumentException: AssertEntityHasComponent` at playback, with cascade noise from `DeathSystem` after.
+**Finding:** When a job does `ECB.Instantiate(prefab)` then `ECB.SetComponent(newEntity, T)`, the assertion fails if the prefab wasn't authored with `T`. Symptom is at ECB **playback** (in `EndSimulationEntityCommandBufferSystem`), not at recording, and the message names the **recording** system. Common cause: an `Authoring` MonoBehaviour was assigned a prefab that's missing its sibling component authoring (e.g. PearlSpawnerAuthoring referencing a plain prefab that doesn't have `PearlAuthoring`).
+**Why it matters:** Catch this at bake time rather than runtime — let Bakers reject misconfigured prefabs with a clear error:
+```csharp
+if (authoring.prefab.GetComponent<RequiredAuthoring>() == null)
+{
+    Debug.LogError($"[{nameof(MyAuthoring)}] prefab '{authoring.prefab.name}' missing RequiredAuthoring.", authoring);
+    // bake with Entity.Null so runtime systems skip gracefully
+}
+```
+The `authoring` second arg makes the log clickable in the editor console — links straight to the GameObject. `PearlSpawnerAuthoring.Baker` uses this pattern.
+
+## ECB Errors Cascade — Trust the First, Discard the Rest
+When one ECB op throws during playback, subsequent ECB playbacks in the same `EndSimulationEntityCommandBufferSystem.FlushPendingBuffers()` flush often fire follow-on assertions like `AssertNoQueuedManagedDeferredCommands` ("Expected: True; Value was False"). These name *other* systems (e.g. `DeathSystem`) but they're noise — the root cause is the first thrown exception. Read the trace top-down; debug the first ECB error.
+
+## Pattern — RequireForUpdate vs HasSingleton Fallback
+`RequireForUpdate<T>` is "this system can't run without T". Use when the system is meaningless absent the singleton (e.g. `PearlSpawnOnDeathSystem` truly needs `PearlSpawnPrefab` to spawn anything).
+**Avoid** `RequireForUpdate` when the system has independent responsibilities and the singleton is *optional*. Example: `EnemyEscapeSystem` runs unconditionally to destroy escaped enemies; it only optionally drops pearls if a `PearlSpawnPrefab` singleton exists. Hard-requiring the singleton there would silently break escape behavior in scenes without a pearl spawner. Use `HasSingleton<T>()` + fallback to `Entity.Null` instead.
+
+## Pattern — Capture Boundary-Crossing Position via Per-Frame Field Write
+When a system needs to remember "the position where the entity crossed back into region X", don't track a `bool TransitionedThisFrame` + position pair. Instead, write the current position into the struct field **every frame while outside**:
+```csharp
+if (!insideBase) { data.LastOutsidePosition = currentPos; data.DwellTimer = 0; return; }
+// inside: data.LastOutsidePosition holds the last write — i.e. position just before re-entry
+```
+On the frame the entity transitions to inside, the field already holds the boundary-crossing position; no extra state machine needed. Used in `HasLeftBase.LastOutsidePosition` to anchor scared-escape pearl drops at the base boundary instead of deep inside the inaccessible enemy base. See [[steering-and-ai]].
+
+## Pattern — Defer Counter Increment to Animation Completion
+When an ECS event triggers a UI counter bump *and* a fly-to-counter animation, raise the event from ECS but let the **animation's `OnComplete` callback** drive the counter increment, not the event. The counter ticks up exactly when the visual lands, instead of bumping early while pearls are still mid-flight. Implementation: `PearlPickupSystem` raises `PearlPickedUpEvent`; `PearlMagnetController` tween `OnComplete` calls `WorldCurrency.Add(value)`. `WorldCurrency` does **not** subscribe to `PearlPickedUpEvent` directly — it would race with the tween.
+
+## ECS-to-Managed: EventBus from a SystemBase
+A managed `SystemBase` in `GameLoopSystemGroup` can call `EventBus.Raise<T>(in evt)` directly from `OnUpdate` — `EventBus` is static, no DI needed, and managed subscribers (MonoBehaviours, POCOs) listen normally. This sidesteps having to bridge through a dedicated "ECS event reader" managed system when the only need is to notify managed code. `PearlPickupSystem` uses this. Don't try this from an `ISystem` (struct, Burst) — `EventBus.Raise` accesses managed types and won't compile in Burst.
+
+## Unity Physics — Post-Physics System Placement (PearlFloatSystem)
+**Context:** `PearlFloatSystem` initially used `[UpdateInGroup(typeof(PhysicsSystemGroup))] [UpdateAfter(typeof(PhysicsSimulationGroup))]` (same as `InAirCollisionSystem`). Pearls fell to the ground but never transitioned to floating state — rest timer never accumulated, Y override never showed.
+**Finding:** `PhysicsSystemGroup` contains, in order: `PhysicsInitializeGroup` → `PhysicsSimulationGroup` → `ExportPhysicsWorld` → `AfterPhysicsSystemGroup`. `ExportPhysicsWorld` is the system that syncs internal sim state back into `PhysicsVelocity` and `LocalTransform` component buffers. `[UpdateAfter(PhysicsSimulationGroup)]` only constrains "after step 2" — the scheduler is free to place the system before OR after `ExportPhysicsWorld`. If before:
+- `PhysicsVelocity.Linear` reads return the PRE-simulation value (whatever was there at frame start). A falling body can show > threshold velocity indefinitely → no rest detection.
+- Writes to `LocalTransform.Position` get clobbered by `ExportPhysicsWorld` running after.
+
+**Fix:** Use `[UpdateInGroup(typeof(AfterPhysicsSystemGroup))]` for any system that needs POST-physics `PhysicsVelocity` or that writes `LocalTransform` for rendering.
+
+**Why `InAirCollisionSystem`'s placement works**: it consumes `CollisionEvent` from `SimulationSingleton` (populated DURING `PhysicsSimulationGroup`, available after it) and writes velocity via ECB (which plays back at `EndSimulationEntityCommandBufferSystem`, end of frame — well after `ExportPhysicsWorld`). Reading velocity via `_velocityLookup` for the reflection math gives the velocity AT collision-record time, which is what bounce reflection actually wants.
+
+**Rule of thumb:**
+- Reading collision events / writing via ECB → `[UpdateInGroup(PhysicsSystemGroup)] [UpdateAfter(PhysicsSimulationGroup)]` is fine.
+- Reading post-sim velocity directly, OR writing `LocalTransform` directly → `[UpdateInGroup(AfterPhysicsSystemGroup)]`.
+
+## Unity Physics — `PhysicsGravityFactor` Is Not Auto-Baked
+Unity's `RigidbodyBaker` only adds `PhysicsGravityFactor` for non-default cases (e.g., `useGravity = false` bakes Value=0). A dynamic Rigidbody with `useGravity = true` won't get the component unless you add it explicitly. For runtime gravity toggling, add it in your authoring `Baker`:
+```csharp
+AddComponent(entity, new PhysicsGravityFactor { Value = 1f });
+```
+Without this, an `IJobEntity` with `ref PhysicsGravityFactor` parameter silently doesn't match the entity, and the system appears not to run on those entities.
+
+## Unity Physics — Hybrid Kinematic-via-Dynamic Pattern (Pearls)
+To make a dynamic body behave like it's hovering in place while still being knockable by other bodies:
+1. **Don't** mark it kinematic. Keep it dynamic with its collider.
+2. Each post-physics tick: set `PhysicsVelocity.Linear = 0`, `Angular = 0`, set `PhysicsGravityFactor.Value = 0`, write the desired `LocalTransform.Position.y` (sine bob).
+3. To detect "I was pushed", check post-physics `lengthsq(velocity.Linear) > thresholdSq` — when a unit overlaps the hover-body, the solver applies impulse to resolve penetration, producing nonzero velocity. That's the wake signal.
+4. On wake: clear the velocity-zeroing flag, restore `gravity.Value = 1`. Physics integrates naturally next frame.
+
+**Why not `ICollisionEventsJob` for wake?** Collision events fire every frame for stable resting contacts (pearl on ground, pearl touching pearl). The post-physics velocity check naturally filters: stable contacts produce ~0 velocity (solver fully resolves), real impacts produce > threshold. Simpler and no spurious wakes.
+
+## Unity Physics — Exempting a Layer from Existing Collision-Response Systems
+When a new collider type (e.g., pearls on `PickUps` layer) starts colliding with units thanks to a layer-matrix change, existing systems like `InAirCollisionSystem` will start firing their bounce/landed logic on those collisions. Gate by layer-bit check on the OTHER entity's `CollisionFilter.BelongsTo`:
+```csharp
+// In OnCreate (not [BurstCompile] — LayerMask.NameToLayer is managed)
+_pickUpsLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.PickUps);
+
+// In the collision job
+if (IsPickUp(entityA) || IsPickUp(entityB)) return;
+
+private bool IsPickUp(Entity entity)
+    => ColliderLookup.TryGetComponent(entity, out var collider)
+       && (collider.Value.Value.GetCollisionFilter().BelongsTo & PickUpsLayerBit) != 0;
+```
+Mirrors the existing `_groundLayerBit` pattern in `InAirCollisionSystem` — keep them consistent so the file stays readable.
+
+## DynamicsManager.asset Collision Matrix — Hex Format
+`ProjectSettings/DynamicsManager.asset` stores `m_LayerCollisionMatrix` as a single hex string of 32 × 4 bytes (256 chars). Each layer's mask is a 32-bit uint encoded **little-endian** (LSB byte first). To toggle collision between layers A and B you must edit BOTH rows symmetrically — Unity's editor manages this, but if you edit the YAML directly you have to do both yourself, or the asymmetric mask will fail the collision check (Unity Physics builds `CollisionFilter.CollidesWith` per body from one row of the matrix; both directions must agree).
+
+Decoding example: layer 10 (`PickUps`) hex `ff8cfcff` = uint `0xFFFC8CFF`:
+- byte 0 (chars 0–1) `ff` = bits 0–7 (Default..Ground)
+- byte 1 (chars 2–3) `8c` = `10001100` → bits 8 (Grabbable)=0, 9 (Obstacle)=0, 10 (PickUps)=1, 11=1, 15=1
+- etc.
+
+To enable collision between PickUps (10) and Unit (6): set bit 10 in Unit's row AND set bit 6 in PickUps' row.
+
+**Gotcha:** SubScene baking captures `CollisionFilter` at bake time. Editing the matrix requires re-baking the subscene for the change to take effect at runtime.
+
+## Component File Organization — Don't Pile Unrelated Singletons in One File
+**Context:** Initial draft put `Pearl`, `PearlLifetime`, `PearlSettings`, `PearlSpawnPrefab`, AND `CursorWorldPosition` in `Components/Pearl.cs`. The cursor singleton was lifted into its own `Components/CursorWorldPosition.cs` shortly after.
+**Finding:** Group `IComponentData` files by **subject**, not by who-introduced-them. A cursor-position singleton fed by an input bridge belongs in its own file (or with other input-side singletons), even if it's first consumed by the pearl pickup system. Keeps file moves cheap when the consumer changes.

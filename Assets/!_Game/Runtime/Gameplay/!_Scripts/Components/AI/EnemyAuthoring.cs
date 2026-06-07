@@ -27,6 +27,9 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public LayerMask ObstacleLayer;
         public Curve ObstacleDangerCurve = Curve.Quadratic;
 
+        public int pearlsMin = 10;
+        public int pearlsMax = 20;
+        public float pearlValue = 1f;
         
         public class Baker : Baker<EnemyAuthoring>
         {
@@ -93,6 +96,12 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new PathTarget());
                 AddComponent(entity, new FinalDestination());
 
+                AddComponent(entity, new PearlDropOnDeath
+                {
+                    MinCount = authoring.pearlsMin,
+                    MaxCount = authoring.pearlsMax,
+                    ValuePerPearl = authoring.pearlValue,
+                });
             }
         }
     }

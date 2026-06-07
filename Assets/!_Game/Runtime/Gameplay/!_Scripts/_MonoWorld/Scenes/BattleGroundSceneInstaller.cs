@@ -45,6 +45,8 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(typeof(BattleCameraMovement), typeof(BattleCameraMovement), typeof(IGameListener), typeof(IDisposable));
         
             builder.AddSingleton(typeof(BattleCameraBorderSyncBridge), typeof(BattleCameraBorderSyncBridge), typeof(IGameListener));
+
+            builder.AddSingleton(typeof(CursorEcsBridge), typeof(CursorEcsBridge), typeof(IGameListener));
         }
     }
 }

@@ -22,6 +22,7 @@ public partial struct InAirCollisionSystem : ISystem
     private ComponentLookup<Unit> _unitLookup;
     private BufferLookup<DamageBufferElement> _damageLookup;
     private uint _groundLayerBit;
+    private uint _pickUpsLayerBit;
 
     // OnCreate is not [BurstCompile] — LayerMask.NameToLayer is a managed call
     public void OnCreate(ref SystemState state)
@@ -34,6 +35,7 @@ public partial struct InAirCollisionSystem : ISystem
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
 
         _groundLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground);
+        _pickUpsLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.PickUps);
 
         state.RequireForUpdate<SimulationSingleton>();
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
@@ -75,6 +77,7 @@ public partial struct InAirCollisionSystem : ISystem
             UnitLookup = _unitLookup,
             DamageLookup = _damageLookup,
             GroundLayerBit = _groundLayerBit,
+            PickUpsLayerBit = _pickUpsLayerBit,
             MinVelocity = minVel,
             MaxVelocity = maxVel,
             CurveSamples = curveSamples,
@@ -94,6 +97,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
     public BufferLookup<DamageBufferElement> DamageLookup;
     public EntityCommandBuffer Ecb;
     public uint GroundLayerBit;
+    public uint PickUpsLayerBit;
     public float MinVelocity;
     public float MaxVelocity;
     public FixedList512Bytes<float> CurveSamples;
@@ -109,6 +113,9 @@ public struct InAirCollisionJob : ICollisionEventsJob
         var bInAir = bHasInAir && InAirLookup.IsComponentEnabled(entityB);
 
         if (!aInAir && !bInAir) return;
+
+        // Pearls/pickups never bounce thrown units and never count as landings — let physics resolve naturally.
+        if (IsPickUp(entityA) || IsPickUp(entityB)) return;
 
         // Normal points B→A
         var normalBtoA = collisionEvent.Normal;
@@ -233,6 +240,10 @@ public struct InAirCollisionJob : ICollisionEventsJob
 
     private bool IsAlly(Entity entity)
         => UnitLookup.TryGetComponent(entity, out var unit) && unit.faction == Faction.Ally;
+
+    private bool IsPickUp(Entity entity)
+        => ColliderLookup.TryGetComponent(entity, out var collider)
+           && (collider.Value.Value.GetCollisionFilter().BelongsTo & PickUpsLayerBit) != 0;
 
     private float ComputeVelocityPower(float3 velocity)
     {

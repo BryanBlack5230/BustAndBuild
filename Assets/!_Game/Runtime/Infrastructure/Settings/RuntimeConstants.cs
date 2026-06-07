@@ -20,6 +20,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             public const string Grabbable = "Grabbable";
             public const string Ground = "Ground";
             public const string Obstacle = "Obstacle";
+            public const string PickUps = "PickUps";
         }
         
         public static class Configs

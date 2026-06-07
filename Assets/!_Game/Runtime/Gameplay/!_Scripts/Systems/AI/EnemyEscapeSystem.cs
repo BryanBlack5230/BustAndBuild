@@ -131,6 +131,16 @@ namespace BarkingBird.Runtime.Gameplay.AI
                         NextBlinkToggleAt = 0f,
                         VisibleState = 1,
                     });
+                    ECB.SetComponent(sortKey, pearl, new PearlFloat
+                    {
+                        Amplitude = Settings.FloatAmplitude,
+                        Period = Settings.FloatPeriod,
+                        PhaseOffset = rand.NextFloat(0f, math.PI2),
+                        RestY = pos.y,
+                        RestTimer = 0f,
+                    });
+                    ECB.SetComponent(sortKey, pearl, new PhysicsGravityFactor { Value = 1f });
+                    ECB.SetComponentEnabled<PearlSettled>(sortKey, pearl, false);
                 }
             }
 

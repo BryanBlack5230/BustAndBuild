@@ -3,6 +3,7 @@ using Reflex.Core;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.Camera;
+using BarkingBird.Runtime.Gameplay.Currency;
 using BarkingBird.Runtime.Gameplay.Daylight;
 using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Infrastructure;
@@ -26,6 +27,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(_worldSceneData, typeof(WorldSceneData));
             builder.AddSingleton(typeof(ScrollController), typeof(ScrollController), typeof(IDisposable));
             builder.AddSingleton(typeof(WorldCameraHandler), typeof(WorldCameraHandler), typeof(IGameListener));
+            builder.AddSingleton(typeof(WorldCurrency), typeof(WorldCurrency));
         }
     }
 }
