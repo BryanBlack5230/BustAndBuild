@@ -1,6 +1,5 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -27,8 +26,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [ReadOnly] public ComponentLookup<EnemyUnitType> EnemyTypeLookup;
         [ReadOnly] public ComponentLookup<AllyUnitType> AllyTypeLookup;
 
-        [NativeDisableContainerSafetyRestriction]
-        [ReadOnly] public ComponentLookup<Target> TargetLookup;
+        [ReadOnly] public NativeParallelHashMap<Entity, Entity> TargetSnapshot;
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
 
@@ -175,12 +173,9 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
                 var score = baseWeight + distanceWeight;
 
-                if (isHostileList && settings.AggroBonus > 0 && TargetLookup.HasComponent(other))
+                if (isHostileList && settings.AggroBonus > 0 && TargetSnapshot.TryGetValue(other, out var otherTarget) && otherTarget == me)
                 {
-                    if (TargetLookup[other].TargetEntity == me)
-                    {
-                        score += settings.AggroBonus;
-                    }
+                    score += settings.AggroBonus;
                 }
             
                 var dirToTarget = math.normalize(otherPos - myPos);

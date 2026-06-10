@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Transforms;
 
 using BarkingBird.Runtime.Infrastructure.GameLoop;
@@ -54,7 +55,16 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
             var beaconEnt = Entity.Null;
             if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
-        
+
+            var targetSnapshot = new NativeParallelHashMap<Entity, Entity>(enemies.Length + allies.Length, Allocator.TempJob);
+            state.Dependency = new SnapshotTargetsJob
+            {
+                Enemies = enemies,
+                Allies = allies,
+                TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
+                Snapshot = targetSnapshot,
+            }.Schedule(state.Dependency);
+
             var job = new TargetScorerJob
             {
                 ProfilesBlob = profilesConfig.Blob,
@@ -72,7 +82,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AllyTypeLookup = SystemAPI.GetComponentLookup<AllyUnitType>(true),
                 TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
-                TargetLookup = SystemAPI.GetComponentLookup<Target>(true),
+                TargetSnapshot = targetSnapshot,
             
                 ElapsedTime = elapsedTime,
                 IsBattleActive = coord.IsBattleActive,
@@ -91,6 +101,31 @@ namespace BarkingBird.Runtime.Gameplay.AI
         
             state.Dependency = wallEntities.Dispose(state.Dependency);
             state.Dependency = wallTransforms.Dispose(state.Dependency);
+            state.Dependency = targetSnapshot.Dispose(state.Dependency);
+        }
+
+        [BurstCompile]
+        private struct SnapshotTargetsJob : IJob
+        {
+            [ReadOnly] public NativeArray<Entity> Enemies;
+            [ReadOnly] public NativeArray<Entity> Allies;
+            [ReadOnly] public ComponentLookup<Target> TargetLookup;
+            public NativeParallelHashMap<Entity, Entity> Snapshot;
+
+            public void Execute()
+            {
+                AddRange(Enemies);
+                AddRange(Allies);
+            }
+
+            private void AddRange(NativeArray<Entity> units)
+            {
+                for (var i = 0; i < units.Length; i++)
+                {
+                    var unit = units[i];
+                    if (TargetLookup.HasComponent(unit)) Snapshot.TryAdd(unit, TargetLookup[unit].TargetEntity);
+                }
+            }
         }
     }
 }
