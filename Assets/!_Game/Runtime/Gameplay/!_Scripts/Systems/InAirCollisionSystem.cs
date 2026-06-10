@@ -21,6 +21,7 @@ public partial struct InAirCollisionSystem : ISystem
     private ComponentLookup<BounceDamage> _bounceDamageLookup;
     private ComponentLookup<Unit> _unitLookup;
     private BufferLookup<DamageBufferElement> _damageLookup;
+    private BufferLookup<HitFeedbackBufferElement> _feedbackLookup;
     private uint _groundLayerBit;
     private uint _pickUpsLayerBit;
 
@@ -33,6 +34,7 @@ public partial struct InAirCollisionSystem : ISystem
         _bounceDamageLookup = state.GetComponentLookup<BounceDamage>(true);
         _unitLookup = state.GetComponentLookup<Unit>(true);
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
+        _feedbackLookup = state.GetBufferLookup<HitFeedbackBufferElement>();
 
         _groundLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground);
         _pickUpsLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.PickUps);
@@ -54,6 +56,7 @@ public partial struct InAirCollisionSystem : ISystem
         _bounceDamageLookup.Update(ref state);
         _unitLookup.Update(ref state);
         _damageLookup.Update(ref state);
+        _feedbackLookup.Update(ref state);
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
@@ -76,6 +79,7 @@ public partial struct InAirCollisionSystem : ISystem
             BounceDamageLookup = _bounceDamageLookup,
             UnitLookup = _unitLookup,
             DamageLookup = _damageLookup,
+            FeedbackLookup = _feedbackLookup,
             GroundLayerBit = _groundLayerBit,
             PickUpsLayerBit = _pickUpsLayerBit,
             MinVelocity = minVel,
@@ -95,6 +99,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
     [ReadOnly] public ComponentLookup<BounceDamage> BounceDamageLookup;
     [ReadOnly] public ComponentLookup<Unit> UnitLookup;
     public BufferLookup<DamageBufferElement> DamageLookup;
+    public BufferLookup<HitFeedbackBufferElement> FeedbackLookup;
     public EntityCommandBuffer Ecb;
     public uint GroundLayerBit;
     public uint PickUpsLayerBit;
@@ -167,6 +172,12 @@ public struct InAirCollisionJob : ICollisionEventsJob
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = finalDamage });
 
+        if (FeedbackLookup.HasBuffer(entity))
+            FeedbackLookup[entity].Add(new HitFeedbackBufferElement
+            {
+                HitDirection = math.normalizesafe(-velocity.Linear, new float3(0f, 1f, 0f)),
+            });
+
         // Log.Battle.D($"{entity} has landed. Velocity: {math.length(velocity.Linear)}, VelocityPower: {velocityPower}, Bounced: {bounceDmg.BounceCount}, Damage: {finalDamage}");
         bounceDmg.BounceCount = 0;
         Ecb.SetComponent(entity, bounceDmg);
@@ -191,6 +202,9 @@ public struct InAirCollisionJob : ICollisionEventsJob
         if (IsAlly(entity)) dmg *= 0.25f;
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = dmg });
+
+        if (FeedbackLookup.HasBuffer(entity))
+            FeedbackLookup[entity].Add(new HitFeedbackBufferElement { HitDirection = normal });
 
         bounceDmg.BounceCount++;
         // Log.Battle.D($"{entity} has bounced. Velocity: {math.length(velocity.Linear)}, VelocityPower: {velocityPower}, Bounced: {bounceDmg.BounceCount}, Damage: {dmg}");
@@ -220,6 +234,17 @@ public struct InAirCollisionJob : ICollisionEventsJob
 
         if (DamageLookup.HasBuffer(groundedEntity))
             DamageLookup[groundedEntity].Add(new DamageBufferElement { Value = groundedDamage });
+
+        var horizontalImpactDir = math.normalizesafe(new float3(originalLinear.x, 0f, originalLinear.z), float3.zero);
+
+        if (FeedbackLookup.HasBuffer(flyingEntity))
+            FeedbackLookup[flyingEntity].Add(new HitFeedbackBufferElement
+            {
+                HitDirection = math.normalizesafe(-originalLinear, new float3(0f, 1f, 0f)),
+            });
+
+        if (FeedbackLookup.HasBuffer(groundedEntity))
+            FeedbackLookup[groundedEntity].Add(new HitFeedbackBufferElement { HitDirection = horizontalImpactDir });
 
         flyingVelocity.Linear = -originalLinear * 0.15f;
         Ecb.SetComponent(flyingEntity, flyingVelocity);

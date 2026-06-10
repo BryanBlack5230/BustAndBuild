@@ -75,6 +75,6 @@ public partial struct PearlLifetimeJob : IJobEntity
 
         lifetime.NextBlinkToggleAt = Elapsed + BlinkInterval;
         lifetime.VisibleState = lifetime.VisibleState == 0 ? (byte)1 : (byte)0;
-        transform.Scale = lifetime.VisibleState == 1 ? 0.25f : 0.02f;
+        transform.Scale = lifetime.VisibleState == 1 ? 0.25f : 0.1f;
     }
 }

@@ -7,6 +7,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public class UnitMoverAuthoring : MonoBehaviour
     {
         public float moveSpeed;
+        public float turnSpeed;
         public class Baker : Baker<UnitMoverAuthoring>
         {
             public override void Bake(UnitMoverAuthoring authoring)
@@ -15,12 +16,13 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new UnitMover
                 {
                     moveSpeed = authoring.moveSpeed,
+                    turnSpeed = authoring.turnSpeed
                 });
             }
         }
     }
 
-    public struct UnitMover : IComponentData, IEnableableComponent
+    public struct UnitMover : IComponentData
     {
         public float moveSpeed;
         public float turnSpeed;
@@ -31,11 +33,4 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public float3 Value;
         public float StoppingDistanceSq;
     }
-
-    public struct EvasionDestination : IComponentData
-    {
-        public float3 MoveDirection;
-        public float3 Position;
-    }
-
 }

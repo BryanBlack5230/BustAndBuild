@@ -14,12 +14,14 @@ using BarkingBird.Runtime.Gameplay.AI;
 public partial struct ScreenBounceSystem : ISystem
 {
     private BufferLookup<DamageBufferElement> _damageLookup;
+    private BufferLookup<HitFeedbackBufferElement> _feedbackLookup;
     private ComponentLookup<Unit> _unitLookup;
 
     // OnCreate is not [BurstCompile] — managed calls for RequireForUpdate setup
     public void OnCreate(ref SystemState state)
     {
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
+        _feedbackLookup = state.GetBufferLookup<HitFeedbackBufferElement>();
         _unitLookup = state.GetComponentLookup<Unit>(true);
 
         state.RequireForUpdate<CameraFrustumData>();
@@ -34,6 +36,7 @@ public partial struct ScreenBounceSystem : ISystem
         if (!SystemAPI.TryGetSingleton<BattleScreenCenter>(out var battleCenter)) return;
 
         _damageLookup.Update(ref state);
+        _feedbackLookup.Update(ref state);
         _unitLookup.Update(ref state);
 
         var minVel = 5f;
@@ -91,6 +94,7 @@ public partial struct ScreenBounceSystem : ISystem
             var snappedCamCenter = camCenter;
             var velocityPower = ComputeVelocityPower(vel, minVel, maxVel, curveSamples);
             var bounced = false;
+            var pushbackNormal = float3.zero;
 
             if (outLeft)
             {
@@ -98,6 +102,7 @@ public partial struct ScreenBounceSystem : ISystem
                 {
                     vel = math.reflect(vel, camRight);
                     bounced = true;
+                    pushbackNormal += camRight;
                 }
                 snappedCamCenter.x += -halfWidth - minCamX;
             }
@@ -107,6 +112,7 @@ public partial struct ScreenBounceSystem : ISystem
                 {
                     vel = math.reflect(vel, -camRight);
                     bounced = true;
+                    pushbackNormal += -camRight;
                 }
                 snappedCamCenter.x += halfWidth - maxCamX;
             }
@@ -117,6 +123,7 @@ public partial struct ScreenBounceSystem : ISystem
                 {
                     vel = math.reflect(vel, -camUp);
                     bounced = true;
+                    pushbackNormal += -camUp;
                 }
                 snappedCamCenter.y += topLimit - maxCamY;
             }
@@ -134,6 +141,12 @@ public partial struct ScreenBounceSystem : ISystem
 
                     bounceDmg.ValueRW.BounceCount++;
                 }
+
+                if (_feedbackLookup.HasBuffer(entity))
+                    _feedbackLookup[entity].Add(new HitFeedbackBufferElement
+                    {
+                        HitDirection = math.normalizesafe(pushbackNormal, new float3(0f, 0f, 1f)),
+                    });
             }
 
             vel.z = velZ; // screen bounce only affects x/y; preserve depth velocity

@@ -28,7 +28,7 @@
 
 ## Enableable Components Pattern
 Used as flags whose state changes frequently without restructuring chunks:
-- `Grabbed`, `InAir`, `IsDead`, `IsInvulnerable`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `UnitMover`, `Escaped`, `HasLeftBase`
+- `Grabbed`, `InAir`, `IsDead`, `IsInvulnerable`, `UnableToAct`, `SteeringEnabled`, `UnitRegisteredTag`, `Stun`, `Escaped`, `HasLeftBase`
 - `AttackCooldownExpirationTimestamp`, `TargetSearchCooldownExpirationTimestamp` — combine timestamp data + enabled bit. System checks `IsComponentEnabled` to skip ready-to-act entities; if `Value > elapsedTime` keep enabled, else disable.
 - `HasLeftBase` — same pattern: enableable bit ("has the enemy ever been outside its base") + data field `DwellTimer` (seconds accumulated while back inside under escape conditions). When the timer's relevance is gated by the enableable, fold them into one struct instead of adding a sibling component.
 - `SpawnEnemies` — gates all spawn queries; toggled by `SpawningStateSystem` driven by `EventManager.Daylight` events.
@@ -179,6 +179,8 @@ Three collision-event branches, dispatched in `Execute(CollisionEvent)`:
 
 Discovered when SoftLand-cascade bug looked like the grounded unit's knock-back was being ignored — it was being overridden by `UnitMoverSystem`. Fix: enable `InAir` on the grounded entity alongside the velocity write.
 
+**Alternative for grounded-knockback (no airborne semantics): the `Stun` tag.** `Stun : IComponentData, IEnableableComponent { float Remaining }` is OR'd into `UnableToAct` by `AbleToActEvaluationSystem`. `DamagePushSystem` writes `Stun.Remaining = StunDuration` + enables it; `StunSystem` (runs `[UpdateBefore(AbleToActEvaluationSystem)]`) decrements `Remaining` and disables `Stun` at ≤ 0. `UnitMoverJob` skips the unit through the existing `[WithDisabled(UnableToAct)]` filter — no need to make `UnitMover` enableable. This replaces an earlier pattern that toggled `UnitMover` directly via `IEnableableComponent`, which was an implementation leak (the meaning of "disabled mover" really meant "stunned") and was prone to stranding units immobile (see "Single-Tick Signal Pattern" below). Currently `Stun` is baked alongside `DamagePushConfig` in `HitFeedbackAuthoring`; pull it out to `StunAuthoring` if/when a second stun source appears.
+
 ## ThrowVelocitySettings
 `FixedList512Bytes<float>` of curve samples used by `ScreenBounceSystem` and `InAirCollisionSystem` for unified velocity-power calculation. Built each frame from `_velocityPowerCurve.Evaluate(t)` in `ThrowSettingsSetter.SyncVelocitySettings()` (64 samples). Min/Max velocity bounds also synced.
 
@@ -302,6 +304,67 @@ To enable collision between PickUps (10) and Unit (6): set bit 10 in Unit's row 
 
 **Gotcha:** SubScene baking captures `CollisionFilter` at bake time. Editing the matrix requires re-baking the subscene for the change to take effect at runtime.
 
+## PostTransformMatrix — Bake-Time Identity Strip
+**Context:** Hit-feedback squash system wrote `PostTransformMatrix` on a baked body entity via baker `AddComponent(entity, new PostTransformMatrix { Value = float4x4.identity })`. At runtime, `ComponentLookup<PostTransformMatrix>.HasComponent(body)` returned false; squash silently no-op'd.
+**Finding:** Unity's post-bake transform reconciliation **removes `PostTransformMatrix` when its baked value is identity**, on the assumption that `LocalTransform`'s uniform scale already covers the case. User-added identity-valued bake components don't survive. Other components (URPMaterialPropertyBaseColor, tags) on the same entity were preserved fine — the strip is specific to transform reconciliation.
+**Fix:** Add `PostTransformMatrix` at runtime instead. A one-shot init system in `InitializationSystemGroup` works:
+```csharp
+[UpdateInGroup(typeof(InitializationSystemGroup))]
+public partial struct BodyPostTransformInitSystem : ISystem {
+    public void OnUpdate(ref SystemState state) {
+        var ecb = SystemAPI.GetSingleton<BeginInitializationEntityCommandBufferSystem.Singleton>()
+                           .CreateCommandBuffer(state.WorldUnmanaged);
+        foreach (var (_, entity) in SystemAPI.Query<RefRO<BodyVisualTag>>()
+                     .WithNone<PostTransformMatrix>().WithEntityAccess())
+            ecb.AddComponent(entity, new PostTransformMatrix { Value = float4x4.identity });
+    }
+}
+```
+The `WithNone<PostTransformMatrix>` filter makes it idempotent — the query stops matching after the add, so it's effectively one-shot per entity.
+**Why it matters:** Any non-uniform scale animation (squash, breathe, dynamic stretch) needs PostTransformMatrix on identity-scale entities. The bake-time path is unreliable; the runtime init pattern is the workaround. Likely also affects other transform components that have "identity = redundant" semantics.
+
+## Cross-Baker `AddComponent` on Child Entities — Unreliable
+**Context:** Initially put `AddComponent(bodyEntity, new PostTransformMatrix {...})` inside the **parent's** baker (`HitFeedbackAuthoring.Baker`), resolving the body via `GetEntity(body.gameObject, TransformUsageFlags.Dynamic)`. Component never showed up on the body entity at runtime.
+**Finding:** In Entities 1.4, cross-baker `AddComponent` on a child entity (where another Baker owns that entity's primary baking) is inconsistent. The child's own Baker should add components targeting it. Moving the `AddComponent` to `BodyVisualAuthoring.Baker` (the child's own baker) was the right call. (Still didn't help in this case — the bake-time identity-strip got it — but is the correct architectural choice.)
+**Why it matters:** Default to "each baker owns its own primary entity's components." Use `GetEntity(otherGO)` for *reading* and dependency tracking; reach for cross-baker writes only when there's no alternative, and verify the result in the Entity Debugger.
+
+## URPMaterialPropertyBaseColor With Built-In URP Shaders — No Setup Needed
+**Context:** Considered whether unit body materials needed a Shader Graph with "Allow Material Override" enabled before per-instance `_BaseColor` overrides would work.
+**Finding:** Not needed for built-in URP shaders (`URP/Lit`, `URP/SimpleLit`, `URP/Unlit`) — they're DOTS-instanced by default and pick up `URPMaterialPropertyBaseColor` automatically. The "Allow Material Override" toggle is a **Shader Graph-only** mechanism for opting individual properties into DOTS instancing. Built-in shaders take a different path (via the URP shader includes' DOTS instancing block).
+**Why it matters:** Adding `URPMaterialPropertyBaseColor` in a baker is enough to drive per-instance tint on URP/SimpleLit bodies — no material/shader changes required. Used by `BodyVisualAuthoring` for damage-flash. The same applies to other shipping components in `Unity.Rendering` (`URPMaterialPropertyEmissionColor`, etc.).
+
+## Damage Feedback — Composable Block Pattern (Hit Feedback)
+**Context:** Adding visual juice to damage events (color flash, squash, push) with each effect independently configurable per unit.
+**Finding:** Pattern — separate buffer for visual-feedback signals from gameplay damage; one dispatcher fans out to per-effect "blocks"; each block is a `Config + State` component pair (`State` is `IEnableableComponent`), gated by `[Optional]` semantics.
+- `HitFeedbackBufferElement` buffer (parallel to `DamageBufferElement`) carries `float3 HitDirection`. Damage producers (`AttackSystem`, `InAirCollisionSystem`, `ScreenBounceSystem`) append to it alongside their damage write.
+- `HitFeedbackDispatchSystem` drains the buffer, aggregates direction, and conditionally enables whichever `*State` components the entity has via `SystemAPI.HasComponent<TConfig>()` checks. Runs before `ApplyDamageSystem` so killing blows still get juice.
+- Each block: `DamageFlashSystem`, `DamageSquashSystem`, `DamagePushSystem` — each reads `*Config` + `*State` (enableable filter), advances state, writes target component (`URPMaterialPropertyBaseColor` for flash on body entity, `PostTransformMatrix` for squash, `PhysicsVelocity` for push). Each disables its own `*State` when finished.
+- Blocks are added by a single `HitFeedbackAuthoring` with three optional SO refs (one per block); a null ref → block absent. Designer composes per-unit by SO assignment.
+**Why it matters:** "Effect = component pair + dedicated system" scales linearly: adding a fourth block (e.g. screen shake hint, particle burst trigger) means one new pair + one new system, zero changes to existing blocks or dispatch. Buffer-and-fanout decouples damage producers from visual consumers — producers don't grow per-effect.
+
 ## Component File Organization — Don't Pile Unrelated Singletons in One File
 **Context:** Initial draft put `Pearl`, `PearlLifetime`, `PearlSettings`, `PearlSpawnPrefab`, AND `CursorWorldPosition` in `Components/Pearl.cs`. The cursor singleton was lifted into its own `Components/CursorWorldPosition.cs` shortly after.
 **Finding:** Group `IComponentData` files by **subject**, not by who-introduced-them. A cursor-position singleton fed by an input bridge belongs in its own file (or with other input-side singletons), even if it's first consumed by the pearl pickup system. Keeps file moves cheap when the consumer changes.
+
+## ECB-vs-Lookup Timing Trap (Cross-Group)
+**Context:** `InAirCollisionSystem` runs in `PhysicsSystemGroup` and queues `Ecb.SetComponentEnabled<InAir>(entity, true/false)` against `EndSimulationEntityCommandBufferSystem`. That ECB plays at the **end of `SimulationSystemGroup`** — *after* `GameLoopSystemGroup`. Systems in `GameLoopSystemGroup` (e.g. `HitFeedbackDispatchSystem`, `DamagePushSystem`) read `ComponentLookup<InAir>.IsComponentEnabled(entity)` and see the **pre-ECB-playback** state, not the just-queued change.
+
+**Finding:** When a producer queues an enableable flip via `EndSimulation` ECB and a consumer in the same `SimulationSystemGroup` tick reads the flag via lookup, the consumer always sees stale state. This produced the *"stunned unit lies on the ground forever"* bug: `Landed()` queued `InAir = false` *and* added `HitFeedbackBufferElement`; same tick, `DamagePushSystem` saw `InAir == enabled` (stale) and took the in-air bail-out, which previously left `UnitMover` disabled with no countdown to revive it.
+
+**Why it matters:**
+- Don't reason about post-ECB state inside the same `SimulationSystemGroup` tick. If you must, either (a) use a `BeginSimulation` ECB on the producer so the change lands at the top of the next tick, (b) write the flag directly (`EntityManager.SetComponentEnabled` from a main-thread system, or `EnabledRefRW` inside the producer's own query) instead of via ECB, or (c) design the consumer so the stale read is harmless (e.g., make side effects idempotent / self-healing, see "Single-Tick Signal Pattern" below).
+- The trap is invisible without tracing system-group order against ECB playback. When debugging "the flag I just set isn't showing up," check which ECB system that flag lives on and where it sits relative to your reader.
+
+## Single-Tick Signal Pattern
+**Context:** Refactor of `DamagePushState` after the stranded-unit bug above.
+
+**Pattern:** When System A wants to *signal* System B to do something on the next tick, model the signal as `MyEvent : IComponentData, IEnableableComponent` with the minimum payload (e.g. `float3 HitDirWorld`). A enables the bit and writes payload; B reads payload, **disables the bit at the top of its loop body**, then does its work — regardless of any conditional early-exit. The signal is consumed exactly once per dispatch. Any persistent side effect (timer, stun, cooldown) lives on a **separate** data component owned by its own dedicated tick-down system.
+
+**Concrete example (push-and-stun):**
+- `DamagePushState { float3 HitDirWorld }` — single-tick signal. `HitFeedbackDispatchSystem` enables; `DamagePushSystem` disables on entry and applies impulse (or bails in air).
+- `Stun { float Remaining } : IEnableableComponent` — persistent state. `DamagePushSystem` writes `Remaining = StunDuration`; `StunSystem` decrements and disables at ≤ 0; `AbleToActEvaluationSystem` ORs it into `UnableToAct`.
+
+**Why it matters:**
+- A signal component that's also a *state machine* (the old `DamagePushState` carried `Applied: byte` + `Elapsed: float`) is fragile: re-dispatch during an active state resets the state machine, and any early-exit path becomes a potential strand. Single-tick consumption + separate timer eliminates that whole bug class.
+- Dispatch becomes idempotent: System A can fire on every hit; the side effect (stun) just refreshes naturally on follow-up hits.
+- Each system has one responsibility (signal, impulse, timer, aggregation), each component has one shape (signal payload, persistent state, configuration).

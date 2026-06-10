@@ -59,6 +59,19 @@ UnityEditor.AssetDatabase.SaveAssets();
 **Finding:** When all fields in a `[HorizontalGroup]` are hidden by `[ShowIf]`, the row itself vanishes — no empty gap left behind.  
 **Why it matters:** Safe to combine `[HorizontalGroup]` with `[ShowIf]`; no need to hide the group separately.
 
+## One Unity-Serialized Class Per File — Silent Inspector Wiring Failure
+**Context:** Initial hit-feedback work put three `ScriptableObject` types (`FlashProfile`, `SquashProfile`, `PushProfile`) in one `HitFeedbackProfiles.cs` file. SO assets created from the Create menu. User dragged them into `HitFeedbackAuthoring`'s inspector slots — drops appeared to work. Squash and push blocks never fired at runtime; flash worked (because its baker reads color from material, independent of the SO reference).
+**Finding:** Unity's serialization links inspector references to types by **file path matching the class name**. Multiple `MonoBehaviour` or `ScriptableObject` types in one file → references silently fail to persist through bake (no compile error, no runtime error, drag-drop appears to "stick" in the inspector but the link is dead). Fix: split into one file per class, filename = class name.
+```
+HitFeedbackProfiles.cs   ← BROKEN: three SOs in one file
+   ↓
+FlashProfileSO.cs        ← FIXED: one SO per file
+SquashProfileSO.cs
+PushProfileSO.cs
+```
+Use `[FormerlySerializedAs("_oldName")]` on the new field names if you also rename the fields, to preserve already-assigned inspector references.
+**Why it matters:** Applies to **both** `MonoBehaviour` and `ScriptableObject`. Plain ECS types (`IComponentData`, `IBufferElementData`, `IAspect`), enums, and POCOs can still share files — the rule is specifically about Unity-serialized class types. Project convention emerged: SO filenames use `%Name%SO.cs` (`FlashProfileSO`), not bare `%Name%.cs`.
+
 ## SetBuildConfig Pattern — Global Exclusive Flag (No Scoping)
 **Context:** `RunConfiguration.SetBuildConfig()` — only one config in the entire project can be the build entry point.  
 **Finding:** Same pattern as `SetDefault` but omit the chain equality check — clears the flag on every other asset of the type globally.

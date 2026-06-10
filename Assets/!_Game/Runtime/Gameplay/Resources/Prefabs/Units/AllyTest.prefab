@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3362322714341214501}
   - component: {fileID: 2008988693255972343}
   - component: {fileID: -6275944522738358224}
+  - component: {fileID: 5164564952931912850}
   m_Layer: 8
   m_Name: AllyTest
   m_TagString: Untagged
@@ -189,6 +190,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Entities.Hybrid::Unity.Entities.Hybrid.Baking.LinkedEntityGroupAuthoring
+--- !u!114 &5164564952931912850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4653761851325888072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd2f61cacbbe76748a0e554b7efed945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::HitFeedbackAuthoring
+  _flashProfile: {fileID: 11400000, guid: 8949d53904178fa4c9dd07e4357b2983, type: 2}
+  _squashProfile: {fileID: 11400000, guid: 4f2e9b6efaa30094fb975334636c7ebb, type: 2}
+  _pushProfile: {fileID: 11400000, guid: 837ae33b6033d194ab01fbcb9006fac4, type: 2}
 --- !u!1001 &5285013733820473044
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -293,8 +309,28 @@ PrefabInstance:
     - {fileID: 3211167749860858641, guid: 734462afa7eca5c4ebb9e65d7e9be4c1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6045703068959046795, guid: 734462afa7eca5c4ebb9e65d7e9be4c1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4845608128824467852}
   m_SourcePrefab: {fileID: 100100000, guid: 734462afa7eca5c4ebb9e65d7e9be4c1, type: 3}
+--- !u!1 &1927124019017212511 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6045703068959046795, guid: 734462afa7eca5c4ebb9e65d7e9be4c1, type: 3}
+  m_PrefabInstance: {fileID: 5285013733820473044}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4845608128824467852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927124019017212511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92e1d157827dd2545a521d2adf7ce73f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::BodyVisualAuthoring
 --- !u!4 &8792900776861975302 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3701549145957555666, guid: 734462afa7eca5c4ebb9e65d7e9be4c1, type: 3}

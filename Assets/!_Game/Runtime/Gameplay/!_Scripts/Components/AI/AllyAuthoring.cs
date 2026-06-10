@@ -61,6 +61,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new Target());
                 AddComponent(entity, new Health { Value = authoring.health, Max = authoring.health });
                 AddBuffer<DamageBufferElement>(entity);
+                AddBuffer<HitFeedbackBufferElement>(entity);
                 AddComponent(entity, new AttackData { Damage = authoring.attackDamage, CooldownTime = authoring.attackCooldown, AttackRange = authoring.attackRange});
                 AddComponent(entity, new BattleBrain{ CanAttack = false});
                 AddComponent(entity, new EmotionalState {Value = Emotion.Normal});

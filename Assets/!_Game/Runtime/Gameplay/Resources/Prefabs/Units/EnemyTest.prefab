@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3724430960567086498}
   - component: {fileID: 8147585489975437197}
   - component: {fileID: 1790755117663834051}
+  - component: {fileID: 4670575246625641582}
   m_Layer: 8
   m_Name: EnemyTest
   m_TagString: Untagged
@@ -150,6 +151,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   ObstacleDangerCurve: 1
+  pearlsMin: 10
+  pearlsMax: 20
+  pearlValue: 1
 --- !u!54 &8147585489975437197
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -189,6 +193,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Entities.Hybrid::Unity.Entities.Hybrid.Baking.LinkedEntityGroupAuthoring
+--- !u!114 &4670575246625641582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6250557191891367087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd2f61cacbbe76748a0e554b7efed945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::HitFeedbackAuthoring
+  flashProfileSo: {fileID: 11400000, guid: 8949d53904178fa4c9dd07e4357b2983, type: 2}
+  squashProfileSo: {fileID: 11400000, guid: 4f2e9b6efaa30094fb975334636c7ebb, type: 2}
+  pushProfileSo: {fileID: 11400000, guid: 837ae33b6033d194ab01fbcb9006fac4, type: 2}
 --- !u!1001 &1668353482242551792
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -245,10 +264,30 @@ PrefabInstance:
     - {fileID: 3654418375386998306, guid: 98e2af615b597e9449f46ecb334f7b36, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8517263566300775436, guid: 98e2af615b597e9449f46ecb334f7b36, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2485579641621931463}
   m_SourcePrefab: {fileID: 100100000, guid: 98e2af615b597e9449f46ecb334f7b36, type: 3}
 --- !u!4 &1686963279005255158 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 22063406163356166, guid: 98e2af615b597e9449f46ecb334f7b36, type: 3}
   m_PrefabInstance: {fileID: 1668353482242551792}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6995296047658855420 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8517263566300775436, guid: 98e2af615b597e9449f46ecb334f7b36, type: 3}
+  m_PrefabInstance: {fileID: 1668353482242551792}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2485579641621931463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6995296047658855420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92e1d157827dd2545a521d2adf7ce73f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::BodyVisualAuthoring
