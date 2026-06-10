@@ -21,7 +21,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
         {
             InstallGameLoop(builder);
             builder.AddSingleton(_prototypeConfigSetter, typeof(PrototypeConfigSetter));
-            builder.AddSingleton(typeof(BlobContainer), typeof(BlobContainer));
+            builder.AddSingleton(typeof(BlobContainer), typeof(BlobContainer), typeof(IDisposable));
             builder.AddSingleton(_bootstrapFlow, typeof(BootstrapFlow));
             builder.AddSingleton(_throwSettingsSetter, typeof(ThrowSettingsSetter), typeof(IGameListener));
         }

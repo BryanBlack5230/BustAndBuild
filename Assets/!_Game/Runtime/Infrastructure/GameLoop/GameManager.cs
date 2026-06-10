@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 using BarkingBird.Runtime.Infrastructure.Utilities;
@@ -17,7 +18,9 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
             _uiController.SubscribeButtons(StartGame, PauseGame, ResumeGame);
         }
 
-        public async void StartGame()
+        public void StartGame() => StartGameAsync().Forget();
+
+        private async UniTaskVoid StartGameAsync()
         {
             _uiController.OnStart();
 

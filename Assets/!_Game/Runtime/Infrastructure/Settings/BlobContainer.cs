@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -6,10 +7,12 @@ using BarkingBird.Runtime.Gameplay.AI;
 
 namespace BarkingBird.Runtime.Infrastructure.Settings
 {
-    public sealed class BlobContainer
+    public sealed class BlobContainer : IDisposable
     {
         private readonly ConfigContainer _container;
         private readonly PrototypeConfigSetter _prototypeConfig;
+
+        private BlobAssetReference<TargetProfilesBlob> _profilesBlob;
 
         public BlobContainer(ConfigContainer container, PrototypeConfigSetter prototypeConfig)
         {
@@ -22,12 +25,20 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             var world = World.DefaultGameObjectInjectionWorld;
             var entityManager = world.EntityManager;
 
+            if (_profilesBlob.IsCreated) _profilesBlob.Dispose();
+            _profilesBlob = CreateProfilesBlob();
+
             var configEntity = entityManager.CreateEntity();
             entityManager.AddComponentData(configEntity, new TargetProfiles
             {
-                Blob = CreateProfilesBlob()
+                Blob = _profilesBlob
             });
             entityManager.SetName(configEntity, "Global_Target_Profiles");
+        }
+
+        public void Dispose()
+        {
+            if (_profilesBlob.IsCreated) _profilesBlob.Dispose();
         }
         
         private BlobAssetReference<TargetProfilesBlob> CreateProfilesBlob()

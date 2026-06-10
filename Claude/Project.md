@@ -26,7 +26,7 @@ Two assemblies, both rooted under `Assets/!_Game/`:
 
 | Assembly | asmdef | Root namespace |
 |---|---|---|
-| `Runtime` | `!_Game/Runtime.asmdef` (covers everything except `Editor/`) | `BarkingBird.Runtime.*` |
+| `Runtime` | `!_Game/Runtime/Runtime.asmdef` (covers everything under `Runtime/`) | `BarkingBird.Runtime.*` |
 | `Editor` | `!_Game/Editor/Editor.asmdef` | `BarkingBird.Editor` |
 
 Runtime code is split into two trees:

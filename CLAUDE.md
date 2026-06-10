@@ -13,12 +13,12 @@ Bust and Build/
 │
 ├── `Assets/`                                       ← Assets for Unity
 │   ├── `!_Game/`                                   ← Assets made in BarkingBird studio
-│   │   ├── Runtime.asmdef                          ← Assembly: `Runtime` (covers everything except Editor/)
 │   │   ├── ProjectScope.prefab                     ← Reflex ProjectScope (ProjectInstaller lives here)
 │   │   ├── `Editor/`                               ← Editor-only code, assembly `Editor`, namespace `BarkingBird.Editor`
 │   │   │   ├── ConfigGenerator.cs / EditorConstants.cs / EditorSceneUtils.cs / SceneChainEditor.cs / ToolBox.cs
 │   │   │   └── `SceneWorkflow/`                    ← EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox
 │   │   └── `Runtime/`                              ← Runtime code split into Gameplay/ and Infrastructure/
+│   │       ├── Runtime.asmdef                      ← Assembly: `Runtime` (covers everything under Runtime/)
 │   │       ├── `Gameplay/`                         ← namespace `BarkingBird.Runtime.Gameplay.*`
 │   │       │   ├── Data/                           ← InputActions.inputactions, PostProcessing Profile
 │   │       │   ├── Resources/                      ← Audio, Cursors, Materials, Models, Prefabs, Shaders, Textures
@@ -46,7 +46,7 @@ Bust and Build/
 ```
 
 ## Namespace Conventions
-- Two assemblies: `Runtime` (everything under `Assets/!_Game/` minus `Editor/`) and `Editor` (`Assets/!_Game/Editor/`).
+- Two assemblies: `Runtime` (everything under `Assets/!_Game/Runtime/`) and `Editor` (`Assets/!_Game/Editor/`).
 - All editor code: `namespace BarkingBird.Editor`.
 - Runtime code is split into two top-level branches under `BarkingBird.Runtime.*`:
   - `Gameplay.{AI|Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Scenes|Settings}` — scene/gameplay-bound code.
