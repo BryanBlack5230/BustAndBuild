@@ -114,34 +114,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 var rand = Random.CreateFromIndex(Seed + (uint)entity.Index * 2654435761u);
                 var rolled = rand.NextInt(drop.MinCount, drop.MaxCount + 1);
                 var halfCount = rolled / 2;
-                var source = hasLeftBaseData.LastOutsidePosition;
 
-                for (var i = 0; i < halfCount; i++)
-                {
-                    var angle = rand.NextFloat(0f, math.PI2);
-                    var radius = math.sqrt(rand.NextFloat()) * Settings.Scatter;
-                    var pos = new float3(source.x + math.cos(angle) * radius, source.y + Settings.SpawnHeight, source.z + math.sin(angle) * radius);
-
-                    var pearl = ECB.Instantiate(sortKey, PearlPrefab);
-                    ECB.SetComponent(sortKey, pearl, LocalTransform.FromPosition(pos));
-                    ECB.SetComponent(sortKey, pearl, new Pearl { Value = drop.ValuePerPearl });
-                    ECB.SetComponent(sortKey, pearl, new PearlLifetime
-                    {
-                        TimeRemaining = Settings.Lifetime,
-                        NextBlinkToggleAt = 0f,
-                        VisibleState = 1,
-                    });
-                    ECB.SetComponent(sortKey, pearl, new PearlFloat
-                    {
-                        Amplitude = Settings.FloatAmplitude,
-                        Period = Settings.FloatPeriod,
-                        PhaseOffset = rand.NextFloat(0f, math.PI2),
-                        RestY = pos.y,
-                        RestTimer = 0f,
-                    });
-                    ECB.SetComponent(sortKey, pearl, new PhysicsGravityFactor { Value = 1f });
-                    ECB.SetComponentEnabled<PearlSettled>(sortKey, pearl, false);
-                }
+                PearlSpawnUtility.Spawn(ref ECB, sortKey, PearlPrefab, Settings, hasLeftBaseData.LastOutsidePosition, halfCount, drop.ValuePerPearl, ref rand);
             }
 
             ECB.DestroyEntity(sortKey, entity);
