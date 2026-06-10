@@ -36,7 +36,7 @@ public readonly partial struct HealthAspect : IAspect
         }
         else
         {
-            next = math.max(projected, 0f);
+            next = math.clamp(projected, 0f, _health.ValueRO.Max);
         }
 
         _health.ValueRW.Value = next;
