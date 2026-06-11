@@ -13,9 +13,7 @@ namespace BarkingBird.Runtime.Gameplay.Settings
     [Serializable]
     public sealed class GameLoopStateOverride : StateOverride
     {
-        public enum TargetState { Start, Pause, Finish }
-
-        [SerializeField] private TargetState _state;
+        [SerializeField] private GameState _state = GameState.Start;
 
         public override UniTask Apply()
         {
@@ -28,10 +26,14 @@ namespace BarkingBird.Runtime.Gameplay.Settings
 
             switch (_state)
             {
-                case TargetState.Start:  manager.StartGame();  break;
-                case TargetState.Pause:  manager.PauseGame();  break;
-                case TargetState.Finish: manager.FinishGame(); break;
-                default: throw new ArgumentOutOfRangeException(nameof(_state), _state, null);
+                case GameState.Start:  manager.StartGame();  break;
+                case GameState.Pause:  manager.PauseGame();  break;
+                case GameState.Resume: manager.ResumeGame(); break;
+                case GameState.Finish: manager.FinishGame(); break;
+                case GameState.Unknown:
+                default:
+                    Log.Boot.W($"{nameof(GameLoopStateOverride)}: state '{_state}' is not applicable; skipping.");
+                    break;
             }
 
             return UniTask.CompletedTask;

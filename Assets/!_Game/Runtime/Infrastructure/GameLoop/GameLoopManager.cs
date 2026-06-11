@@ -9,23 +9,19 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 {
     public class GameLoopManager : MonoBehaviour
     {
-        [Serializable]
-        public enum State
-        {
-            Unknown,
-            Start,
-            Finish,
-            Pause,
-            Resume
-        }
-		
         [ShowInInspector] private List<IGameListener> _listeners = new();
         [ShowInInspector] private List<IGameUpdateListener> _updateListeners = new();
         [ShowInInspector] private List<IGameFixedUpdateListener> _fixedUpdateListeners = new();
         [ShowInInspector] private List<IGameLateUpdateListener> _lateUpdateListeners = new();
-		
-        [ShowInInspector] private State _state = State.Unknown;
-		
+
+        [ShowInInspector] private GameState _state = GameState.Unknown;
+
+        /// <summary>
+        /// Authoritative current lifecycle state. Single source of truth — read it instead of inferring
+        /// state from UI or local flags. Changes are announced via <see cref="GameStateChangedEvent"/>.
+        /// </summary>
+        public GameState State => _state;
+
         [Inject]
         private void Construct(IEnumerable<IGameListener> gameListeners)
         {
@@ -89,8 +85,8 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 
         public void StartGame()
         {
-            _state = State.Start;
-			
+            SetState(GameState.Start);
+
             foreach (var gameListener in _listeners)
             {
                 if (gameListener is IGameStartListener gameStartListener)
@@ -102,8 +98,8 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 
         public void FinishGame()
         {
-            _state = State.Finish;
-			
+            SetState(GameState.Finish);
+
             foreach (var gameListener in _listeners)
             {
                 if (gameListener is IGameFinishListener gameFinishListener)
@@ -115,7 +111,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 
         public void PauseGame()
         {
-            _state = State.Pause;
+            SetState(GameState.Pause);
 
             foreach (var gameListener in _listeners)
             {
@@ -128,8 +124,8 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 
         public void ResumeGame()
         {
-            _state = State.Resume;
-			
+            SetState(GameState.Resume);
+
             foreach (var gameListener in _listeners)
             {
                 if (gameListener is IGameResumeListener gameResumeListener)
@@ -139,11 +135,21 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
             }
         }
 
+        /// <summary>
+        /// Assigns the authoritative state and announces it. Every transition routes through here so the
+        /// state value and the <see cref="GameStateChangedEvent"/> notification can never drift apart.
+        /// </summary>
+        private void SetState(GameState state)
+        {
+            _state = state;
+            EventBus.Raise(new GameStateChangedEvent(state));
+        }
+
         #endregion
 
         #region Updates
 
-        private bool CanUpdate() => _state is State.Start or State.Resume;
+        private bool CanUpdate() => _state is GameState.Start or GameState.Resume;
 
         private void Update() 
         {
@@ -207,7 +213,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
         {
             switch (_state)
             {
-                case State.Start:
+                case GameState.Start:
                     foreach (var gameListener in collection)
                     {
                         if (gameListener is IGameResumeListener gameResumeListener)
@@ -216,7 +222,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
                         }
                     }
                     break;
-                case State.Pause:
+                case GameState.Pause:
                     foreach (var gameListener in collection)
                     {
                         if (gameListener is IGameStartListener gameStartListener)
@@ -229,7 +235,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
                         }
                     }
                     break;
-                case State.Resume:
+                case GameState.Resume:
                     foreach (var gameListener in collection)
                     {
                         if (gameListener is IGameStartListener gameStartListener)
@@ -246,7 +252,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
                         }
                     }
                     break;
-                case State.Finish:
+                case GameState.Finish:
                     foreach (var gameListener in collection)
                     {
                         if (gameListener is IGameStartListener gameStartListener)

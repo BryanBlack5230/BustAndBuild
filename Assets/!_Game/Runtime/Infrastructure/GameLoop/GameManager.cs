@@ -7,8 +7,8 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 {
     public sealed class GameManager
     {
-        private GameLoopManager _gameLoopManager;
-        private GameManagerUIController _uiController;
+        private readonly GameLoopManager _gameLoopManager;
+        private readonly GameManagerUIController _uiController;
 
         public GameManager(GameLoopManager gameLoopManager, GameManagerUIController uiController)
         {
@@ -22,7 +22,7 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
 
         private async UniTaskVoid StartGameAsync()
         {
-            _uiController.OnStart();
+            _uiController.Render(GameState.Start);
 
             var countdown = new Countdown(3);
             await countdown.StartCountdownAsync();
@@ -34,16 +34,12 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
         {
             Debug.Log("Game paused!");
             _gameLoopManager.PauseGame();
-
-            _uiController.OnPause();
         }
 
         public void ResumeGame()
         {
             Debug.Log("Game resumed!");
             _gameLoopManager.ResumeGame();
-
-            _uiController.OnResume();
         }
 
         public void FinishGame()
