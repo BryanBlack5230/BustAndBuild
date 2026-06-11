@@ -35,17 +35,21 @@ When `DayEndedEvent` fires, `DaylightEcsBridge` flips `BattleCoordinator.IsDayPh
 
 **Enemies that successfully reach the base are removed by `EnemyEscapeSystem`** (see ecs-architecture pipeline §4a). It gates on `HasLeftBase` so just-spawned enemies aren't culled, and waits 2s of continuous dwell inside `EnemyBaseBounds` under (`!IsDayPhaseActive` OR `Scared`) before flipping `Escaped` + destroying. Uses `LocalToWorld.Position` against `Aabb.Contains` — center-based is correct here because it matches the brain's `baseBounds.ClosestPoint(myWorldPos)` retreat goal (the screen-frustum edge-check rule from `feedback_boundary_checks` does **not** apply to navigation-goal AABB tests).
 
-`HasLeftBase` carries `LastOutsidePosition` (written each frame while outside the base). Used by the **Scared-escape pearl drop** branch: when an enemy escapes via `EmotionalState == Scared`, half the rolled pearl count is spawned at `LastOutsidePosition` (= the position just before crossing back into the enemy base), not at the unit's current pos. Otherwise the drop would happen deep inside the inaccessible enemy base. Day-end escapes (non-Scared) drop nothing. See [[ecs-architecture]] "Capture Boundary-Crossing Position via Per-Frame Field Write" for the general pattern.
+`HasLeftBase` carries `LastOutsidePosition` (written each frame while outside the base). Used by the **Scared-escape pearl drop** branch: when an enemy escapes via `EmotionalState == Scared`, half the rolled pearl count is spawned at `LastOutsidePosition` (= the position just before crossing back into the enemy base), not at the unit's current pos. Otherwise the drop would happen deep inside the inaccessible enemy base. Day-end escapes (non-Scared) drop nothing. See [[ecs-patterns]] "Capture Boundary-Crossing Position via Per-Frame Field Write" for the general pattern.
+
+**`Emotion.Scared` currently has NO writer** — `EmotionalState` is only set to `Normal` at bake time, so the scared-flee brain branch and the scared pearl drop are unreachable today. Bryan confirmed (2026-06-10) this is **work in progress** — an emotion-evaluation system is planned. Don't strip the branches or report them as dead code.
 
 ## AbleToActEvaluationSystem
 Centralized "should I be active?" check: flips `UnableToAct` enabled whenever `Grabbed || InAir || IsDead` changes. Other systems just check `UnableToAct` enabled state. Runs `[WithOptions(IgnoreComponentEnabledState)]` to see all entities, regardless of their UnableToAct state.
 
-## Target Profiles (Blob)
+## Target Profiles (Blob) & TargetScorerJob
+`TargetProfilesBlob` is a `BlobAssetReference<TargetProfilesBlob>` containing two `BlobArray<TargetProfileBlob>` — enemy and ally profile lookups indexed by `EnemyType`/`AllyType` enum. Built by `BlobContainer.Initialize()` from `PrototypeConfigSetter.EnemyProfiles`/`AllyProfiles` (List<TargetProfile>) on bootstrap. Walls and beacon scored separately by reading `WallEntities`/`BeaconEntity` from the system. `LowHealthBonus` is baked into the blob but **never read** in scoring — implement or drop during the config refactor (see `Claude/ConfigTask.md`).
+
 - Per `EnemyType` and `AllyType` slot. Indexed by enum byte. Built from `PrototypeConfigSetter` (designer-tunable MonoBehaviour) — not yet from `ConfigContainer.Battle.EnemyProfiles`, that path is commented out in `BlobContainer`.
 - `WeightEnemy / WeightAlly / WeightWall / WeightBeacon` — positive = pursue, set to 0 to skip the category entirely.
 - `DistanceWeight` scales `(1 - distSq/detectionRadiusSq)` — used as a "prefer closer" bias.
-- `AggroBonus` applies when scanning hostiles list: if `TargetLookup[other].TargetEntity == me` (they're targeting me), score bumps.
-- `LineOfSightBonus` applies when `dot(myForward, dirToTarget) >= ViewAngleCos`. View angle is stored as cosine of half-angle: `cos(radians(ViewAngleCos * 0.5))` — note the field name is misleading (`ViewAngleCos` is the source ANGLE in degrees, then converted on blob build).
+- `AggroBonus` applies when scanning hostiles list: if the other unit's target is me, score bumps. Read from a `NativeParallelHashMap<Entity, Entity>` snapshot built by `SnapshotTargetsJob` before the scorer runs (replaced the racy `[NativeDisableContainerSafetyRestriction]` lookup, 2026-06-10 — see [[ecs-patterns]] "Snapshot Job" pattern).
+- `LineOfSightBonus` applies when `dot(myForward, dirToTarget) >= ViewAngleCos`. View angle is stored as cosine of half-angle: `cos(radians(ViewAngleCos * 0.5))` — note the field name is misleading (`ViewAngleCos` is the source ANGLE in degrees, then converted on blob build). Rename to `ViewAngleDegrees` (and `DetectionRadiusSq` → `DetectionRadius`, which currently gets squared TWICE) is planned — see `Claude/ConfigTask.md`.
 - `CheckInterval` puts a per-unit cooldown on re-targeting via `TargetSearchCooldownExpirationTimestamp`.
 
 ## Override From Coordinator

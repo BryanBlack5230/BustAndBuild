@@ -9,19 +9,19 @@ namespace BarkingBird.Runtime.Gameplay.Currency
 {
     public sealed class PearlMagnetController : MonoBehaviour
     {
-        [SerializeField] private PearlsUIView pearlsUIView;
-        [SerializeField] private RectTransform flyingPearlPrefab;
-        [SerializeField] private RectTransform canvasRoot;
-        [SerializeField, Min(0.05f)] private float magnetDuration = 0.4f;
-        [SerializeField] private Ease magnetEase = Ease.InCubic;
+        [SerializeField] private PearlsUIView _pearlsUIView;
+        [SerializeField] private RectTransform _flyingPearlPrefab;
+        [SerializeField] private RectTransform _canvasRoot;
+        [SerializeField, Min(0.05f)] private float _magnetDuration = 0.4f;
+        [SerializeField] private Ease _magnetEase = Ease.InCubic;
 
-        private WorldCurrency _currency;
+        private Wallet _wallet;
         private UnityEngine.Camera _camera;
 
         [Inject]
-        private void Construct(WorldCurrency currency)
+        private void Construct(Wallet wallet)
         {
-            _currency = currency;
+            _wallet = wallet;
         }
 
         private void OnEnable()
@@ -36,7 +36,7 @@ namespace BarkingBird.Runtime.Gameplay.Currency
 
         private void OnPearlPickedUp(in PearlPickedUpEvent evt)
         {
-            if (flyingPearlPrefab == null || canvasRoot == null || pearlsUIView == null || pearlsUIView.MagnetTarget == null) return;
+            if (_flyingPearlPrefab == null || _canvasRoot == null || _pearlsUIView == null || _pearlsUIView.MagnetTarget == null) return;
 
             if (_camera == null) _camera = CoreHelper.MainCamera;
             if (_camera == null) return;
@@ -44,16 +44,16 @@ namespace BarkingBird.Runtime.Gameplay.Currency
             var screenPos = _camera.WorldToScreenPoint(evt.Position);
             if (screenPos.z < 0f) return;
 
-            var flying = Instantiate(flyingPearlPrefab, canvasRoot);
+            var flying = Instantiate(_flyingPearlPrefab, _canvasRoot);
             flying.position = screenPos;
 
             var value = Mathf.RoundToInt(evt.Value);
-            var target = pearlsUIView.MagnetTarget;
+            var target = _pearlsUIView.MagnetTarget;
 
-            Tween.Position(flying, target.position, magnetDuration, magnetEase)
+            Tween.Position(flying, target.position, _magnetDuration, _magnetEase)
                 .OnComplete(() =>
                 {
-                    if (_currency != null) _currency.Add(value);
+                    if (_wallet != null) _wallet.Add(CurrencyType.Pearls, value);
                     if (flying != null) Destroy(flying.gameObject);
                 });
         }

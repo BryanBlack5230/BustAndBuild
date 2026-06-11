@@ -6,7 +6,7 @@ High-level orientation map so future Claude doesn't need to re-derive folder str
 "Bust and Build" — physics-based throw-em-up by BarkingBird Studio. Player grabs units/objects (cursor), flings them with mouse velocity → they fly, bounce off screen edges, damage enemies on impact. Battle is a unit RTS where allies and enemies path toward each other; player intervenes by physically throwing pieces.
 
 ## Project Root
-- `Assets/!_Game/` — all studio-authored content (note `!_` prefix sorts to top). Two asmdefs: `Runtime.asmdef` at the root and `Editor/Editor.asmdef`.
+- `Assets/!_Game/` — all studio-authored content (note `!_` prefix sorts to top). Two asmdefs: `Runtime/Runtime.asmdef` (moved from `!_Game/` root during v0.1.0) and `Editor/Editor.asmdef`.
 - `Assets/!_Game/Editor/` — editor-only C#, namespace `BarkingBird.Editor` (`ConfigGenerator`, `EditorConstants`, `EditorSceneUtils`, `SceneChainEditor`, `ToolBox`, `SceneWorkflow/{EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox}`).
 - `Assets/!_Game/Runtime/Gameplay/!_Scripts/` — gameplay C#. `Components/` (ECS authoring + structs, root files in **global namespace**; `Components/AI/` subfolder in `Gameplay.AI`), `Systems/` (ISystem, root files in **global namespace**; `Systems/AI/` subfolder in `Gameplay.AI`), `_MonoWorld/` (non-ECS — `Camera/`, `Cursor/`, `DaylightCycle/`, `Input/` (+`GrabAndThrow/`), `Scenes/` (ISceneFlow + installers), `Settings/` (+`StateOverrides/`)).
 - `Assets/!_Game/Runtime/Infrastructure/` — framework services. Root files (`EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride`) are `BarkingBird.Runtime.Infrastructure`; subfolders `GameLoop/`, `SceneWorkflow/`, `Settings/`, `Utilities/` get their own subnamespaces.
@@ -38,6 +38,11 @@ High-level orientation map so future Claude doesn't need to re-derive folder str
 All runtime code lives under `BarkingBird.Runtime.*` (except root-level ECS files, see below); all editor code under `BarkingBird.Editor`. The split mirrors folder layout — `Gameplay.AI` (only `Components/AI/` and `Systems/AI/` subfolders), `Gameplay.{Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Scenes|Settings}`, and `Infrastructure` root + `Infrastructure.{GameLoop|SceneWorkflow|Settings|Utilities}`. There are no longer any `Game.*` / `GameEngine.*` / `GameManagement` / `Game.Configs` namespaces — those were collapsed during the v0.1.0 reorganization.
 
 **ECS root-namespace convention:** files directly in `Components/` and `Systems/` (root, not the `AI/` subfolder) have **no namespace** — they live in the global/root namespace. This is intentional: it follows Unity DOTS norms so `Health`, `Castle`, `Beacon`, `WallSection`, `ApplyDamageSystem`, etc. stay short and unqualified. AI-pipeline scripts (brain, steering, targeting, pathfinding, unit movement & registration) sit in `Components/AI/` + `Systems/AI/` under `BarkingBird.Runtime.Gameplay.AI`. When adding a new ECS file, decide which bucket it belongs to — if it's part of the AI pipeline, place it in `AI/` and namespace it accordingly; otherwise leave it in root with no namespace.
+
+## Designed-But-Not-Started Refactors (agreed 2026-06-10)
+Full specs live next to this folder — read them before touching the affected systems:
+- `Claude/ConfigTask.md` — SO-based config hub (promoted `PrototypeConfigSetter`), per-unit-type profile SOs tied to enums, `*Config` naming for tunables vs `*Constants` for invariants, magic-number migration table, JSON-config-path delete list. Do this **before** the health/barracks/wall tasks.
+- `Claude/CurrencyTask.md` — `Wallet` (multi-currency) + per-world `WorldSaveData` saves; wallet stays World-scoped, `SaveRepository` at Bootstrap.
 
 ## Code Style Quirks Observed
 - `#nullable enable` used in newer files but inconsistently across the codebase.

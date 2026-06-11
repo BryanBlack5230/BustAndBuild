@@ -8,36 +8,40 @@ namespace BarkingBird.Runtime.Gameplay.Currency
 {
     public sealed class PearlsUIView : MonoBehaviour
     {
-        [SerializeField] private TMP_Text counterLabel;
-        [SerializeField] private RectTransform magnetTarget;
-        [SerializeField] private string labelFormat = "Pearls: {0}";
+        [SerializeField] private TMP_Text _counterLabel;
+        [SerializeField] private RectTransform _magnetTarget;
+        [SerializeField] private string _labelFormat = "Pearls: {0}";
 
-        public RectTransform MagnetTarget => magnetTarget;
+        public RectTransform MagnetTarget => _magnetTarget;
 
-        private WorldCurrency _currency;
+        private Wallet _wallet;
 
         [Inject]
-        private void Construct(WorldCurrency currency)
+        private void Construct(Wallet wallet)
         {
-            _currency = currency;
+            _wallet = wallet;
         }
 
         private void OnEnable()
         {
-            EventBus.Subscribe<PearlsChangedEvent>(OnPearlsChanged);
-            Refresh(_currency != null ? _currency.Pearls : 0);
+            EventBus.Subscribe<CurrencyChangedEvent>(OnCurrencyChanged);
+            Refresh(_wallet != null ? _wallet.Get(CurrencyType.Pearls) : 0);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<PearlsChangedEvent>(OnPearlsChanged);
+            EventBus.Unsubscribe<CurrencyChangedEvent>(OnCurrencyChanged);
         }
 
-        private void OnPearlsChanged(in PearlsChangedEvent evt) => Refresh(evt.NewTotal);
+        private void OnCurrencyChanged(in CurrencyChangedEvent evt)
+        {
+            if (evt.Type != CurrencyType.Pearls) return;
+            Refresh(evt.NewTotal);
+        }
 
         private void Refresh(int total)
         {
-            if (counterLabel != null) counterLabel.text = string.Format(labelFormat, total);
+            if (_counterLabel != null) _counterLabel.text = string.Format(_labelFormat, total);
         }
     }
 }

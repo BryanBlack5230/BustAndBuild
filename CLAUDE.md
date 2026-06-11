@@ -7,9 +7,11 @@ This is a game project by BarkingBird studio. For more information, load the [Pr
 Bust and Build/
 ├── CLAUDE.md                                       ← You are here (always loaded)
 ├── `Claude/`                                       ← Folder for claude related files
-│   ├── `learnings/`                                ← Your knowledge database for internal use
+│   ├── `learnings/`                                ← Your knowledge database (see "Learnings Routing" below)
 │   ├── Project.md                                  ← Task router
-│   └── Input.md                                    ← User inputed prompt
+│   ├── Input.md                                    ← User inputed prompt
+│   ├── ConfigTask.md                               ← Agreed design: SO config hub refactor (read before touching config/balance)
+│   └── CurrencyTask.md                             ← Agreed design: Wallet + per-world saves (read before touching currency)
 │
 ├── `Assets/`                                       ← Assets for Unity
 │   ├── `!_Game/`                                   ← Assets made in BarkingBird studio
@@ -37,7 +39,9 @@ Bust and Build/
 │   │       │           ├── Scenes/                 ← `...Gameplay.Scenes` (flows + installers)
 │   │       │           └── Settings/               ← `...Gameplay.Settings` (incl. StateOverrides/)
 │   │       └── `Infrastructure/`                   ← namespace `BarkingBird.Runtime.Infrastructure.*`
-│   │           ├── EventManager.cs / InputActions.cs / InputManager.cs / ReflexExtensions.cs / StateOverride.cs   ← root `...Infrastructure`
+│   │           ├── InputManager.cs / ReflexExtensions.cs / StateOverride.cs / StringExtensions.cs   ← root `...Infrastructure`
+│   │           ├── Commands/                       ← `...Infrastructure.Commands` (CommandDispatcher)
+│   │           ├── EventBus/                       ← `...Infrastructure` (static EventBus + IEvent)
 │   │           ├── GameLoop/                       ← `...Infrastructure.GameLoop`
 │   │           ├── SceneWorkflow/                  ← `...Infrastructure.SceneWorkflow`
 │   │           ├── Settings/                       ← `...Infrastructure.Settings` (configs, blob container, constants)
@@ -45,10 +49,31 @@ Bust and Build/
 │   └── Tasks.md                                    ← Task management memos (lives under !_Game/)
 ```
 
+## Learnings Routing (read BEFORE coding, not after getting stuck)
+`Claude/learnings/` holds verified project knowledge from past sessions — gotchas, system maps, design decisions with rationale. **Do not re-derive from source what is already written there.** Before non-trivial work, load the matching file:
+
+| Task touches | Load |
+|---|---|
+| Anything (orientation) | `learnings/README.md` (index) + `learnings/project-overview.md` |
+| ECS systems/components/pipeline | `learnings/ecs-architecture.md`, `learnings/ecs-patterns.md` |
+| Damage, death, collisions, hit feedback, throwing | `learnings/ecs-combat-and-collisions.md` |
+| Unity Physics placement/baking/AABB/layers | `learnings/unity-physics-gotchas.md` |
+| AI, targeting, steering, escape/retreat | `learnings/steering-and-ai.md` |
+| DI, installers, new services | `learnings/di-architecture.md` |
+| Currency, wallet, saves, persistence, slots | `learnings/currency-and-saves.md` |
+| Events, commands, messaging decisions | `learnings/events-and-services.md` |
+| Game loop, pause, listeners | `learnings/game-loop-listeners.md` |
+| Input, grab/throw, cursor, camera drag | `learnings/input-system.md` |
+| Scenes, RunConfigurations, editor workflow | `learnings/scene-flow-system.md` |
+| Static state, play mode, Hot Reload limits | `learnings/play-mode-and-hot-reload.md` |
+| Inspectors, SO assets, editor windows | `learnings/{custom-inspector,scriptable-object,editor-window}-patterns.md` |
+
+After completing work that produced non-obvious discoveries, offer to run `/knowledge-save`.
+
 ## Namespace Conventions
 - Two assemblies: `Runtime` (everything under `Assets/!_Game/Runtime/`) and `Editor` (`Assets/!_Game/Editor/`).
 - All editor code: `namespace BarkingBird.Editor`.
 - Runtime code is split into two top-level branches under `BarkingBird.Runtime.*`:
   - `Gameplay.{AI|Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Scenes|Settings}` — scene/gameplay-bound code.
-  - `Infrastructure` (root for `EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride`) + `Infrastructure.{GameLoop|SceneWorkflow|Settings|Utilities}` — framework-level services.
+  - `Infrastructure` (root for `InputManager`, `ReflexExtensions`, `StateOverride`, plus `EventBus/` which stays in the root namespace) + `Infrastructure.{Commands|GameLoop|SceneWorkflow|Settings|Utilities}` — framework-level services.
 - ECS Components & Systems are split: root-level files (`Components/*.cs`, `Systems/*.cs`) live in the **global namespace** (Unity-DOTS-friendly short names like `Health`, `Castle`, `ApplyDamageSystem`); the AI subfolders (`Components/AI/`, `Systems/AI/`) live in `BarkingBird.Runtime.Gameplay.AI`.

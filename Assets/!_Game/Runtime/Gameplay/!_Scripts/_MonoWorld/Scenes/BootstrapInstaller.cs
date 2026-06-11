@@ -5,6 +5,7 @@ using UnityEngine;
 using BarkingBird.Runtime.Gameplay.Settings;
 using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
+using BarkingBird.Runtime.Infrastructure.Save;
 using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.Scenes
@@ -24,6 +25,8 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(typeof(BlobContainer), typeof(BlobContainer), typeof(IDisposable));
             builder.AddSingleton(_bootstrapFlow, typeof(BootstrapFlow));
             builder.AddSingleton(_throwSettingsSetter, typeof(ThrowSettingsSetter), typeof(IGameListener));
+            builder.AddSingleton(typeof(ActiveSlot), typeof(ActiveSlot));
+            builder.AddSingleton(typeof(DummySaveSystem), typeof(ISaveSystem));
         }
 
         private void InstallGameLoop(ContainerBuilder builder)

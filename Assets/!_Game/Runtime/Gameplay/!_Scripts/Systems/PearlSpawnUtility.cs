@@ -24,7 +24,7 @@ public static class PearlSpawnUtility
             var pos = new float3(source.x + math.cos(angle) * radius, source.y + settings.SpawnHeight, source.z + math.sin(angle) * radius);
 
             var pearl = ecb.Instantiate(sortKey, prefab);
-            ecb.SetComponent(sortKey, pearl, LocalTransform.FromPosition(pos));
+            ecb.SetComponent(sortKey, pearl, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, settings.PearlScale));
             ecb.SetComponent(sortKey, pearl, new Pearl { Value = valuePerPearl });
             ecb.SetComponent(sortKey, pearl, new PearlLifetime
             {

@@ -1,6 +1,8 @@
 using Unity.Mathematics;
 
-namespace BarkingBird.Runtime.Infrastructure
+using BarkingBird.Runtime.Infrastructure;
+
+namespace BarkingBird.Runtime.Gameplay.Currency
 {
     public readonly struct PearlPickedUpEvent : IEvent
     {
@@ -11,18 +13,6 @@ namespace BarkingBird.Runtime.Infrastructure
         {
             Position = position;
             Value = value;
-        }
-    }
-
-    public readonly struct PearlsChangedEvent : IEvent
-    {
-        public readonly int NewTotal;
-        public readonly int Delta;
-
-        public PearlsChangedEvent(int newTotal, int delta)
-        {
-            NewTotal = newTotal;
-            Delta = delta;
         }
     }
 }

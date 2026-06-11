@@ -41,7 +41,7 @@ List of `SceneChainElement` — each holds `_sceneAsset` (UnityEditor-only `Scen
 
 ## StateOverride (Polymorphic, [SerializeReference])
 Abstract base with `UniTask Apply()`. Concrete:
-- `GameLoopStateOverride` — finds `GameLoopManager` (MonoBehaviour) via `FindFirstObjectByType` and calls `StartGame/PauseGame/FinishGame`. Useful for "start in pause state" dev runs.
+- `GameLoopStateOverride` — finds `GameLoopManager` (MonoBehaviour) via `FindFirstObjectByType` and calls `StartGame/PauseGame/ResumeGame/FinishGame`. Serializes the **shared** `GameState` enum (`Infrastructure/GameLoop/GameState.cs`) directly — no private `TargetState` enum anymore. `GameState.Unknown` is a no-op (logs a warning). Because the call goes through `GameLoopManager.SetState`, the UI now repaints correctly off the override path too — see [[game-loop-listeners]]. Useful for "start in pause state" dev runs.
 - `ActiveCameraOverride` — sends `ChangeSceneCommand(_switchUp)` via `CommandDispatcher` to flip between battle/world cams.
 - `DayCycleStateOverride` — sends `StartDayCommand` or `ForceFinishDayCommand` based on its `TargetAction` enum.
 
@@ -55,6 +55,7 @@ To add a new override: subclass `StateOverride`, mark `[Serializable]`, implemen
 `ToolBox.cs` exposes Alt+1..5 shortcuts to open individual scenes single-mode (`BarkingBird/Scenes/Bootstrap &1` etc.). Uses `EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()` before swap.
 
 ## Common Pitfalls
+- **`[SerializeReference]` stores enum fields by integer, not name — changing the enum silently reinterprets existing data.** `StateOverride`s live in a `references: RefIds:` block inside each RunConfiguration `.asset` (e.g. `_state: 0`). When `GameLoopStateOverride` switched its field from a private `TargetState { Start=0, Pause=1, Finish=2 }` to the shared `GameState { Unknown=0, Start=1, ... }`, every serialized `_state: 0` (= "Start") would have silently become "Unknown". Fix required hand-editing the YAML in all affected assets (`BattleDev`/`NormalDev`/`CityDev` → `_state: 0` to `1`). **Before changing any enum used in a `[SerializeReference]`/serialized field: keep the integer ordering stable, or grep the `.asset`/`.unity` files for the field and migrate the values.** Reordering or inserting enum members is a data migration, not a rename.
 - `SceneWorkflowRunner` is stripped from builds when no `IsBuildConfig` flag set. Game launches to whatever scene is first in Build Settings.
 - Need a new scene to participate in the workflow? Add a `*Flow : MonoBehaviour, ISceneFlow` with a `UniTaskCompletionSource` and `_initCompleted.TrySetResult()` in `Start()`. Register its container parent via `SceneScope.OnSceneContainerBuilding`.
 - Backwards iteration `for (int i = sceneCount-1; i >= 0; i--)` required when closing multiple scenes in editor — forward iteration shifts indices.

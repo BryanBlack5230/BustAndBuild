@@ -8,10 +8,10 @@
 `InputManager` (Project scope singleton) enables `UI` + `Gameplay.MousePosition` at construction; everything else is enabled by its controller (`InteractController`, `PowerHitController`, `ScrollController`) on `OnStartGame()`/`OnResume()`, disabled on `OnPause()`/`Dispose()`.
 
 ## Grab → Drag → Release Flow
-1. **`InteractController.OnClick(LMB performed)`**: raycasts via `PhysicsWorld.CastRay` from `mouseRay.GetPoint(9f)` to `GetPoint(40f)` with filter `Grabbable | Ground`. Hits a `Grabbable` entity (has enableable `Grabbed` component) → invokes `EventManager.Input.ObjectGrabbed` and calls `_grabbingInteractor.Grab(entity)`. Hits ground → invokes `EventManager.Input.GroundGrabbed(false)` (start-of-hold).
+1. **`InteractController.OnClick(LMB performed)`**: raycasts via `PhysicsWorld.CastRay` from `mouseRay.GetPoint(9f)` to `GetPoint(40f)` with filter `Grabbable | Ground`, using a `PhysicsWorldSingleton` `EntityQuery` cached in `Initialize()` (disposed in `Dispose()`). Hits a `Grabbable` entity (has enableable `Grabbed` component) → `EventBus.Raise(new ObjectGrabbedEvent())` and calls `_grabbingInteractor.Grab(entity)`. Hits ground → `EventBus.Raise(new GroundGrabbedEvent(false))` (start-of-hold).
 2. **`GrabbingInteractor.Grab(entity)`**: stores `_originalMass`, sets `PhysicsMass.InverseMass = 0` (freezes), zeroes `PhysicsVelocity`, enables `Grabbed`, disables `InAir`, starts `GrabbedEntityMover` and `ThrowTrajectoryPredictor`.
 3. **`GrabbedEntityMover.OnUpdate`**: each frame snaps entity to `mouseScreenPos → world plane at entityZ`, clamps to ground (`y >= groundY + halfHeight`), then re-clamps to camera viewport (4-corner check). Two-pass ground clamp because the viewport-clamp may have pushed Y back below ground.
-4. **`InteractController.OnCanceled(LMB up)`**: invokes `EventManager.Input.Release` and calls `_grabbingInteractor.Release()`.
+4. **`InteractController.OnCanceled(LMB up)`**: `EventBus.Raise(new ReleaseEvent())` and calls `_grabbingInteractor.Release()`.
 5. **`GrabbingInteractor.Release()`**: computes throw impulse from cursor velocity, calls `ReleaseCoordinator.HandleRelease(entity, impulse, isFastSpeed, originalMass)`, calls `_throwSettingsSetter.OnThrow` (for diagnostics).
 
 ## ReleaseCoordinator — Overlap Strategies
@@ -70,13 +70,13 @@ Horizontal extent is unchanged (`ehw = entityHalfWidth`), but vertical extent mu
 Access `lineRenderer.material` once at construction and store it; modifying `.color.a` on the stored instance is allocation-free. Accessing `.material` every frame creates a new material instance each time.
 
 ## Camera Drag (BattleCameraMovement)
-Hold ground for `config.timeToHold` (1s default, configurable via `ConfigContainer.Battle.CameraConfig`) → `Countdown` ticks while waiting → `CameraInputHandler` fires `EventManager.Input.GroundGrabbed(true)` once → drag starts. `CameraDragHandler` reads mouse delta, scales by `moveSpeed`, applies to `CinemachineTransposer.m_FollowOffset`. `CameraBorderHandler` applies soft resistance via `borderPushCurve` when offset is outside `BorderRange` (derived from `BattleSceneData.sceneBoundary*` transforms). Release → snap back if outside bounds via `returnCurve`.
+Hold ground for `config.timeToHold` (1s default, configurable via `ConfigContainer.Battle.CameraConfig`) → `Countdown` ticks while waiting → `CameraInputHandler` raises `GroundGrabbedEvent(true)` via `EventBus` once → drag starts. `CameraDragHandler` reads mouse delta, scales by `moveSpeed`, applies to `CinemachineTransposer.m_FollowOffset`. `CameraBorderHandler` applies soft resistance via `borderPushCurve` when offset is outside `BorderRange` (derived from `BattleSceneData.sceneBoundary*` transforms). Release → snap back if outside bounds via `returnCurve`.
 
 ## ScrollController — Bird's-Eye Switch
 Scroll up/down → `CommandDispatcher.Send(new ChangeSceneCommand(bool switchUp))`. `WorldCameraHandler` (in World scene) registers a handler that toggles bird-view GO active. Used to switch between top-down strategic and tilted battle view. `ActiveCameraOverride` (a `StateOverride`) sends the same command from a `RunConfiguration` startup. See [[events-and-services]] for the notifications-vs-commands split.
 
 ## Cursor Textures
-`CursorSetter` (ILoadUnit, namespace `BarkingBird.Runtime.Gameplay.Cursor`) preloads textures from `Cursors/Textures/{OpenHandCursor, HoldingObjectCursor, HoldingGroundCursor}` (relative to `Runtime/Gameplay/Resources/`) and subscribes to `EventManager.Input.*` to switch cursor via `Cursor.SetCursor(..., CursorMode.ForceSoftware)`.
+`CursorSetter` (ILoadUnit, namespace `BarkingBird.Runtime.Gameplay.Cursor`) preloads textures from `Cursors/Textures/{OpenHandCursor, HoldingObjectCursor, HoldingGroundCursor}` (relative to `Runtime/Gameplay/Resources/`) and subscribes to the input events (`ObjectGrabbedEvent`/`GroundGrabbedEvent`/`ReleaseEvent`) via `EventBus` to switch cursor via `Cursor.SetCursor(..., CursorMode.ForceSoftware)`.
 
 ## MousePositionProvider — Projects to Z-plane, NOT Y-plane (Critical Gotcha)
 **Context:** Implementing a cursor-proximity pickup system that compares cursor world position to entity positions on the ground.

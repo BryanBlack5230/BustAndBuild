@@ -8,12 +8,16 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Project Overview](project-overview.md) — game concept, folder layout, stack, naming conventions, style quirks
 - [DI Architecture](di-architecture.md) — Reflex installers, container parent chain, listener auto-collection, registration order
 - [Game Loop & Listeners](game-loop-listeners.md) — `IGameListener` interfaces, `GameLoopManager` state machine, `DotsGameLoopBridge`
-- [Events & Services](events-and-services.md) — `EventManager` hub, `Log`, `LoadingService`, `RuntimeConstants`, config pipeline
+- [Events & Services](events-and-services.md) — `EventBus` + `CommandDispatcher` (decision guide), `Log`, `LoadingService`, `RuntimeConstants`, config pipeline
 - [Scene Flow System](scene-flow-system.md) — `ISceneFlow`, `RunConfiguration`, `SceneChain`, editor toolbox, state overrides
+- [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
 
 ### ECS / Battle
-- [ECS Architecture](ecs-architecture.md) — system groups, pipeline order, enableable components, damage/death, `BattleCoordinator`, `TargetScorerJob`
-- [Steering & AI](steering-and-ai.md) — brain → steering → mover pipeline, 8-dir context map, target profiles, attack cooldown pattern
+- [ECS Architecture](ecs-architecture.md) — the map: system groups, battle pipeline order, enableable components, `BattleCoordinator`, spawning, walls, namespaces
+- [ECS Combat & Collisions](ecs-combat-and-collisions.md) — damage/death pipeline (HealthAspect, IsInvulnerable intent), bounce/landing systems, UnitMover velocity override, hit-feedback blocks, throw settings
+- [ECS Patterns](ecs-patterns.md) — reusable DOTS patterns: enableable queries, aspects, ECB gotchas, snapshot jobs, baking gotchas, ECS↔managed bridging
+- [Unity Physics Gotchas](unity-physics-gotchas.md) — AABB local-vs-world, post-physics system placement, gravity factor baking, hover bodies, collision matrix hex
+- [Steering & AI](steering-and-ai.md) — brain → steering → mover pipeline, 8-dir context map, target profiles + `TargetScorerJob`, attack cooldown pattern
 
 ### Input / Camera / Throw
 - [Input System](input-system.md) — grab/drag/release flow, `ReleaseCoordinator`, `ThrowTrajectoryPredictor`, camera drag, screen-edge gotchas

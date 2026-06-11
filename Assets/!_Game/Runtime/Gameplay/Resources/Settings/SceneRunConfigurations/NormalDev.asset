@@ -23,4 +23,4 @@ MonoBehaviour:
     - rid: 6817342082545352982
       type: {class: GameLoopStateOverride, ns: BarkingBird.Runtime.Gameplay.Settings, asm: Runtime}
       data:
-        _state: 0
+        _state: 1

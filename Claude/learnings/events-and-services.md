@@ -124,9 +124,10 @@ Single static class collecting collider-geometry reads and PhysicsWorld overlap 
 2. At runtime, `ConfigContainer : ILoadUnit` is registered as singleton; `BootstrapFlow` calls `LoadingService.BeginLoading(_configContainer)` → `Resources.Load<TextAsset>("Config")` → `JsonConvert.PopulateObject`.
 3. `BlobContainer.Initialize()` (called after configs loaded) converts `TargetProfile` lists into a `BlobAssetReference<TargetProfilesBlob>` stored on a singleton entity named `Global_Target_Profiles`.
 4. Currently `BlobContainer` reads from `PrototypeConfigSetter` (MonoBehaviour) not `ConfigContainer.Battle.EnemyProfiles` — that path is commented out. **Don't be surprised** if config-JSON edits don't change AI behaviour; edit the Bootstrap scene's `PrototypeConfigSetter` instead.
+5. **The JSON path is scheduled for deletion** (agreed 2026-06-10): SOs become the single source of truth, `PrototypeConfigSetter` gets promoted to an SO-reference hub. Full spec in `Claude/ConfigTask.md` — read it before touching anything in this pipeline. `BlobContainer` is now `IDisposable` (disposes the persistent blob; `Initialize()` is rebake-safe).
 
 ## BlobConfigConverter (Reflection)
-`BlobConfigConverter.CreateBlob<T>(source)` walks public instance fields by name match and copies values into a blob root struct via `__makeref` / `SetValueDirect`. Skips fields whose types differ. Used as generic converter for `[BlobConfig]`-annotated config classes. Currently not invoked anywhere — `BlobContainer` builds its profile blobs manually. Keep in mind if you see `[BlobConfig]` on a class but no allocation site.
+`BlobConfigConverter.CreateBlob<T>(source)` walks public instance fields by name match and copies values into a blob root struct via `__makeref` / `SetValueDirect`. Skips fields whose types differ. Used as generic converter for `[BlobConfig]`-annotated config classes. Currently not invoked anywhere — `BlobContainer` builds its profile blobs manually. Keep in mind if you see `[BlobConfig]` on a class but no allocation site. On the `Claude/ConfigTask.md` delete list along with the rest of the JSON path.
 
 ## RuntimeConstants
 At `Runtime/Infrastructure/Settings/RuntimeConstants.cs`, namespace `BarkingBird.Runtime.Infrastructure.Settings`. **All Resources paths and Assets-relative paths must live here** — no string literals at call sites.

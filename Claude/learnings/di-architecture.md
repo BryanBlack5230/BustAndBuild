@@ -4,9 +4,9 @@
 Reflex uses scene-scoped containers stitched into a parent chain via `SceneScope.OnSceneContainerBuilding`. The Bootstrap scene container becomes the parent for `WorldScene` and `BattleGroundScene`.
 
 - **ProjectInstaller** (Project scope, lives across all scenes): `InputManager`, `LoadingService`, `ConfigContainer`, `CursorSetter`.
-- **BootstrapInstaller** (Bootstrap scene): `GameLoopManager`, `GameManagerUIController`, `BootstrapFlow`, `PrototypeConfigSetter`, `BlobContainer`, `ThrowSettingsSetter`, `DotsGameLoopBridge`, `GameManager` (NonLazy).
-- **WorldSceneInstaller**: `WorldFlow`, `DayNightCycle`, `WorldSceneData`, `ScrollController`, `WorldCameraHandler`.
-- **BattleGroundSceneInstaller**: `BattleSceneData`, `BattleGroundSceneFlow`, all battle-side input/camera (`MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `TrajectoryPredictorSettings`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge`).
+- **BootstrapInstaller** (Bootstrap scene): `GameLoopManager`, `GameManagerUIController`, `BootstrapFlow`, `PrototypeConfigSetter`, `BlobContainer` (bound with `IDisposable` contract since 2026-06-10 — disposes its persistent blob on teardown), `ThrowSettingsSetter`, `DotsGameLoopBridge`, `GameManager` (NonLazy), `ActiveSlot`, `DummySaveSystem` (as `ISaveSystem`).
+- **WorldSceneInstaller**: `WorldFlow`, `DayNightSetting`, `DaylightHandler`, `DayNightCycle`, `DaylightEcsBridge` (NonLazy + IDisposable), `WorldSceneData`, `ScrollController`, `WorldCameraHandler`, `Wallet` (bare singleton), `WorldSaveService` (NonLazy + IDisposable — hydrates the wallet, flushes on day end / scene unload). `Wallet` + save seam covered in [[currency-and-saves]]; `ActiveSlot` + `ISaveSystem` (`DummySaveSystem`) are Bootstrap-scoped and inherited here.
+- **BattleGroundSceneInstaller**: `BattleSceneData`, `BattleGroundSceneFlow`, all battle-side input/camera (`MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `TrajectoryPredictorSettings`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge`, `CursorEcsBridge`).
 
 ## Parent Hookup Trick (Cross-Scene Containers)
 `BootstrapFlow.Construct()` subscribes to `SceneScope.OnSceneContainerBuilding` and inside the callback calls `builder.SetParent(_bootSceneContainer)`. `WorldFlow` does the same. Pattern: each scene flow can stitch its container under the boot container so deps registered in Bootstrap (e.g. `GameLoopManager`) resolve down-scene.
@@ -14,6 +14,10 @@ Reflex uses scene-scoped containers stitched into a parent chain via `SceneScope
 
 ## Registration Order Matters
 `AddSingleton` registration order determines constructor injection resolution order. The classic gotcha — `BattleGroundSceneInstaller` registers `ThrowTrajectoryPredictor` **before** `GrabbingInteractor` because the latter consumes the former by ctor injection. Silent failure if reversed. See [[input-system]].
+
+## Factory Bindings & Container Disposal
+- `builder.AddSingleton<T>(Func<Container, T> factory, params Type[] contracts)` resolves at first demand and hands you the built container — use it when a binding must pull other (incl. parent-scope) services to construct itself. (We considered it for hydrating `Wallet` but moved hydration into `WorldSaveService` instead — see [[currency-and-saves]].)
+- **Scene containers dispose on scene unload.** Reflex's `UnityInjector` subscribes to `SceneManager.sceneUnloaded` and calls `container.Dispose()`, which disposes every `IDisposable`-contracted binding. So a World-scope service bound `typeof(IDisposable)` gets `Dispose()` called when the World scene unloads — a reliable flush/teardown hook. The **project** container disposes on `Application.quitting` (not scene containers), so app-quit teardown of scene-scoped services rides on scene unload, which is not guaranteed on quit — add an explicit `OnApplicationQuit` hook if quit-time persistence matters.
 
 ## ReflexExtensions Helpers
 ```csharp

@@ -60,6 +60,10 @@ public class PearlSpawnerAuthoring : MonoBehaviour
 
             var blinkStart = Mathf.Max(0f, authoring.lifetime * authoring.blinkPercent);
 
+            // Capture the prefab's baked scale so spawning stays prefab-authoritative.
+            // LocalTransform only supports uniform scale, so the X axis is representative.
+            var pearlScale = authoring.pearlPrefab != null ? authoring.pearlPrefab.transform.localScale.x : 1f;
+
             AddComponent(entity, new PearlSettings
             {
                 PickupRadius = authoring.pickupRadius,
@@ -68,6 +72,7 @@ public class PearlSpawnerAuthoring : MonoBehaviour
                 BlinkInterval = authoring.blinkInterval,
                 Scatter = authoring.scatter,
                 SpawnHeight = authoring.spawnHeight,
+                PearlScale = pearlScale,
                 FloatAmplitude = authoring.floatAmplitude,
                 FloatPeriod = Mathf.Max(0.01f, authoring.floatPeriod),
                 RestSpeedThreshold = Mathf.Max(0f, authoring.restSpeedThreshold),

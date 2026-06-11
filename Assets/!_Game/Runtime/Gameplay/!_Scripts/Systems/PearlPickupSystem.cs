@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+using BarkingBird.Runtime.Gameplay.Currency;
 using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 

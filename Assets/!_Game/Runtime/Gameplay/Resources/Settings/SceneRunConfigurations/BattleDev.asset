@@ -29,7 +29,7 @@ MonoBehaviour:
     - rid: 6817342082545352979
       type: {class: GameLoopStateOverride, ns: BarkingBird.Runtime.Gameplay.Settings, asm: Runtime}
       data:
-        _state: 0
+        _state: 1
     - rid: 6817342082545352990
       type: {class: DayCycleStateOverride, ns: BarkingBird.Runtime.Gameplay.Settings, asm: Runtime}
       data:
