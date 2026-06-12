@@ -6,9 +6,11 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 
 ### Architecture (project-wide)
 - [Project Overview](project-overview.md) — game concept, folder layout, stack, naming conventions, style quirks
+- [Design Heuristics](design-heuristics.md) — polymorphism test: no abstraction extraction without a named second consumer
 - [DI Architecture](di-architecture.md) — Reflex installers, container parent chain, listener auto-collection, registration order
 - [Game Loop & Listeners](game-loop-listeners.md) — `IGameListener` interfaces, `GameLoopManager` state machine, `DotsGameLoopBridge`
 - [Events & Services](events-and-services.md) — `EventBus` + `CommandDispatcher` (decision guide), `Log`, `LoadingService`, `RuntimeConstants`, config pipeline
+- [Logging System](logging-system.md) — `Log`/`TagLog`, `[HideInCallstack]` + strip toggle, Console Pro `CPIGNORE`, `[CallerFilePath]` class prefix, color-key overload resolution gotcha
 - [Scene Flow System](scene-flow-system.md) — `ISceneFlow`, `RunConfiguration`, `SceneChain`, editor toolbox, state overrides
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
 
@@ -24,6 +26,8 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 
 ### C# / Unity Patterns
 - [Unity C# Patterns](unity-csharp-patterns.md) — fake-null with #nullable, ScriptableObject settings pattern, required SerializeField guard
+- [Vortex Framework Notes](vortex-framework-notes.md) — what was ported (`[Formula]`, `DateTimeTimer`, `UiPool`) and harvested ideas: audio channels, queued-action timer, ExtensibleEnum, preset→model + notify-once discipline, def-GUID save-reference conventions
+- [UGFW Harvest](ugfw-harvest.md) — what was ported (`Timer`, `TimeFormatter`, `NumberFormatter`, `PriorityQueue`, `MissingScriptsFinder`) and harvested ideas: UI channel/stack architecture, pending-transaction pattern, registry-keyed pooled spawners, GUID-identity definition SOs, PlayerPrefs save stopgap
 - [Play Mode & Hot Reload](play-mode-and-hot-reload.md) — domain/scene reload OFF, static-state reset pattern, Hot Reload limitations (DOTS, Reflex, ScriptableObjects)
 
 ### Editor Tooling

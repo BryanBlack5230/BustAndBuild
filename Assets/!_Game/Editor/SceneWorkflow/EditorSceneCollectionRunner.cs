@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using BarkingBird.Runtime.Infrastructure.Utilities;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -62,7 +63,7 @@ namespace BarkingBird.Editor
 
             EditorApplication.delayCall += RestartPlay;
 
-            Debug.Log($"[SceneWorkflow] Switched to '{firstSceneName}' — restarting play.");
+            Log.Editor.D($"Switched to '{firstSceneName}' — restarting play.");
         }
 
         private static void HandleEnteredEditMode()

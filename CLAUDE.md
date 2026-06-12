@@ -18,6 +18,7 @@ Bust and Build/
 │   │   ├── ProjectScope.prefab                     ← Reflex ProjectScope (ProjectInstaller lives here)
 │   │   ├── `Editor/`                               ← Editor-only code, assembly `Editor`, namespace `BarkingBird.Editor`
 │   │   │   ├── ConfigGenerator.cs / EditorConstants.cs / EditorSceneUtils.cs / SceneChainEditor.cs / ToolBox.cs
+│   │   │   ├── `Formulas/`                         ← FormulaDrawer + FormulaReflectionResolver (inspector for `[Formula]` fields)
 │   │   │   └── `SceneWorkflow/`                    ← EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox
 │   │   └── `Runtime/`                              ← Runtime code split into Gameplay/ and Infrastructure/
 │   │       ├── Runtime.asmdef                      ← Assembly: `Runtime` (covers everything under Runtime/)
@@ -42,7 +43,10 @@ Bust and Build/
 │   │           ├── InputManager.cs / ReflexExtensions.cs / StateOverride.cs / StringExtensions.cs   ← root `...Infrastructure`
 │   │           ├── Commands/                       ← `...Infrastructure.Commands` (CommandDispatcher)
 │   │           ├── EventBus/                       ← `...Infrastructure` (static EventBus + IEvent)
+│   │           ├── Formulas/                       ← `...Infrastructure.Formulas` (`[Formula]` strings, FormulaParser/FormulaEvaluator)
 │   │           ├── GameLoop/                       ← `...Infrastructure.GameLoop`
+│   │           ├── Pooling/                        ← `...Infrastructure.Pooling` (UiPool/UiPoolItem — data-keyed UI list rows)
+│   │           ├── Save/                           ← `...Infrastructure.Save` (ISaveSystem, DummySaveSystem, ActiveSlot)
 │   │           ├── SceneWorkflow/                  ← `...Infrastructure.SceneWorkflow`
 │   │           ├── Settings/                       ← `...Infrastructure.Settings` (configs, blob container, constants)
 │   │           └── Utilities/                      ← `...Infrastructure.Utilities` (Log, AssetService, MathHelper, etc.)

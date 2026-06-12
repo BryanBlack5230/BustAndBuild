@@ -24,7 +24,7 @@ public partial struct HitFeedbackDispatchSystem : ISystem
             var dirSum = float3.zero;
             for (var i = 0; i < buffer.Length; i++) dirSum += buffer[i].HitDirection;
             var dirWorld = math.normalizesafe(dirSum, new float3(0f, 0f, 1f));
-            // Log.Battle.D($"HitFeedbackDispatchSystem: {entity} has hits in buffer, hit direction [{dirWorld}]".ColorBasedOnID(entity.ToString()));
+            // Log.Battle.D(entity, $"{entity} has hits in buffer, hit direction [{dirWorld}]");
 
             buffer.Clear();
 
@@ -32,7 +32,7 @@ public partial struct HitFeedbackDispatchSystem : ISystem
             {
                 SystemAPI.SetComponent(entity, new DamageFlashState { Phase = 0, Elapsed = 0f });
                 SystemAPI.SetComponentEnabled<DamageFlashState>(entity, true);
-                // Log.Battle.D($"HitFeedbackDispatchSystem: {entity} has flash config, enable flash".ColorBasedOnID(entity.ToString()));
+                // Log.Battle.D(entity, $"{entity} has flash config, enable flash");
             }
 
             if (SystemAPI.HasComponent<DamageSquashConfig>(entity))
@@ -45,14 +45,14 @@ public partial struct HitFeedbackDispatchSystem : ISystem
                     Elapsed = 0f,
                 });
                 SystemAPI.SetComponentEnabled<DamageSquashState>(entity, true);
-                // Log.Battle.D($"HitFeedbackDispatchSystem: {entity} has squash config, enable squash".ColorBasedOnID(entity.ToString()));
+                // Log.Battle.D(entity, $"{entity} has squash config, enable squash");
             }
 
             if (SystemAPI.HasComponent<DamagePushConfig>(entity))
             {
                 SystemAPI.SetComponent(entity, new DamagePushState { HitDirWorld = dirWorld });
                 SystemAPI.SetComponentEnabled<DamagePushState>(entity, true);
-                // Log.Battle.D($"HitFeedbackDispatchSystem: {entity} has flash push, enable push".ColorBasedOnID(entity.ToString()));
+                // Log.Battle.D(entity, $"{entity} has push config, enable push");
             }
         }
     }

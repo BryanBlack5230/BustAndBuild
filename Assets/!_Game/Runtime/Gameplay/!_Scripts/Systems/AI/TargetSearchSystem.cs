@@ -21,11 +21,9 @@ namespace BarkingBird.Runtime.Gameplay.AI
         {
             state.RequireForUpdate<BattleCoordinator>();
         
-            _coordinatorQuery = state.GetEntityQuery(
-                ComponentType.ReadOnly<BattleCoordinator>(),
-                ComponentType.ReadOnly<EnemyUnitReference>(),
-                ComponentType.ReadOnly<AllyUnitReference>()
-            );
+            _coordinatorQuery = SystemAPI.QueryBuilder()
+                .WithAll<BattleCoordinator, EnemyUnitReference, AllyUnitReference>()
+                .Build();
 
             _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalToWorld>().Build();
             _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalToWorld>().Build();

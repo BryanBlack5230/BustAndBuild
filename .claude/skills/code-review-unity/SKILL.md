@@ -272,6 +272,35 @@ block-name__element-name--modifier-name
 
 ---
 
+## Review Scope & Depth
+
+Diff reviews are normally small enough to read in full. The rules below apply when the target is a whole file set — a folder, a subsystem, or a third-party package evaluation.
+
+### Size gate (run before starting)
+
+Measure total LOC of the target `.cs` files first (exclude generated files and test assemblies). Pick the approach by size:
+
+| Target size | Approach |
+|-------------|----------|
+| ≤ ~3,000 LOC | Full review — every file read completely |
+| ~3,000–10,000 LOC | Split into 2–4 natural subsystems (e.g. `Systems/AI`, `_MonoWorld/Input`, `Infrastructure/SceneWorkflow`), review each in full, then merge findings — dedupe issue *types* repeated across subsystems |
+| > ~10,000 LOC | A line-by-line review is not possible in one pass — say so explicitly. Offer a qualitative overview clearly labeled as an overview (not a review), and recommend which subsystems deserve a real review first |
+
+Why the gate exists: past roughly 3,000 LOC a "review" silently degrades into cataloging — describing folder structure, counting files, tabulating namespaces. It reads like progress and finds nothing. If the output starts trending toward inventory, stop and re-scope.
+
+### Evidence-bound findings
+
+- Every finding cites `file:line`. An issue that can't point at a line isn't a finding yet.
+- Inventory (LOC counts, file lists, namespace tables) is data gathering, never review output. It must not substitute for findings.
+
+### Delegate counting, keep judgment
+
+On large targets, mechanical tallies may be offloaded to a cheap subagent (`Explore`) that returns numbers only: LOC per folder, magic-number counts, `async void` occurrences, `GetComponent`/allocations inside `Update`, duplicate-block counts.
+
+Never delegate the semantic calls — these require reading code in the main context:
+- SRP and architecture fit (Reflex DI vs statics, EventBus/CommandDispatcher choice, ECS vs MonoBehaviour placement)
+- Naming quality, API shape, whether complexity is justified
+
 ## Review Workflow
 
 ### Local Diff Review

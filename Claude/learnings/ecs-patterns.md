@@ -21,6 +21,14 @@ world.EntityManager.SetComponentEnabled<SpawnEnemies>(_query, true); // now work
 ```
 Without this, calling `SetComponentEnabled` to enable a component on baked-disabled entities silently does nothing because the query is empty.
 
+## Burst BC1028 on Domain Reload — `state.GetEntityQuery(ComponentType...)` in `[BurstCompile]` OnCreate
+**Context:** `TargetSearchSystem` logged `Burst error BC1028: Creating a managed array ComponentType[] is not supported` on every domain reload, without affecting gameplay.  
+**Finding:** `state.GetEntityQuery(ComponentType.ReadOnly<A>(), ...)` is a `params ComponentType[]` overload — the implicit managed array allocation is illegal in Burst-compiled code. Burst falls back to managed execution (so the game runs fine) but re-logs the compiler error each reload. Fix: use the Burst-compatible builder instead:
+```csharp
+_query = SystemAPI.QueryBuilder().WithAll<A, B, C>().Build(); // WithAll = read-only access, same as ComponentType.ReadOnly
+```
+**Why it matters:** The pattern only errors when `OnCreate` itself carries `[BurstCompile]` — eight other systems use `state.GetEntityQuery(...)` inside `RequireForUpdate` with non-Bursted OnCreate and are silently fine, so adding `[BurstCompile]` to any of their OnCreates will resurface this error.
+
 ## Subscene Baking Timing — Entities May Not Exist When Managed Events Fire
 **Context:** Tried to call `EntityManager.SetComponentEnabled` from a managed bridge on the day-started event.  
 **Finding:** Subscenes bake asynchronously. Managed events (e.g. `DayStartedEvent`) can fire *before* any subscene entities exist. A one-shot event handler that calls `SetComponentEnabled` on a freshly built query will silently succeed against an empty result set.  
