@@ -119,7 +119,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
 
         if (!aInAir && !bInAir) return;
 
-        // Pearls/pickups never bounce thrown units and never count as landings — let physics resolve naturally.
+        // Pickups never bounce thrown units and never count as landings — let physics resolve naturally.
         if (IsPickUp(entityA) || IsPickUp(entityB)) return;
 
         // Normal points B→A

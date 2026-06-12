@@ -1,5 +1,9 @@
+using System.Collections.Generic;
+
 using Unity.Entities;
 using UnityEngine;
+
+using BarkingBird.Runtime.Gameplay.Currency;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
@@ -27,10 +31,12 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public LayerMask ObstacleLayer;
         public Curve ObstacleDangerCurve = Curve.Quadratic;
 
-        public int pearlsMin = 10;
-        public int pearlsMax = 20;
-        public float pearlValue = 1f;
-        
+        [Tooltip("Resources this enemy can drop on death. Each row is rolled independently.")]
+        public List<DropTableEntry> drops = new()
+        {
+            new DropTableEntry { type = CurrencyType.Pearls, minCount = 10, maxCount = 20, chance = 1f, value = 1f },
+        };
+
         public class Baker : Baker<EnemyAuthoring>
         {
             public override void Bake(EnemyAuthoring authoring)
@@ -97,12 +103,18 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddComponent(entity, new PathTarget());
                 AddComponent(entity, new FinalDestination());
 
-                AddComponent(entity, new PearlDropOnDeath
+                var drops = AddBuffer<ResourceDrop>(entity);
+                foreach (var entry in authoring.drops)
                 {
-                    MinCount = authoring.pearlsMin,
-                    MaxCount = authoring.pearlsMax,
-                    ValuePerPearl = authoring.pearlValue,
-                });
+                    drops.Add(new ResourceDrop
+                    {
+                        Type = entry.type,
+                        MinCount = entry.minCount,
+                        MaxCount = entry.maxCount,
+                        Chance = entry.chance,
+                        Value = entry.value,
+                    });
+                }
             }
         }
     }

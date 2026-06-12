@@ -7,25 +7,25 @@ using Unity.Transforms;
 
 [BurstCompile]
 [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
-public partial struct PearlFloatSystem : ISystem
+public partial struct PickupFloatSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<PearlSettings>();
+        state.RequireForUpdate<PickupSettings>();
         state.RequireForUpdate(state.GetEntityQuery(
-            ComponentType.ReadOnly<Pearl>(),
-            ComponentType.ReadOnly<PearlFloat>()));
+            ComponentType.ReadOnly<Pickup>(),
+            ComponentType.ReadOnly<PickupFloat>()));
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var settings = SystemAPI.GetSingleton<PearlSettings>();
+        var settings = SystemAPI.GetSingleton<PickupSettings>();
         var elapsed = (float)SystemAPI.Time.ElapsedTime;
         var dt = SystemAPI.Time.DeltaTime;
         var wakeSpeedSq = settings.RestSpeedThreshold * settings.RestSpeedThreshold;
 
-        new PearlFloatJob
+        new PickupFloatJob
         {
             Elapsed = elapsed,
             DeltaTime = dt,
@@ -36,8 +36,8 @@ public partial struct PearlFloatSystem : ISystem
 }
 
 [BurstCompile]
-[WithPresent(typeof(PearlSettled))]
-public partial struct PearlFloatJob : IJobEntity
+[WithPresent(typeof(PickupSettled))]
+public partial struct PickupFloatJob : IJobEntity
 {
     public float Elapsed;
     public float DeltaTime;
@@ -48,8 +48,8 @@ public partial struct PearlFloatJob : IJobEntity
         ref LocalTransform transform,
         ref PhysicsVelocity velocity,
         ref PhysicsGravityFactor gravity,
-        ref PearlFloat floatData,
-        EnabledRefRW<PearlSettled> settled)
+        ref PickupFloat floatData,
+        EnabledRefRW<PickupSettled> settled)
     {
         var speedSq = math.lengthsq(velocity.Linear);
 

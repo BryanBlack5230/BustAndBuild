@@ -7,11 +7,11 @@ using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
-public partial class PearlPickupSystem : SystemBase
+public partial class PickupCollectSystem : SystemBase
 {
     protected override void OnCreate()
     {
-        RequireForUpdate<PearlSettings>();
+        RequireForUpdate<PickupSettings>();
         RequireForUpdate<CursorWorldPosition>();
         RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
@@ -21,7 +21,7 @@ public partial class PearlPickupSystem : SystemBase
         var cursor = SystemAPI.GetSingleton<CursorWorldPosition>();
         if (!cursor.IsValid) return;
 
-        var settings = SystemAPI.GetSingleton<PearlSettings>();
+        var settings = SystemAPI.GetSingleton<PickupSettings>();
         var radiusSq = settings.PickupRadius * settings.PickupRadius;
         var rayOrigin = cursor.RayOrigin;
         var rayDir = cursor.RayDirection;
@@ -30,8 +30,8 @@ public partial class PearlPickupSystem : SystemBase
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
             .CreateCommandBuffer(World.Unmanaged);
 
-        foreach (var (pearl, transform, beingCollected, entity) in SystemAPI
-            .Query<RefRO<Pearl>, RefRO<LocalTransform>, EnabledRefRW<PearlBeingCollected>>()
+        foreach (var (pickup, transform, beingCollected, entity) in SystemAPI
+            .Query<RefRO<Pickup>, RefRO<LocalTransform>, EnabledRefRW<PickupBeingCollected>>()
             .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
             .WithEntityAccess())
         {
@@ -39,12 +39,12 @@ public partial class PearlPickupSystem : SystemBase
 
             var pos = transform.ValueRO.Position;
             var t = (pos.y - rayOrigin.y) * invDirY;
-            var cursorAtPearlY = rayOrigin + rayDir * t;
-            var distSq = math.distancesq(new float2(pos.x, pos.z), new float2(cursorAtPearlY.x, cursorAtPearlY.z));
+            var cursorAtPickupY = rayOrigin + rayDir * t;
+            var distSq = math.distancesq(new float2(pos.x, pos.z), new float2(cursorAtPickupY.x, cursorAtPickupY.z));
             if (distSq > radiusSq) continue;
 
             beingCollected.ValueRW = true;
-            EventBus.Raise(new PearlPickedUpEvent(pos, pearl.ValueRO.Value));
+            EventBus.Raise(new PickupCollectedEvent(pickup.ValueRO.Type, pos, pickup.ValueRO.Value));
             ecb.DestroyEntity(entity);
         }
     }

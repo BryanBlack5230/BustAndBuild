@@ -48,3 +48,20 @@ if (_settings == null)
     _settings = Resources.Load<FooSettings>("FooSettings");
 ```
 **Why it matters:** Silent fallbacks make inspector setup optional when it should be mandatory, leading to hard-to-diagnose runtime failures.
+
+## Serialize Child-Component Refs on a Prefab — Don't `GetComponent` Per-Spawn
+
+When a prefab is `Instantiate`d on a hot path (per pickup, per projectile, per VFX) and you need a child component on the clone, **do not** `GetComponent`/`GetComponentInChildren` on every instance. Put a small root component on the prefab that holds the child as a `[SerializeField]`, wire it once in the inspector, and read the field after Instantiate — Unity remaps internal prefab references to the clone automatically, so the reference already points at the cloned child. Zero runtime lookups.
+```csharp
+[RequireComponent(typeof(RectTransform))]
+public sealed class FlyingPickup : MonoBehaviour
+{
+    [SerializeField] private Image _icon;            // drag the child Image in the inspector
+    private RectTransform _rectTransform;
+    public RectTransform RectTransform => _rectTransform;
+    private void Awake() => _rectTransform = (RectTransform)transform;   // Awake runs *during* Instantiate
+    public void SetIcon(Sprite s) { if (_icon != null && s != null) _icon.sprite = s; }
+}
+// caller: var f = Instantiate(_flyingPrefab, _root); f.RectTransform.position = p; f.SetIcon(icon);
+```
+**Why it matters:** `PickupMagnetController` originally did `GetComponentInChildren<Image>()` on every collected pickup (a very frequent event). Replacing it with the serialized-ref `FlyingPickup` component removed the per-spawn reflection walk. Type the prefab field as the component (`FlyingPickup`, not `RectTransform`/`GameObject`) so `Instantiate` returns it directly and the access is statically typed. Cache `transform`-derived values (like the `RectTransform` cast) in `Awake`, which runs synchronously inside `Instantiate` for an active object.

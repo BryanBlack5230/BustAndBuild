@@ -692,7 +692,7 @@ GameObject:
   - component: {fileID: 998977664}
   - component: {fileID: 998977665}
   m_Layer: 0
-  m_Name: PearlSpawner
+  m_Name: PickupSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -725,7 +725,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ab508c75fdf9943a104bf6bbe3b637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::PearlSpawnerAuthoring
-  pearlPrefab: {fileID: 468609492767552385, guid: e6650b1976f3d504cb62de776c6a2954, type: 3}
+  prefabs:
+  - type: 0
+    prefab: {fileID: 468609492767552385, guid: e6650b1976f3d504cb62de776c6a2954, type: 3}
+  - type: 2
+    prefab: {fileID: 3534485535727448373, guid: 50390ec084cfd3f41af90595e636b210, type: 3}
+  - type: 3
+    prefab: {fileID: 568162134049505695, guid: d04e6ae561dfd114484147a6a62670a3, type: 3}
   lifetime: 10
   blinkPercent: 0.15
   blinkInterval: 0.15

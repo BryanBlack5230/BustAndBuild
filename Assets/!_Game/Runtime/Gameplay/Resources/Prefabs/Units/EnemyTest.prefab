@@ -151,9 +151,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   ObstacleDangerCurve: 1
-  pearlsMin: 10
-  pearlsMax: 20
-  pearlValue: 1
+  drops:
+  - type: 0
+    minCount: 10
+    maxCount: 20
+    chance: 1
+    value: 1
+  - type: 2
+    minCount: 1
+    maxCount: 1
+    chance: 0.2
+    value: 1
+  - type: 3
+    minCount: 1
+    maxCount: 1
+    chance: 0.05
+    value: 1
 --- !u!54 &8147585489975437197
 Rigidbody:
   m_ObjectHideFlags: 0

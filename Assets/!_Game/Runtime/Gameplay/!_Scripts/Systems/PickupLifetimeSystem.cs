@@ -7,23 +7,23 @@ using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 [BurstCompile]
 [UpdateInGroup(typeof(GameLoopSystemGroup))]
-public partial struct PearlLifetimeSystem : ISystem
+public partial struct PickupLifetimeSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<PearlSettings>();
+        state.RequireForUpdate<PickupSettings>();
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var settings = SystemAPI.GetSingleton<PearlSettings>();
+        var settings = SystemAPI.GetSingleton<PickupSettings>();
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
             .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
         var elapsed = (float)SystemAPI.Time.ElapsedTime;
 
-        new PearlLifetimeJob
+        new PickupLifetimeJob
         {
             BlinkStart = settings.BlinkStart,
             BlinkInterval = math.max(settings.BlinkInterval, 0.01f),
@@ -35,8 +35,8 @@ public partial struct PearlLifetimeSystem : ISystem
 }
 
 [BurstCompile]
-[WithPresent(typeof(PearlBlinking))]
-public partial struct PearlLifetimeJob : IJobEntity
+[WithPresent(typeof(PickupBlinking))]
+public partial struct PickupLifetimeJob : IJobEntity
 {
     public float BlinkStart;
     public float BlinkInterval;
@@ -47,9 +47,9 @@ public partial struct PearlLifetimeJob : IJobEntity
     private void Execute(
         Entity entity,
         [EntityIndexInQuery] int sortKey,
-        ref PearlLifetime lifetime,
+        ref PickupLifetime lifetime,
         ref LocalTransform transform,
-        EnabledRefRW<PearlBlinking> blinking)
+        EnabledRefRW<PickupBlinking> blinking)
     {
         lifetime.TimeRemaining -= DeltaTime;
         if (lifetime.TimeRemaining <= 0f)
@@ -64,7 +64,7 @@ public partial struct PearlLifetimeJob : IJobEntity
             if (lifetime.VisibleState == 0)
             {
                 lifetime.VisibleState = 1;
-                transform.Scale = math.max(transform.Scale, 0.25f);
+                transform.Scale = lifetime.BaseScale;
             }
             return;
         }
@@ -75,6 +75,6 @@ public partial struct PearlLifetimeJob : IJobEntity
 
         lifetime.NextBlinkToggleAt = Elapsed + BlinkInterval;
         lifetime.VisibleState = lifetime.VisibleState == 0 ? (byte)1 : (byte)0;
-        transform.Scale = lifetime.VisibleState == 1 ? 0.25f : 0.1f;
+        transform.Scale = lifetime.VisibleState == 1 ? lifetime.BaseScale : lifetime.BaseScale * 0.4f;
     }
 }

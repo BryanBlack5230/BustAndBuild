@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -30,12 +31,18 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
             var coordinator = SystemAPI.GetSingleton<BattleCoordinator>();
 
-            var prefab = SystemAPI.HasSingleton<PearlSpawnPrefab>()
-                ? SystemAPI.GetSingleton<PearlSpawnPrefab>().Prefab
-                : Entity.Null;
-            var settings = SystemAPI.HasSingleton<PearlSettings>()
-                ? SystemAPI.GetSingleton<PearlSettings>()
-                : default;
+            // The spawner is optional here — escapees still get destroyed in scenes without one.
+            // PickupSettings + the PickupPrefabRef buffer live on the same baked spawner entity.
+            var hasSpawner = SystemAPI.HasSingleton<PickupSettings>();
+            var settings = hasSpawner ? SystemAPI.GetSingleton<PickupSettings>() : default;
+
+            var map = default(PickupPrefabMap);
+            if (hasSpawner)
+            {
+                var prefabBuffer = SystemAPI.GetSingletonBuffer<PickupPrefabRef>(true);
+                for (var i = 0; i < prefabBuffer.Length; i++) map.Entries.Add(prefabBuffer[i]);
+            }
+
             var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
@@ -44,7 +51,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 EnemyBaseBounds = bases.EnemyBaseBounds,
                 IsDayPhaseActive = coordinator.IsDayPhaseActive,
                 DeltaTime = SystemAPI.Time.DeltaTime,
-                PearlPrefab = prefab,
+                PrefabMap = map,
                 Settings = settings,
                 Seed = (uint)math.max(1, (int)(SystemAPI.Time.ElapsedTime * 10007)),
                 ECB = ecb,
@@ -61,8 +68,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public Aabb EnemyBaseBounds;
         public bool IsDayPhaseActive;
         public float DeltaTime;
-        public Entity PearlPrefab;
-        public PearlSettings Settings;
+        public PickupPrefabMap PrefabMap;
+        public PickupSettings Settings;
         public uint Seed;
         public EntityCommandBuffer.ParallelWriter ECB;
 
@@ -71,7 +78,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
             [EntityIndexInQuery] int sortKey,
             in LocalToWorld worldTransform,
             in EmotionalState emotion,
-            in PearlDropOnDeath drop,
+            [ReadOnly] DynamicBuffer<ResourceDrop> drops,
             ref HasLeftBase hasLeftBaseData,
             EnabledRefRW<HasLeftBase> hasLeftBase,
             EnabledRefRW<Escaped> escaped)
@@ -109,13 +116,28 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
             escaped.ValueRW = true;
 
-            if (isScared && PearlPrefab != Entity.Null)
+            // Scared escapees drop HALF their rolled loot at the base boundary (reachable by the player).
+            if (isScared)
             {
                 var rand = Random.CreateFromIndex(Seed + (uint)entity.Index * 2654435761u);
-                var rolled = rand.NextInt(drop.MinCount, drop.MaxCount + 1);
-                var halfCount = rolled / 2;
 
-                PearlSpawnUtility.Spawn(ref ECB, sortKey, PearlPrefab, Settings, hasLeftBaseData.LastOutsidePosition, halfCount, drop.ValuePerPearl, ref rand);
+                for (var i = 0; i < drops.Length; i++)
+                {
+                    var drop = drops[i];
+
+                    var idx = (int)drop.Type;
+                    if (idx < 0 || idx >= PrefabMap.Entries.Length) continue;
+
+                    var prefabEntry = PrefabMap.Entries[idx];
+                    if (prefabEntry.Prefab == Entity.Null) continue;
+
+                    if (rand.NextFloat() > drop.Chance) continue;
+
+                    var halfCount = rand.NextInt(drop.MinCount, drop.MaxCount + 1) / 2;
+                    if (halfCount <= 0) continue;
+
+                    PickupSpawnUtility.Spawn(ref ECB, sortKey, prefabEntry.Prefab, prefabEntry.Scale, Settings, drop.Type, hasLeftBaseData.LastOutsidePosition, halfCount, drop.Value, ref rand);
+                }
             }
 
             ECB.DestroyEntity(sortKey, entity);
