@@ -18,7 +18,7 @@ You are a Unity C# architect-level developer.
 4. **Throw exceptions for errors — never log errors and continue.** A required `[SerializeField]` that is null at install time → throw `InvalidOperationException`, no silent `Resources.Load` fallback.
 5. **`Log.<Context>.D/W/E()` for runtime logging** — static utility, no injection, never in constructors. `Debug.Log` is for editor-only code. Tags: `Log.Battle` (combat/AI/ECS), `Log.Loading`, `Log.Boot`, `Log.World`, `Log.City`, `Log.Default`. `.D()` is auto-stripped in PROD via `[Conditional]` — never wrap it in `#if` guards. `.E(exception)` for caught exceptions; `.ThrowException(msg)` for tagged throws.
 6. **readonly for non-reassigned fields, const for constants, nameof over string literals.**
-7. **No inline comments** — use descriptive names. Comment only constraints the code can't express.
+7. **No inline comments** — use descriptive names. Comment only constraints the code can't express. The one sanctioned comment is a **"why-not"**: when a natural/standard approach was tried and rejected (an API misbehaves here, a guard exists for a framework constraint, a slower path is chosen for correctness), leave a short note so reviewers and a future Claude don't re-suggest the dead end.
 8. **No LINQ anywhere** — explicit loops, always.
 9. **No magic numbers** (agreed 2026-06-10): tunable values do NOT get hardcoded in systems/jobs. They live in config (see `Claude/ConfigTask.md`: `*Config` ScriptableObjects → blob/singleton components; `*Constants` static classes are reserved for true compile-time invariants). If the config plumbing for a value doesn't exist yet, put the value in a clearly named field/SO rather than inline, and flag it.
 10. **One Unity-serialized class per file, filename = class name** — applies to every `MonoBehaviour` and `ScriptableObject`. Multiple serialized types in one file silently break inspector reference wiring (no error — references just don't persist through bake). Plain ECS structs, enums, and POCOs may share files. Project SO filename convention: `%Name%SO.cs` for profile-style SOs.
@@ -96,6 +96,11 @@ File placement: one type → own file next to the owner; multiple types per owne
 ### Async: UniTask
 - **Never `async void`** — use `async UniTaskVoid` + `.Forget()` for fire-and-forget; exceptions must surface.
 - Pause/cancel via `CancellationTokenSource`; `try / catch (OperationCanceledException) {}` around loops.
+- **Re-throw `OperationCanceledException` before any general `catch`** when the token came from a caller (you don't own the CTS) — swallowing it mid-chain hides the cancellation from the owner. Only the loop that *owns* the CTS swallows it (see `Claude/learnings/game-loop-listeners.md`).
+
+### IL2CPP (shipping builds)
+- **No `System.Reflection.Emit`** — unsupported under IL2CPP; runtime codegen throws on device.
+- Methods invoked **only via reflection** need `[UnityEngine.Scripting.Preserve]` so managed-code-stripping doesn't drop them.
 
 ### Resources
 - All `Resources.Load*` goes through `AssetService.R.Load<T>(path)`.
@@ -108,3 +113,13 @@ File placement: one type → own file next to the owner; multiple types per owne
 **🟡 Important:** missing readonly/const/nameof; `#if` guards around `Log.D`; wrong Log tag; missing `NonLazy` on self-sufficient singletons; registration-order bugs; per-frame allocations (cache `GUILayoutOption`s, materials, queries).
 
 **🟢 Suggestion:** expression bodies, pattern matching, naming improvements.
+
+## Diagnostics & Review Feedback
+
+A diagnostic (IDE inspection, analyzer) or review comment is *general* guidance — it isn't always right for the code at hand. Apply it when it fits; when it doesn't (hurts readability, conflicts with a deliberate local design):
+- **Decline and say why** — report the declined item + reason to the user, and if the surrounding code is non-obvious leave a "why-not" comment (see Priority 1, rule 7) so the same note isn't re-raised next review.
+- **Suppress a mis-firing diagnostic at the narrowest scope** — a single line/member via `[SuppressMessage]` or `// ReSharper disable once <Inspection>`, never a file- or assembly-wide blanket.
+
+## Research
+- Verify Unity APIs against the local editor docs or primary source before implementing — don't guess from memory.
+- Unity Discussions (Discourse) render badly for scraping — append `/print` to a thread URL to retrieve the full text.

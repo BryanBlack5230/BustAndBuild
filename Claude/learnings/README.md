@@ -14,11 +14,14 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Scene Flow System](scene-flow-system.md) — `ISceneFlow`, `RunConfiguration`, `SceneChain`, editor toolbox, state overrides
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
 
+### Testing
+- [Testing Methodology](testing-methodology.md) — test-layer assignment, ECS systems as the unit-test sweet spot (World/`Update`/assert pattern + enableable & domain-reload arrange traps), technique selection, PRNG strategies, naming; current state: no test asmdef yet
+
 ### ECS / Battle
 - [ECS Architecture](ecs-architecture.md) — the map: system groups, battle pipeline order, enableable components, `BattleCoordinator`, spawning, walls, namespaces
 - [ECS Combat & Collisions](ecs-combat-and-collisions.md) — damage/death pipeline (HealthAspect, IsInvulnerable intent), bounce/landing systems, UnitMover velocity override, hit-feedback blocks, throw settings
 - [ECS Patterns](ecs-patterns.md) — reusable DOTS patterns: enableable queries, aspects, ECB gotchas, snapshot jobs, baking gotchas, ECS↔managed bridging
-- [Unity Physics Gotchas](unity-physics-gotchas.md) — AABB local-vs-world, post-physics system placement, gravity factor baking, hover bodies, collision matrix hex
+- [Unity Physics Gotchas](unity-physics-gotchas.md) — AABB local-vs-world, post-physics system placement, gravity factor baking, hover bodies, collision matrix hex, pickup mid-air-settle + upward-only bob, drop-spawn ground anchoring, battle ground/CollisionWorld topology
 - [Steering & AI](steering-and-ai.md) — brain → steering → mover pipeline, 8-dir context map, target profiles + `TargetScorerJob`, attack cooldown pattern
 
 ### Input / Camera / Throw

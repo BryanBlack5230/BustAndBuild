@@ -49,6 +49,26 @@ if (_settings == null)
 ```
 **Why it matters:** Silent fallbacks make inspector setup optional when it should be mandatory, leading to hard-to-diagnose runtime failures.
 
+## Pooled MonoBehaviours — Teardown Order & SetActive Re-entrancy
+
+**Context:** Hardening `UiPool`/`UiPoolItem` (review of the Vortex port, 2026-06-13). Four rules for any manager MonoBehaviour that owns child GameObjects:
+1. **`OnDestroy` must not touch member GameObjects.** During hierarchy destruction/scene unload the children may already be gone (their `OnDisable` runs before the parent's `OnDestroy`) — `SetActive`/`.gameObject` access throws `MissingReferenceException`. Clear the C# collections only.
+2. **No `SetActive` from inside `OnEnable`/`OnDisable` of the same object** — Unity errors with "GameObject is already being activated or deactivated". A return-to-pool path triggered by `OnDisable` needs a variant that skips deactivation (the object is already inactive); same reason not to "self-correct" activation state in `OnEnable`.
+3. **Guard `OnDisable` side effects with `gameObject.scene.isLoaded`** — during scene unload it's `false`, skipping pool-return/event work while peer objects are half-destroyed.
+4. **Free-lists holding `UnityEngine.Object` must skip fake-null on dequeue** — an externally `Destroy`ed pooled item survives in the queue as a destroyed reference; loop `Dequeue` until the implicit bool check passes.
+
+**Why it matters:** all four fail only at scene-unload/destruction edges, so they pass play-mode smoke tests and then spam exceptions on scene transitions.
+
+## Editing Prefab Assets from Editor Tools
+
+Mutating a prefab **asset** (Project-window selection, `EditorUtility.IsPersistent(go)` true) in place — e.g. `GameObjectUtility.RemoveMonoBehavioursWithMissingScript` + `SetDirty` — **silently doesn't persist** to the `.prefab` file. Route persistent objects through the prefab-contents API:
+```csharp
+var root = PrefabUtility.LoadPrefabContents(path);
+try { /* mutate root hierarchy */ if (changed) PrefabUtility.SaveAsPrefabAsset(root, path); }
+finally { PrefabUtility.UnloadPrefabContents(root); }
+```
+**Why it matters:** the in-place edit *appears* to work in the session (imported objects change) — the loss only shows after a reimport/restart. Branch on `EditorUtility.IsPersistent` (scene objects keep the `Undo` path; prefab contents are not undoable). Live example: `Editor/MissingScriptsFinder.cs`.
+
 ## Serialize Child-Component Refs on a Prefab — Don't `GetComponent` Per-Spawn
 
 When a prefab is `Instantiate`d on a hot path (per pickup, per projectile, per VFX) and you need a child component on the clone, **do not** `GetComponent`/`GetComponentInChildren` on every instance. Put a small root component on the prefab that holds the child as a `[SerializeField]`, wire it once in the inspector, and read the field after Instantiate — Unity remaps internal prefab references to the clone automatically, so the reference already points at the cloned child. Zero runtime lookups.

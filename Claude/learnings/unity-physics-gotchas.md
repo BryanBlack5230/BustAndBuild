@@ -44,6 +44,28 @@ To make a dynamic body behave like it's hovering in place while still being knoc
 
 **Why not `ICollisionEventsJob` for wake?** Collision events fire every frame for stable resting contacts (pearl on ground, pearl touching pearl). The post-physics velocity check naturally filters: stable contacts produce ~0 velocity (solver fully resolves), real impacts produce > threshold. Simpler and no spurious wakes.
 
+## Pickup Settle Is Speed-Only → Mid-Air Settle; Bob Must Be Upward-Only
+**Context:** "Some pickups spawn below ground and fall through / disappear." (`PickupFloatSystem`, `PickupSpawnUtility`, scene `PickupSpawner` tuning.)
+**Finding (two compounding bugs):**
+1. `PickupFloatSystem`'s settle test is **speed-only** (`speedSq < RestSpeedThreshold²` for `RestDuration`), with **no ground-contact requirement**. The scene tunes `restDuration ≈ 0.03s` (~2 frames) and `restSpeedThreshold 0.6`. A pickup is spawned with **zero velocity**, so it settles in **mid-air at its spawn height before gravity ever accelerates it past 0.6 m/s** — it never falls to the ground. So `RestY ≈ spawnY`, NOT ground level.
+2. The settled bob was `RestY + sin(phase) * Amplitude` — **symmetric**, so the trough is `Amplitude` *below* `RestY`. With scene `floatAmplitude 1` but `spawnHeight 0.2`, the trough sat ~0.8 m **underground** every cycle.
+**Fix:** bob **upward from the rest point**: `RestY + (1 - cos(phase)) * 0.5 * Amplitude` (trough pinned at `RestY`, period unchanged, same peak). Robust for any `Amplitude` and survives post-bump re-settles (where `RestY` = ground-contact height). Note `floatAmplitude 1` is huge for a ~0.4-scale pickup (the `PickupAuthoring` baker default is `0.1`) — aesthetic, not correctness, once the bob is upward-only.
+**Why it matters:** "settle when slow" is NOT "settle when grounded." Any hover body spawned at rest will freeze in mid-air; and a symmetric sine bob dives below its baseline whenever amplitude > clearance. Both are invisible until you trace the actual tuning values.
+
+## Pickup Drop Spawn Must Be Ground-Anchored, Not Corpse-Anchored
+**Context:** `PickupSpawnUtility.Spawn` originally placed pickups at `dyingUnit.LocalToWorld.Position.y + spawnHeight`.
+**Finding:** A unit killed by a throw/smash is briefly **penetrating the ground on its death frame** (`DeathSystem` destroys it same-frame as `ApplyDamageSystem`), so its `LocalToWorld.Position.y` can be **below the ground surface** → pickup spawns underground. Fix: raycast straight down (`CollisionWorld.CastRay`, start a few units above the corpse, filter `CollidesWith = 1 << Ground(7)`) and spawn at `hitY + spawnHeight`, falling back to corpse Y on a miss. Plumbed by both `PickupSpawnOnDeathSystem` and `EnemyEscapeSystem` (scared-escapee loot): `state.RequireForUpdate<PhysicsWorldSingleton>()`, resolve the ground layer bit in `OnCreate` (managed `LayerMask.NameToLayer`), pass `[ReadOnly] CollisionWorld` into the job.
+**Why it matters:** Spawn-position fix alone does NOT cure the symptom — the mid-air-settle + symmetric-bob bug above still drives it underground. Both fixes are needed together.
+
+## Where the Battle Ground Actually Lives (CollisionWorld topology)
+**Context:** Needed to know what a downward ground raycast can hit at runtime, and why scene colliders looked layer-0.
+**Finding:** The walkable ground (the **Island**, layer 7 = `Ground`) lives in `WorldECS.unity`, loaded as a **baked SubScene** by `2.World` (SubScene GUID `45ec3ca1…` = `WorldECS`). It stays loaded under the battle, so the DOTS `CollisionWorld` *does* contain a layer-7 ground. The battle scenes' structural box colliders are **layer 0 (Default)** baked from `BattleGroundSceneECS` (walls/obstacles, not the floor). `3.BattleGroundScene.unity` is the **non-ECS** management/camera scene — its GameObjects are NOT baked, so they are absent from the `CollisionWorld`. Units walk on the Island, so a `Ground`-layer (7) downward ray is the correct surface probe.
+**Collision matrix (`DynamicsManager`):** PickUps (layer 10) mask `ff8cfcff` collides with layers **0–7 (incl. Default and Ground)**, 10, 11, 15, 18–31; NOT Grabbable(8)/Obstacle(9). `Ground` (7) = `ffffffff` (collides with everything).
+**Side note:** `PearlAuthoring`→`PickupAuthoring` and `PearlSpawnerAuthoring`→`PickupSpawnerAuthoring` were renamed keeping the same `.meta` GUID, so old prefabs/scenes show a stale `m_EditorClassIdentifier` string (e.g. `Runtime::PearlSpawnerAuthoring`) but still bind to the renamed script — don't be misled when reading YAML.
+
+## Pickup Prefabs Use Discrete Collision (tunneling risk)
+`PearlPickup`/`WoodPickup`/`StonePickup` Rigidbodies have `m_CollisionDetection: 0` (Discrete) and `m_DefaultMaxDepenetrationVelocity` is 10. Multiple pickups spawned within `scatter` overlap, and the solver can launch an overlapping pickup at up to 10 m/s — fast enough to **tunnel through a thin/static ground** in one discrete step. Secondary suspect if pickups still vanish after the spawn-anchor + upward-bob fixes; the cure would be continuous CCD on the prefab or non-overlapping spawn placement.
+
 ## Exempting a Layer from Existing Collision-Response Systems
 When a new collider type (e.g., pearls on `PickUps` layer) starts colliding with units thanks to a layer-matrix change, existing systems like `InAirCollisionSystem` will start firing their bounce/landed logic on those collisions. Gate by layer-bit check on the OTHER entity's `CollisionFilter.BelongsTo`:
 ```csharp

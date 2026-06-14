@@ -7,10 +7,22 @@ In June 2026 we evaluated UGFW (Unity Game Framework, MIT © 2026 MAK, github.co
 | File | Where | Adaptation notes |
 |---|---|---|
 | `Timer` | `Infrastructure/Utilities/Timer/` | Ported earlier; UGFW original had a timeScale double-scaling bug (multiplied tick by `timeScale` on top of UniTask's already-scaled delay) and `Pause/Resume` only worked in countdown mode — fixed in our version |
-| `TimeFormatter` | `Infrastructure/Utilities/TimeFormatter.cs` | Duration ("1h 30m" / "01:30:45"), relative ("5m ago"), arrival ("Tomorrow at 5pm"), parse-back. `TimeRounding.Ceil` exists specifically for cooldowns — never show "0m" while one is active. Added a `TimeSpan` overload |
-| `NumberFormatter` | `Infrastructure/Utilities/NumberFormatter.cs` | Merged UGFW's two redundant APIs into one `FormatAbbreviated` family. Key semantic kept: **owned resources floor, costs ceil** (`roundDown` param, default floor). Dropped two-letter idle-game suffixes (long can't exceed "Q") and the custom exception class |
+| `TimeFormatter` | `Infrastructure/Utilities/TimeFormatter.cs` | Duration ("1h 30m" / "01:30:45"), relative ("5m ago"), arrival ("Tomorrow at 5pm"), parse-back. `TimeRounding.Ceil` exists specifically for cooldowns — never show "0m" while one is active. Added a `TimeSpan` overload. Post-port audit fixes (see below): invariant-culture parsing, Stopwatch skips whole-second rounding (ms were always 00), `ToRelativeTime` compares in UTC, `ParseTime` throws + `TryParseTime` added |
+| `NumberFormatter` | `Infrastructure/Utilities/NumberFormatter.cs` | Merged UGFW's two redundant APIs into one `FormatAbbreviated` family. Key semantic kept: **owned resources floor, costs ceil** (`roundDown` param, default floor). Dropped two-letter idle-game suffixes (long can't exceed "Q") and the custom exception class. Post-port audit fix: floor/ceil applies to the **signed** value (floor-of-abs rounded negatives toward zero, overstating owned negative balances); ceil renormalizes at unit boundaries (999999 cost → "1M", not "1000K") |
 | `PriorityQueue<TElement,TPriority>` | `Infrastructure/Utilities/DataStructures/PriorityQueue.cs` | Verbatim .NET quaternary-min-heap port (absent from Unity's .NET Standard 2.1). Local change: merged the BCL throw-helper polyfill classes into `ThrowHelper` because `internal static class ArgumentNullException` **shadowed `System.ArgumentNullException` for every file in the namespace**. Intended consumer: island pathfinding (A*/Dijkstra, sea spawn → beacon) |
-| `MissingScriptsFinder` | `Editor/MissingScriptsFinder.cs` | Menu `BarkingBird/Missing Scripts/...`. Fixed: original's remove pass didn't recurse into children (find did) |
+| `MissingScriptsFinder` | `Editor/MissingScriptsFinder.cs` | Menu `BarkingBird/Missing Scripts/...`. Fixed: original's remove pass didn't recurse into children (find did). Post-port audit fix: prefab assets selected in the Project window now go through `LoadPrefabContents` → `SaveAsPrefabAsset` (in-place removal silently didn't persist — see [[unity-csharp-patterns]]) |
+
+## Post-port audit (2026-06-13) — bug classes hiding in harvested code
+
+**Context:** A standards review of the UGFW/Vortex ports found three shipping-grade bugs that demos never surface. The ports compiled and looked correct; every bug lived at a locale, numeric-range, or lifecycle edge.
+**Finding — the checklist for any future harvest:**
+1. **Culture-sensitive parsing**: every `double.Parse`/`TryParse` of game data needs `CultureInfo.InvariantCulture` — on comma-decimal locales (de-DE, ru-RU) `"1.5"` parses as **15**, so `"1.5h"` became 15 hours.
+2. **Round-then-format ordering**: TimeFormatter floored total seconds before formatting, so the Stopwatch format's millisecond component was always "00".
+3. **UTC/local mixing across utilities**: `ToRelativeTime` used `DateTime.Now` while `DateTimeTimer` anchors to `UtcNow` — combining them was silently off by the timezone.
+4. **Display-rounding sign handling**: floor-of-absolute-value rounds negatives toward zero — "never overstate what the player owns" requires flooring the *signed* value.
+5. **Silent-zero parse APIs**: `ParseTime` returned 0 on garbage; converted to throw + `TryParse` pair per studio rule 4.
+
+**Why it matters:** harvested code must be reviewed at the same depth as new code — MIT pedigree and "it works in the demo" prove nothing about locale/range edges.
 
 ## What we deliberately skipped
 - **GenericEventBus** — our static `EventBus` was already built *instead of* it (see [[events-and-services]]); ours is allocation-free, theirs isn't. Its consume/stop-propagation feature remains the one thing we lack, deliberately.
