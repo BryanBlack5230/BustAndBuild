@@ -4,8 +4,10 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
+using UnityEngine;
 
 using BarkingBird.Runtime.Infrastructure.GameLoop;
+using BarkingBird.Runtime.Infrastructure.Settings;
 
 using Random = Unity.Mathematics.Random;
 
@@ -16,10 +18,16 @@ namespace BarkingBird.Runtime.Gameplay.AI
     [UpdateAfter(typeof(BattleCoordinatorSystem))]
     public partial struct EnemyEscapeSystem : ISystem
     {
+        private uint _groundLayerBit;
+
+        // OnCreate is not [BurstCompile] — LayerMask.NameToLayer is a managed call
         public void OnCreate(ref SystemState state)
         {
+            _groundLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground);
+
             state.RequireForUpdate<BattleCoordinator>();
             state.RequireForUpdate<FactionBases>();
+            state.RequireForUpdate<PhysicsWorldSingleton>();
             state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
         }
 
@@ -53,6 +61,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 DeltaTime = SystemAPI.Time.DeltaTime,
                 PrefabMap = map,
                 Settings = settings,
+                CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+                GroundLayerBit = _groundLayerBit,
                 Seed = (uint)math.max(1, (int)(SystemAPI.Time.ElapsedTime * 10007)),
                 ECB = ecb,
             }.ScheduleParallel();
@@ -70,6 +80,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
         public float DeltaTime;
         public PickupPrefabMap PrefabMap;
         public PickupSettings Settings;
+        [ReadOnly] public CollisionWorld CollisionWorld;
+        public uint GroundLayerBit;
         public uint Seed;
         public EntityCommandBuffer.ParallelWriter ECB;
 
@@ -136,7 +148,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                     var halfCount = rand.NextInt(drop.MinCount, drop.MaxCount + 1) / 2;
                     if (halfCount <= 0) continue;
 
-                    PickupSpawnUtility.Spawn(ref ECB, sortKey, prefabEntry.Prefab, prefabEntry.Scale, Settings, drop.Type, hasLeftBaseData.LastOutsidePosition, halfCount, drop.Value, ref rand);
+                    PickupSpawnUtility.Spawn(ref ECB, sortKey, prefabEntry.Prefab, prefabEntry.Scale, Settings, in CollisionWorld, GroundLayerBit, drop.Type, hasLeftBaseData.LastOutsidePosition, halfCount, drop.Value, ref rand);
                 }
             }
 

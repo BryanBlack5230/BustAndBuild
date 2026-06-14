@@ -2,9 +2,12 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
+using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.AI;
+using BarkingBird.Runtime.Infrastructure.Settings;
 
 using Random = Unity.Mathematics.Random;
 
@@ -14,10 +17,16 @@ using Random = Unity.Mathematics.Random;
 [UpdateBefore(typeof(DeathSystem))]
 public partial struct PickupSpawnOnDeathSystem : ISystem
 {
+    private uint _groundLayerBit;
+
+    // OnCreate is not [BurstCompile] — LayerMask.NameToLayer is a managed call
     public void OnCreate(ref SystemState state)
     {
+        _groundLayerBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground);
+
         // PickupSettings + the PickupPrefabRef buffer live on the same baked spawner entity.
         state.RequireForUpdate<PickupSettings>();
+        state.RequireForUpdate<PhysicsWorldSingleton>();
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
 
@@ -37,6 +46,8 @@ public partial struct PickupSpawnOnDeathSystem : ISystem
         {
             PrefabMap = map,
             Settings = settings,
+            CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+            GroundLayerBit = _groundLayerBit,
             Seed = (uint)math.max(1, (int)(SystemAPI.Time.ElapsedTime * 10007)),
             ECB = ecb,
         }.ScheduleParallel();
@@ -49,6 +60,8 @@ public partial struct SpawnPickupsOnDeathJob : IJobEntity
 {
     public PickupPrefabMap PrefabMap;
     public PickupSettings Settings;
+    [ReadOnly] public CollisionWorld CollisionWorld;
+    public uint GroundLayerBit;
     public uint Seed;
     public EntityCommandBuffer.ParallelWriter ECB;
 
@@ -75,7 +88,7 @@ public partial struct SpawnPickupsOnDeathJob : IJobEntity
             var count = rand.NextInt(drop.MinCount, drop.MaxCount + 1);
             if (count <= 0) continue;
 
-            PickupSpawnUtility.Spawn(ref ECB, sortKey, prefabEntry.Prefab, prefabEntry.Scale, Settings, drop.Type, worldTransform.Position, count, drop.Value, ref rand);
+            PickupSpawnUtility.Spawn(ref ECB, sortKey, prefabEntry.Prefab, prefabEntry.Scale, Settings, in CollisionWorld, GroundLayerBit, drop.Type, worldTransform.Position, count, drop.Value, ref rand);
         }
 
         ECB.RemoveComponent<ResourceDrop>(sortKey, entity);
