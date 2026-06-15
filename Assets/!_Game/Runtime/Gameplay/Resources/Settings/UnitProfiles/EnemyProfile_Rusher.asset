@@ -48,17 +48,14 @@ MonoBehaviour:
     ObstacleDangerCurve: 1
   Drops:
   - type: 0
-    minCount: 10
-    maxCount: 20
+    minMaxCount: {x: 10, y: 20}
     chance: 1
     value: 1
   - type: 2
-    minCount: 1
-    maxCount: 1
+    minMaxCount: {x: 1, y: 1}
     chance: 0.2
     value: 1
   - type: 3
-    minCount: 1
-    maxCount: 1
+    minMaxCount: {x: 1, y: 1}
     chance: 0.05
     value: 1

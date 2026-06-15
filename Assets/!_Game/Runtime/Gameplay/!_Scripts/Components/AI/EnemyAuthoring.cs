@@ -5,6 +5,7 @@ using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.Currency;
 using BarkingBird.Runtime.Infrastructure.Utilities;
+using Unity.Mathematics;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
@@ -114,8 +115,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
                         drops.Add(new ResourceDrop
                         {
                             Type = entry.type,
-                            MinCount = entry.minCount,
-                            MaxCount = entry.maxCount,
+                            MinCount = (int)math.floor(entry.minMaxCount.x),
+                            MaxCount = (int)math.floor(entry.minMaxCount.y),
                             Chance = entry.chance,
                             Value = entry.value,
                         });

@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.Currency;
+using Sirenix.OdinInspector;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
@@ -16,10 +17,9 @@ namespace BarkingBird.Runtime.Gameplay.AI
     {
         [Tooltip("Resource granted when one of these pickups is collected.")]
         public CurrencyType type;
-        [Tooltip("Minimum number of pickups spawned when this row hits.")]
-        public int minCount;
-        [Tooltip("Maximum number of pickups spawned when this row hits (inclusive).")]
-        public int maxCount;
+        [Tooltip("Minimum/Maximum number of pickups spawned when this row hits.")]
+        [MinMaxSlider(1f, "@100f",  true)]
+        public Vector2 minMaxCount;
         [Range(0f, 1f), Tooltip("Independent chance this row drops at all. 1 = always (e.g. pearls).")]
         public float chance;
         [Tooltip("Wallet amount granted per pickup.")]

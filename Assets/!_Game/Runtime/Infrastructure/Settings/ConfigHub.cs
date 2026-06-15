@@ -18,7 +18,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
     /// </summary>
     public class ConfigHub : MonoBehaviour
     {
-        [Title("Unit Targeting Profiles")]
+        [Title("Units")]
         [Tooltip("One asset per EnemyType. Order does not matter — the baker keys each profile by its Type.")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public List<EnemyUnitProfile> EnemyProfiles = new();
@@ -27,8 +27,6 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public List<AllyUnitProfile> AllyProfiles = new();
 
-        [Title("Combat — Bounce & Landing")]
-        [HideLabel]
         public BounceConfig Bounce = BounceConfig.Default;
 
         [Title("Hit Feedback")]
@@ -44,15 +42,9 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public PushProfileSO PushProfile;
 
-        [Title("AI — Brain & Escape")]
-        [HideLabel]
         public BattleBrainConfig Brain = BattleBrainConfig.Default;
-
-        [Title("AI — Steering")]
-        [HideLabel]
         public SteeringConfig Steering = SteeringConfig.Default;
 
-        [Title("Camera & Power Hit")]
         [Tooltip("Camera drag/border tuning. Bound in DI at bootstrap and injected into BattleCameraMovement.")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public CameraConfigSO CameraConfig;
@@ -61,7 +53,6 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public PowerHitConfigSO PowerHitConfig;
 
-        [Title("Throw & Daylight")]
         [Tooltip("Throw + throw-physics tuning. Baked into ThrowVelocitySettings by BlobContainer; gravity applied by ThrowDebugTracker.")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public ThrowConfigSO ThrowConfig;
@@ -70,7 +61,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public DaylightConfigSO DaylightConfig;
 
-        [Title("Trajectory Predictor")]
+        [Title("Common")]
         [Tooltip("Throw-arc preview tuning. Bound in DI at bootstrap and injected into ThrowTrajectoryPredictor.")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public TrajectoryPredictorSettings TrajectoryPredictor;

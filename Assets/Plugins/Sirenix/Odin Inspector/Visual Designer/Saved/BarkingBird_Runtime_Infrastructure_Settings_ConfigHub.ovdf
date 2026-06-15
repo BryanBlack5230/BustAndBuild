@@ -2,81 +2,196 @@ OVDF v1.1
 BarkingBird.Runtime.Infrastructure.Settings.ConfigHub, Runtime
 MetaGuid:1e3bd763e9d74ef08c9bc9db98559d26
 
-# $xEZGGtxIGsuV5wsFoMS6rN
+# $BhC9bG3yoLZ01moqWCVtIy
 Position: $root:0
 + [Sirenix.OdinInspector.TabGroupAttribute]
 	GroupName = "ConfigTabs"
+	HideWhenChildrenAreInvisible = False
+	TabLayouting = MultiRow
 
-# $4BWj82tqkTdVclqbsWwjgU
-Position: $xEZGGtxIGsuV5wsFoMS6rN:0
+# $xebc2JlKlxBoXOrYqkfWU0
+Position: $L7e9kDZoscHLcniFFFv8Va:1
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
-	GroupName = "General"
-	Name = "General"
+	GroupName = "Units"
+	Name = "Units"
 	TextColor = "#66CCFFFF"
+	Icon = PersonFill
 
-# $pDkn64PjPbTZjjSAUZP2H3
-Position: $xEZGGtxIGsuV5wsFoMS6rN:1
+# $iA6SKnyrm1mq3sex7H5tvk
+Position: $L7e9kDZoscHLcniFFFv8Va:2
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "AI"
+	Name = "AI"
+	TextColor = "#66CCFFFF"
+	Icon = Diagram3
+
+# $YiWuA6ZrHpx4sfkr0rpgLX
+Position: $L7e9kDZoscHLcniFFFv8Va:0
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Feedback"
+	Name = "Feedback"
+	TextColor = "#FF8066FF"
+	Icon = EmojiDizzyFill
+
+# $0MgV8yQkmvMEl5CtBnT6Pu
+Position: $L7e9kDZoscHLcniFFFv8Va:3
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Throw"
+	Name = "Throw"
+	TextColor = "#FF8066FF"
+	Icon = LightningFill
+
+# $IfOEkQrqHNak1pH0IK9kyl
+Position: $L7e9kDZoscHLcniFFFv8Va:4
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Structures"
+	Name = "Structures"
+	TextColor = "#73D973FF"
+	Icon = HouseFill
+
+# $bwffC49LIS1aRiR4G92P2E
+Position: "BhC9bG3yoLZ01moqWCVtIy":0
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
 	GroupName = "World"
 	Name = "World"
 	TextColor = "#73D973FF"
+	Icon = ImageAlt
 
-# $MEv7f1WR6YdQqASMGHTmYd
-Position: $xEZGGtxIGsuV5wsFoMS6rN:2
+# $PVuAJzLJ9FxR8tRrAusKKk
+Position: "BhC9bG3yoLZ01moqWCVtIy":1
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
-	GroupName = "Battle"
 	Name = "Battle"
+	GroupName = "Battle"
+	Icon = SunriseFill
 	TextColor = "#FF8066FF"
 
-# $WxzUGpYdNE7f8NNscjRPxh
-Position: $xEZGGtxIGsuV5wsFoMS6rN:3
+# $L7e9kDZoscHLcniFFFv8Va
+Position: $PVuAJzLJ9FxR8tRrAusKKk:0
++ [Sirenix.OdinInspector.TabGroupAttribute]
+	GroupName = "BattleTabGroup"
+	TabLayouting = MultiRow
+
+# $SFYZSfku8YkixUsARonjaa
+Position: "BhC9bG3yoLZ01moqWCVtIy":2
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
-	GroupName = "City"
 	Name = "City"
-	TextColor = "#F2C759FF"
+	GroupName = "City"
+	Icon = Building
+	TextColor = "#906622FF"
+
+# EnemyProfiles
+Position: "xebc2JlKlxBoXOrYqkfWU0":0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "One profile asset per unit type. The baker keys each by its Type, so list order is irrelevant; missing types fall back to slot 0."
+	InfoMessageType = Info
++ [Sirenix.OdinInspector.ListDrawerSettingsAttribute]
+	ShowItemCount = True
+	DraggableItems = True
+
+# AllyProfiles
+Position: "xebc2JlKlxBoXOrYqkfWU0":1
++ [Sirenix.OdinInspector.ListDrawerSettingsAttribute]
+	ShowItemCount = True
+	DraggableItems = True
+
+# Steering
+Position: $iA6SKnyrm1mq3sex7H5tvk:0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "Battle AI tuning. Steering drives movement & avoidance; Brain drives target selection and combat decisions."
+	InfoMessageType = Info
+
+# Brain
+Position: $iA6SKnyrm1mq3sex7H5tvk:1
+
+# FlashProfile
+Position: "YiWuA6ZrHpx4sfkr0rpgLX":0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "On-hit juice baked into unit prefabs via HitFeedbackAuthoring. Point these at the same assets the prefabs use."
+	InfoMessageType = Info
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Flash profile unassigned on the hub editing surface."
+	MessageType = Warning
+
+# SquashProfile
+Position: "YiWuA6ZrHpx4sfkr0rpgLX":1
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Squash profile unassigned on the hub editing surface."
+	MessageType = Warning
+
+# PushProfile
+Position: "YiWuA6ZrHpx4sfkr0rpgLX":2
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Push profile unassigned on the hub editing surface."
+	MessageType = Warning
+
+# ThrowConfig
+Position: "0MgV8yQkmvMEl5CtBnT6Pu":0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "Grab / throw / power-hit mechanic. Throw + Trajectory feed the arc predictor; Bounce governs screen-edge rebounds."
+	InfoMessageType = Info
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Throw config unassigned — throw tuning + gravity will fail to bind."
+	MessageType = Error
+
+# TrajectoryPredictor
+Position: "0MgV8yQkmvMEl5CtBnT6Pu":1
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Trajectory predictor settings unassigned — ThrowTrajectoryPredictor will fail to bind."
+	MessageType = Error
+
+# PowerHitConfig
+Position: "0MgV8yQkmvMEl5CtBnT6Pu":2
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "PowerHit config unassigned — PowerHitController will fail to bind."
+	MessageType = Error
+
+# Bounce
+Position: "0MgV8yQkmvMEl5CtBnT6Pu":3
+
+# BeaconConfig
+Position: "IfOEkQrqHNak1pH0IK9kyl":0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "Battleground structure stats. Read at bake time — editing re-bakes the subscene."
+	InfoMessageType = Info
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Beacon config unassigned — beacons bake with the default health."
+	MessageType = Warning
+
+# WallSectionConfig
+Position: "IfOEkQrqHNak1pH0IK9kyl":1
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Wall section config unassigned — walls bake with the default health."
+	MessageType = Warning
+
+# DaylightConfig
+Position: "bwffC49LIS1aRiR4G92P2E":0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "Scene-level tuning: day/night cycle, world pickups, and the battle camera. Bound in DI at bootstrap."
+	InfoMessageType = Info
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Daylight config unassigned — DayNightCycle will fail to bind."
+	MessageType = Error
+
+# PickupConfig
+Position: "bwffC49LIS1aRiR4G92P2E":1
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Pickup config unassigned — the pickup spawner bakes with the default tuning."
+	MessageType = Warning
+
+# PickupMagnetConfig
+Position: "bwffC49LIS1aRiR4G92P2E":2
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Pickup magnet config unassigned — PickupMagnetController will fail to bind."
+	MessageType = Error
+
+# CameraConfig
+Position: "bwffC49LIS1aRiR4G92P2E":3
++ [Sirenix.OdinInspector.RequiredAttribute]
+	ErrorMessage = "Camera config unassigned — BattleCameraMovement will fail to bind."
+	MessageType = Error
 
 # Rebake()
-Position: $4BWj82tqkTdVclqbsWwjgU:0
+Position: $root:1
 + [Sirenix.OdinInspector.InfoBoxAttribute]
 	Message = "ConfigHub is the single source of truth for runtime balance. Rebake re-bakes every config into the live ECS world (play mode only)."
 	InfoMessageType = Info
-
-# DaylightConfig
-Position: $pDkn64PjPbTZjjSAUZP2H3:0
-+ [Sirenix.OdinInspector.TitleAttribute]
-	Title = "Day / Night Cycle"
-	Bold = True
-	HorizontalLine = True
-
-# EnemyProfiles
-Position: $MEv7f1WR6YdQqASMGHTmYd:0
-
-# AllyProfiles
-Position: $MEv7f1WR6YdQqASMGHTmYd:1
-
-# Bounce
-Position: $MEv7f1WR6YdQqASMGHTmYd:2
-
-# Brain
-Position: $MEv7f1WR6YdQqASMGHTmYd:3
-
-# Steering
-Position: $MEv7f1WR6YdQqASMGHTmYd:4
-
-# CameraConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:5
-
-# PowerHitConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:6
-
-# ThrowConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:7
-
-# BeaconConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:8
-
-# WallSectionConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:9
-
-# PickupConfig
-Position: $MEv7f1WR6YdQqASMGHTmYd:10

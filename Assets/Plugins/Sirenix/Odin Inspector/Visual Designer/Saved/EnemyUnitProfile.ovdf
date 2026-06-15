@@ -2,37 +2,40 @@ OVDF v1.1
 EnemyUnitProfile, Runtime
 MetaGuid:b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7
 
-# Type
-Position: $root:0
-
 # $ABmT9n9YWhteqJu9fKOzEp
 Position: $root:1
 + [Sirenix.OdinInspector.TabGroupAttribute]
 	GroupName = "ProfileTabs"
 
 # $OMp83G5OA7ZnlkaUmKxlIU
-Position: $ABmT9n9YWhteqJu9fKOzEp:0
+Position: "ABmT9n9YWhteqJu9fKOzEp":0
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
 	GroupName = "Targeting"
 	Name = "Targeting"
-	TextColor = "#66CCFFFF"
+	TextColor = "#FF8066FF"
+	Icon = Bullseye
 
 # $q7JtfM9ATC9dQqQbWU3K5H
-Position: $ABmT9n9YWhteqJu9fKOzEp:1
+Position: "ABmT9n9YWhteqJu9fKOzEp":1
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
 	GroupName = "Stats"
 	Name = "Stats"
-	TextColor = "#FF8066FF"
+	TextColor = "#66CCFFFF"
+	Icon = BookHalf
 
 # $6bHLZqumdRnGEshVfVL2N4
-Position: $ABmT9n9YWhteqJu9fKOzEp:2
+Position: "ABmT9n9YWhteqJu9fKOzEp":2
 + [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
 	GroupName = "Drops"
 	Name = "Drops"
-	TextColor = "#F2C759FF"
+	TextColor = "#73D973FF"
+	Icon = MinecartLoaded
+
+# Type
+Position: $root:0
 
 # Targeting
-Position: $OMp83G5OA7ZnlkaUmKxlIU:0
+Position: "OMp83G5OA7ZnlkaUmKxlIU":0
 
 # Stats
 Position: $q7JtfM9ATC9dQqQbWU3K5H:0
