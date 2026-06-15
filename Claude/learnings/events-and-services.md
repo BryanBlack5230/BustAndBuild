@@ -95,7 +95,7 @@ Both buses give you type-safe payloads and `IDisposable` subscription tokens (no
 **Pattern:** prefer `Log.Battle.D("...")` over raw `Debug.Log`. Compile-out semantics for production come for free.
 
 ## LoadingService
-Wraps `ILoadUnit.Load()` and `ILoadUnit<T>.Load(param)` with stopwatch timing + main-thread switch + exception logging. Has a `CompositeDisposable Disposable` field for collecting `IDisposableLoadUnit`. Used by `BootstrapFlow` to load `ConfigContainer` (JSON from `Runtime/Gameplay/Resources/Settings/Config.json`) and `CursorSetter` (cursor textures).
+Wraps `ILoadUnit.Load()` and `ILoadUnit<T>.Load(param)` with stopwatch timing + main-thread switch + exception logging. Has a `CompositeDisposable Disposable` field for collecting `IDisposableLoadUnit`. Used by `BootstrapFlow` to load `CursorSetter` (cursor textures); after the load chain it calls `_blobContainer.Initialize()`. (The old `ConfigContainer` JSON load was removed with the ConfigHub rework, 2026-06-14.)
 
 ## AssetService — Required Wrapper For All Resources Loads
 **Convention:** every `Resources.Load*` call in the project goes through `AssetService.R.Load<T>(path)` / `AssetService.R.LoadAll<T>(path)`. Direct `UnityEngine.Resources.Load*` calls are only allowed inside `AssetService.cs` itself.
@@ -120,21 +120,17 @@ Single static class collecting collider-geometry reads and PhysicsWorld overlap 
 - `AabbsOverlapXY(Aabb, Aabb)` *(internal)* — XY-only overlap test; ignores Z because the game plane is XY.
 
 ## Config Pipeline
-1. `BarkingBird/Generate Configs` (editor menu) — `ConfigGenerator.Generate()` writes a hardcoded `ConfigContainer` to `Assets/!_Game/Runtime/Gameplay/Resources/Settings/Config.json` via Newtonsoft.
-2. At runtime, `ConfigContainer : ILoadUnit` is registered as singleton; `BootstrapFlow` calls `LoadingService.BeginLoading(_configContainer)` → `Resources.Load<TextAsset>("Config")` → `JsonConvert.PopulateObject`.
-3. `BlobContainer.Initialize()` (called after configs loaded) converts `TargetProfile` lists into a `BlobAssetReference<TargetProfilesBlob>` stored on a singleton entity named `Global_Target_Profiles`.
-4. Currently `BlobContainer` reads from `PrototypeConfigSetter` (MonoBehaviour) not `ConfigContainer.Battle.EnemyProfiles` — that path is commented out. **Don't be surprised** if config-JSON edits don't change AI behaviour; edit the Bootstrap scene's `PrototypeConfigSetter` instead.
-5. **The JSON path is scheduled for deletion** (agreed 2026-06-10): SOs become the single source of truth, `PrototypeConfigSetter` gets promoted to an SO-reference hub. Full spec in `Claude/ConfigTask.md` — read it before touching anything in this pipeline. `BlobContainer` is now `IDisposable` (disposes the persistent blob; `Initialize()` is rebake-safe).
+**Balance/AI tuning moved off JSON to the `ConfigHub` system (2026-06-14).** Full reference: [[config-system]]. In short: `ConfigHub` (Bootstrap-scene MonoBehaviour, was `PrototypeConfigSetter`) holds per-unit-type profile SOs + flat config groups; `BlobContainer.Initialize()` bakes them into `Global_Target_Profiles` (blob) + `Config_*` singletons at bootstrap.
 
-## BlobConfigConverter (Reflection)
-`BlobConfigConverter.CreateBlob<T>(source)` walks public instance fields by name match and copies values into a blob root struct via `__makeref` / `SetValueDirect`. Skips fields whose types differ. Used as generic converter for `[BlobConfig]`-annotated config classes. Currently not invoked anywhere — `BlobContainer` builds its profile blobs manually. Keep in mind if you see `[BlobConfig]` on a class but no allocation site. On the `Claude/ConfigTask.md` delete list along with the rest of the JSON path.
+**JSON config is fully dead (Phase 3, 2026-06-14).** `ConfigContainer`, `Config.json`, `ConfigGenerator` (BarkingBird → Generate Configs), `BlobConfigConverter`/`[BlobConfig]`, and the `RuntimeConstants.Configs` paths are all **deleted**. The last JSON holdouts — camera and power-hit — moved to plain SOs (`CameraConfigSO`, `PowerHitConfigSO`) referenced from the hub and bound as their own types in `BootstrapInstaller`. Nothing reads JSON for config anymore. Full reference: [[config-system]].
 
 ## RuntimeConstants
 At `Runtime/Infrastructure/Settings/RuntimeConstants.cs`, namespace `BarkingBird.Runtime.Infrastructure.Settings`. **All Resources paths and Assets-relative paths must live here** — no string literals at call sites.
 - `Scenes.Bootstrap/Loading/World/Battle/City` — int build indices, resolved at static init via `SceneUtility.GetBuildIndexByScenePath`.
-- `PhysicLayers.Unit/Grabbable/Ground/Obstacle` — string names; resolved via `LayerMask.NameToLayer` at use sites.
-- `Configs.ConfigFileName = "Settings/Config"` — Resources-relative path consumed by `ConfigContainer.Load()`.
-- `Configs.AssetsResourcesFolder = "!_Game/Runtime/Gameplay/Resources"` — Assets-relative path for editor-side writes (`ConfigGenerator` uses it with `Application.dataPath`). Separate constant because `Path.Combine(Application.dataPath, …)` is not a Resources.Load.
+- `PhysicLayers.Unit/Grabbable/Ground/Obstacle/PickUps` — string names; resolved via `LayerMask.NameToLayer` at use sites.
+- `SceneWorkflow.RunConfigurationsPath = "Settings/SceneRunConfigurations"` — Resources-relative path for run-config assets.
+- `Daylight.MinutesInDay = 1440`.
+- *(The `Configs` nested class — `ConfigFileName`/`AssetsResourcesFolder` — was removed with the JSON config in the ConfigHub rework, 2026-06-14.)*
 - `Cursors.Open/ObjectHold/GroundHold/Dummy` and `Cursors.All` — texture filenames (just the basename).
 - `Cursors.RootPath = "Cursors/"`, `Cursors.SpritesPath`, `Cursors.TexturesPath`, `Cursors.DummyPrefabPath` — composed from `RootPath`. Pattern: define the folder once, build subpaths via `const` concatenation, so a folder rename is a one-line change.
 - `SceneWorkflow.RunConfigurationsPath = "Settings/SceneRunConfigurations"` — Resources-relative; consumed by `SceneWorkflowRunner` in build mode via `AssetService.R.LoadAll<RunConfiguration>`.

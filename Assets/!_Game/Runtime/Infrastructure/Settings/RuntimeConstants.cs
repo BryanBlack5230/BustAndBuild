@@ -22,14 +22,6 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             public const string Obstacle = "Obstacle";
             public const string PickUps = "PickUps";
         }
-        
-        public static class Configs
-        {
-            public const string ConfigFileName = "Settings/Config";
-
-            // Assets-relative path to the Resources root, used by editor-side ConfigGenerator when writing Config.json.
-            public const string AssetsResourcesFolder = "!_Game/Runtime/Gameplay/Resources";
-        }
 
         public static class Cursors
         {

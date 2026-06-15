@@ -19,6 +19,18 @@ namespace BarkingBird.Runtime.Infrastructure.Utilities
         }
 
         /// <summary>
+        /// Local-space (unrotated) XY half-extents from a <see cref="PhysicsCollider"/>'s AABB. Burst-friendly —
+        /// takes the component by value so it can be read from a job via a ComponentLookup. Returns
+        /// <paramref name="fallback"/> when the collider blob is missing/invalid.
+        /// </summary>
+        internal static float2 GetColliderHalfExtentsXY(in PhysicsCollider collider, float2 fallback)
+        {
+            if (!collider.IsValid) return fallback;
+            var aabb = collider.Value.Value.CalculateAabb();
+            return new float2((aabb.Max.x - aabb.Min.x) * 0.5f, (aabb.Max.y - aabb.Min.y) * 0.5f);
+        }
+
+        /// <summary>
         /// Returns a random point inside the collider volume of a PhysicsCollider component.
         /// Works for any convex collider. If sampling fails, returns the collider center.
         /// </summary>

@@ -27,11 +27,14 @@ namespace BarkingBird.Runtime.Gameplay.AI
             if (!bases.IsInitialized) return;
 
             var coordinator = SystemAPI.GetSingleton<BattleCoordinator>();
+            var config = SystemAPI.TryGetSingleton<BattleBrainConfig>(out var brainConfig) ? brainConfig : BattleBrainConfig.Default;
 
             var brainJob = new BrainDecisionJob
             {
                 Bases = bases,
                 IsDayPhaseActive = coordinator.IsDayPhaseActive,
+                EvadeTriggerRangeMultiplier = config.EvadeTriggerRangeMultiplier,
+                EvadeRetreatDistance = config.EvadeRetreatDistance,
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
                 UnableToActLookup = SystemAPI.GetComponentLookup<UnableToAct>(true),
                 CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(true),
@@ -51,6 +54,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [ReadOnly] public ComponentLookup<IsInvulnerable> IsInvulnerableLookup;
         [ReadOnly] public FactionBases Bases;
         public bool IsDayPhaseActive;
+        public float EvadeTriggerRangeMultiplier;
+        public float EvadeRetreatDistance;
 
         
         private void Execute(
@@ -133,11 +138,11 @@ namespace BarkingBird.Runtime.Gameplay.AI
             }
             else
             {
-                if (distToTargetSq <= attackRangeSq * 32) //TODO this is a quick-fix, need a proper evasion system
+                if (distToTargetSq <= attackRangeSq * EvadeTriggerRangeMultiplier) //TODO this is a quick-fix, need a proper evasion system
                 {
                     action.Value = ActionType.Evading;
                     var dirAway = math.normalize(myWorldPos - targetWorldPos);
-                    finalDestination.Value = myWorldPos + (dirAway * 3.0f);
+                    finalDestination.Value = myWorldPos + (dirAway * EvadeRetreatDistance);
                     brain.CanAttack = false;
                 }
                 else

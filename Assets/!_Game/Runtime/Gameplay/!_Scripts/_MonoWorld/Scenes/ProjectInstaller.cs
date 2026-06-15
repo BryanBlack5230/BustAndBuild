@@ -5,7 +5,6 @@ using UnityEngine;
 using BarkingBird.Runtime.Gameplay.Cursor;
 using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.Commands;
-using BarkingBird.Runtime.Infrastructure.Settings;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Scenes
@@ -16,7 +15,6 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
         {
             builder.AddSingleton(new InputManager(), typeof(InputManager), typeof(IDisposable));
             builder.AddSingleton(typeof(LoadingService), typeof(LoadingService));
-            builder.AddSingleton(typeof(ConfigContainer), typeof(ConfigContainer));
             builder.AddSingleton(typeof(CursorSetter), typeof(CursorSetter));
             builder.AddSingleton(typeof(CommandDispatcher), typeof(CommandDispatcher));
         

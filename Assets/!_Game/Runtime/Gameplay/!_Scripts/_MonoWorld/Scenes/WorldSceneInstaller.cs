@@ -14,14 +14,12 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
 {
     public class WorldSceneInstaller : MonoBehaviour, IInstaller
     {
-        [SerializeField] private DayNightSetting _dayNightSetting;
         [SerializeField] private DaylightHandler _daylightHandler;
         [SerializeField] private WorldFlow _worldFlow;
         [SerializeField] private WorldSceneData _worldSceneData;
         public void InstallBindings(ContainerBuilder builder)
         {
             builder.AddSingleton(_worldFlow, typeof(WorldFlow));
-            builder.AddSingleton(_dayNightSetting, typeof(DayNightSetting));
             builder.AddSingleton(_daylightHandler, typeof(DaylightHandler));
             builder.AddSingleton(typeof(DayNightCycle), typeof(DayNightCycle), typeof(IGameListener), typeof(IDisposable));
             builder.AddSingleton(typeof(DaylightEcsBridge), typeof(DaylightEcsBridge), typeof(IDisposable)).NonLazy<DaylightEcsBridge>();

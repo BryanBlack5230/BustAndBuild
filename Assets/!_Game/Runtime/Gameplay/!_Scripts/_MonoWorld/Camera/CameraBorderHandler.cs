@@ -3,19 +3,17 @@ using Cinemachine;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-using BarkingBird.Runtime.Infrastructure.Settings;
-
 namespace BarkingBird.Runtime.Gameplay.Camera
 {
     public class CameraBorderHandler
     {
         private readonly CinemachineTransposer _transposer;
         private readonly BorderRange _rangeX, _rangeY;
-        private readonly CameraConfig _config;
-        
+        private readonly CameraConfigSO _config;
+
         private CancellationTokenSource _returnCts;
 
-        public CameraBorderHandler(CinemachineTransposer transposer, BorderRange rangeX, BorderRange rangeY, CameraConfig config)
+        public CameraBorderHandler(CinemachineTransposer transposer, BorderRange rangeX, BorderRange rangeY, CameraConfigSO config)
         {
             _rangeX = rangeX;
             _rangeY = rangeY;
@@ -60,8 +58,8 @@ namespace BarkingBird.Runtime.Gameplay.Camera
                 (pos < r.Min && movement > 0f) ||
                 (pos > r.Max && movement < 0f); 
 
-            var t = Mathf.Clamp01(dist / _config.maxOutsideDistance);
-            var resistance = _config.borderPushCurve.Evaluate(t);
+            var t = Mathf.Clamp01(dist / _config.MaxOutsideDistance);
+            var resistance = _config.BorderPushCurve.Evaluate(t);
 
             return Mathf.Lerp(1f, isReturning ? 2f : 0f, resistance);
         }
@@ -84,12 +82,12 @@ namespace BarkingBird.Runtime.Gameplay.Camera
             );
 
             var duration = 0f;
-            while (duration < _config.returnDuration)
+            while (duration < _config.ReturnDuration)
             {
                 duration += Time.deltaTime;
-                var t = Mathf.Clamp01(duration / _config.returnDuration);
+                var t = Mathf.Clamp01(duration / _config.ReturnDuration);
 
-                var curve = _config.returnCurve.Evaluate(t);
+                var curve = _config.ReturnCurve.Evaluate(t);
                 _transposer.m_FollowOffset = Vector3.LerpUnclamped(start, target, curve);
 
                 token.ThrowIfCancellationRequested();

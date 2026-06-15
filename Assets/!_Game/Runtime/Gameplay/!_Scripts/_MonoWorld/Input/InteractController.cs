@@ -13,6 +13,10 @@ namespace BarkingBird.Runtime.Gameplay.Input
 {
     public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IDisposable
     {
+        // Near/far bounds of the interaction ray along the camera ray (meters from the camera).
+        private const float RayStartDistance = 9f;
+        private const float RayEndDistance = 40f;
+
         private readonly InputActions _inputActions;
         private readonly GrabbingInteractor _grabbingInteractor;
         private readonly MousePositionProvider _mousePositionProvider;
@@ -73,8 +77,8 @@ namespace BarkingBird.Runtime.Gameplay.Input
             var collisionWorld = _physicsWorldQuery.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var raycastInput = new RaycastInput
             { // if not hitting, try 0f and 99999f for start and end
-                Start = cameraRay.GetPoint(9f),
-                End = cameraRay.GetPoint(40f),
+                Start = cameraRay.GetPoint(RayStartDistance),
+                End = cameraRay.GetPoint(RayEndDistance),
                 Filter = _collisionFilter
             };
 

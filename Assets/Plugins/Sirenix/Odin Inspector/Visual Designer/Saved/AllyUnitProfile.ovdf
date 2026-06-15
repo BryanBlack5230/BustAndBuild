@@ -1,0 +1,34 @@
+OVDF v1.1
+AllyUnitProfile, Runtime
+MetaGuid:c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8
+
+# Type
+Position: $root:0
+
+# $77t6ieDZ2PTOM8DSrRndgY
+Position: $root:1
++ [Sirenix.OdinInspector.TabGroupAttribute]
+	GroupName = "ProfileTabs"
+
+# $DguFayg0fnaNeiGZOmuvwm
+Position: $77t6ieDZ2PTOM8DSrRndgY:0
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Targeting"
+	Name = "Targeting"
+	TextColor = "#66CCFFFF"
+
+# $4S5ITepsreZotE0I6GRS3G
+Position: $77t6ieDZ2PTOM8DSrRndgY:1
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Stats"
+	Name = "Stats"
+	TextColor = "#FF8066FF"
+
+# Targeting
+Position: $DguFayg0fnaNeiGZOmuvwm:0
+
+# Stats
+Position: $4S5ITepsreZotE0I6GRS3G:0
+
+# Combat
+Position: $4S5ITepsreZotE0I6GRS3G:1

@@ -14,7 +14,7 @@ namespace BarkingBird.Runtime.Gameplay.Input
     public class PowerHitController : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
     {
         private readonly InputActions _inputActions;
-        private readonly PowerHitConfig _powerHitSettings;
+        private readonly PowerHitConfigSO _powerHitSettings;
         private readonly MousePositionProvider _mousePositionProvider;
 
         private CollisionFilter _collisionFilter;
@@ -23,11 +23,11 @@ namespace BarkingBird.Runtime.Gameplay.Input
         private bool _isActive;
         private float _activeDuration;
 
-        public PowerHitController(InputManager inputManager, MousePositionProvider mousePositionProvider, ConfigContainer configContainer)
+        public PowerHitController(InputManager inputManager, MousePositionProvider mousePositionProvider, PowerHitConfigSO powerHitConfig)
         {
             _mousePositionProvider = mousePositionProvider;
             _inputActions = inputManager.Actions;
-            _powerHitSettings = configContainer.Battle.PowerHitConfig;
+            _powerHitSettings = powerHitConfig;
         }
 
         public void Initialize()
@@ -81,7 +81,7 @@ namespace BarkingBird.Runtime.Gameplay.Input
             if (!_isActive) return;
             
             _activeDuration += deltaTime;
-            if (_activeDuration >= _powerHitSettings.duration) Cancel();
+            if (_activeDuration >= _powerHitSettings.Duration) Cancel();
             if (!_isActive) return;
             
             Log.Battle.D("PowerHitController: Active");

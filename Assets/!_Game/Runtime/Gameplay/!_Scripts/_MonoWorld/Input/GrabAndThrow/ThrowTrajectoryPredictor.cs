@@ -21,7 +21,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         private const float DefaultBounceElasticity = 0.8f;
 
         private readonly CursorMovementCalculations _cursorMovements;
-        private readonly ThrowSettingsSetter _throwSettingsSetter;
+        private readonly ThrowConfigSO _throwConfig;
         private readonly TrajectoryPredictorSettings _settings;
         private readonly EntityManager _entityManager;
         private readonly EntityQuery _cameraFrustumQuery;
@@ -44,11 +44,11 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 
         public ThrowTrajectoryPredictor(
             CursorMovementCalculations cursorMovements,
-            ThrowSettingsSetter throwSettingsSetter,
+            ThrowConfigSO throwConfig,
             TrajectoryPredictorSettings settings)
         {
             _cursorMovements = cursorMovements;
-            _throwSettingsSetter = throwSettingsSetter;
+            _throwConfig = throwConfig;
             _settings = settings;
 
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -158,7 +158,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             var cursorVel = _cursorMovements.Velocity + _cursorMovements.Acceleration * _settings.LookAheadTime;
             var rawPower  = cursorVel.magnitude;
             var impulse   = new float3(cursorVel.normalized.x, cursorVel.normalized.y, 0f)
-                            * (rawPower * _throwSettingsSetter.ThrowScale);
+                            * (rawPower * _throwConfig.ThrowScale);
             return impulse * _trackedMass.InverseMass;
         }
 
@@ -175,7 +175,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 
             var pos     = startPos;
             var vel     = startVel;
-            var gravity = _throwSettingsSetter.Gravity;
+            var gravity = _throwConfig.Gravity;
 
             var worldToCam = camData.WorldToCameraMatrix;
             var camToWorld = math.inverse(worldToCam);

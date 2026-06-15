@@ -6,7 +6,6 @@ using BarkingBird.Runtime.Gameplay.Camera;
 using BarkingBird.Runtime.Gameplay.Cursor;
 using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Gameplay.Input.GrabAndThrow;
-using BarkingBird.Runtime.Gameplay.Settings;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 namespace BarkingBird.Runtime.Gameplay.Scenes
@@ -15,8 +14,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
     {
         [SerializeField] private BattleSceneData battleSceneData;
         [SerializeField] private BattleGroundSceneFlow _battleGroundSceneFlow;
-        [SerializeField] private TrajectoryPredictorSettings _trajectoryPredictorSettings;
-    
+
         public void InstallBindings(ContainerBuilder builder)
         {
             builder.AddSingleton(battleSceneData, typeof(BattleSceneData));
@@ -34,9 +32,6 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(typeof(OverlapResolver), typeof(OverlapResolver), typeof(IDisposable));
             builder.AddSingleton(typeof(TunnelTeleporter), typeof(TunnelTeleporter), typeof(IDisposable));
             builder.AddSingleton(typeof(ReleaseCoordinator), typeof(ReleaseCoordinator));
-            if (_trajectoryPredictorSettings == null)
-                throw new InvalidOperationException($"{nameof(_trajectoryPredictorSettings)} is not assigned in the inspector.");
-            builder.AddSingleton(_trajectoryPredictorSettings, typeof(TrajectoryPredictorSettings));
             builder.AddSingleton(typeof(ThrowTrajectoryPredictor), typeof(ThrowTrajectoryPredictor), typeof(IGameListener), typeof(IDisposable));
             builder.AddSingleton(typeof(GrabbingInteractor), typeof(GrabbingInteractor), typeof(IGameListener));
             builder.AddSingleton(typeof(InteractController), typeof(InteractController), typeof(IGameListener), typeof(IDisposable));

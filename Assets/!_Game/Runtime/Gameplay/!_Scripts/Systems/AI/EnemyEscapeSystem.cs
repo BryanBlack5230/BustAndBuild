@@ -38,6 +38,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
             if (!bases.IsInitialized) return;
 
             var coordinator = SystemAPI.GetSingleton<BattleCoordinator>();
+            var config = SystemAPI.TryGetSingleton<BattleBrainConfig>(out var brainConfig) ? brainConfig : BattleBrainConfig.Default;
 
             // The spawner is optional here — escapees still get destroyed in scenes without one.
             // PickupSettings + the PickupPrefabRef buffer live on the same baked spawner entity.
@@ -63,6 +64,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 Settings = settings,
                 CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
                 GroundLayerBit = _groundLayerBit,
+                EscapeDwellSeconds = config.EscapeDwellSeconds,
                 Seed = (uint)math.max(1, (int)(SystemAPI.Time.ElapsedTime * 10007)),
                 ECB = ecb,
             }.ScheduleParallel();
@@ -73,11 +75,10 @@ namespace BarkingBird.Runtime.Gameplay.AI
     [WithPresent(typeof(HasLeftBase), typeof(Escaped))]
     public partial struct EnemyEscapeJob : IJobEntity
     {
-        private const float EscapeDwellSeconds = 2f;
-
         public Aabb EnemyBaseBounds;
         public bool IsDayPhaseActive;
         public float DeltaTime;
+        public float EscapeDwellSeconds;
         public PickupPrefabMap PrefabMap;
         public PickupSettings Settings;
         [ReadOnly] public CollisionWorld CollisionWorld;

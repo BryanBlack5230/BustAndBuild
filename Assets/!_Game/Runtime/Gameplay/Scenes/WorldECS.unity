@@ -5111,7 +5111,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::WallSectionAuthoring
   castle: {fileID: 5836607041005670596}
-  health: 30
+  config: {fileID: 11400000, guid: 5a3cc203df6e21242a7afabde5f9a60a, type: 2}
+  healthOverride:
+    Override: 0
+    Value: 0
 --- !u!64 &298055696
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -36522,6 +36525,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 751012029}
     m_Modifications:
+    - target: {fileID: 91650295556194626, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
+      propertyPath: config
+      value: 
+      objectReference: {fileID: 11400000, guid: 66ad6814b68c7824d8c2a5cf12ca289c, type: 2}
     - target: {fileID: 2300831321358189313, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
       propertyPath: m_LocalPosition.x
       value: -67.520035
@@ -36570,6 +36577,10 @@ PrefabInstance:
       propertyPath: health
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 3560462009503873634, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
+      propertyPath: config
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a3cc203df6e21242a7afabde5f9a60a, type: 2}
     - target: {fileID: 5204074635940260226, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.49
@@ -36578,6 +36589,10 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.49
       objectReference: {fileID: 0}
+    - target: {fileID: 6289046707907885986, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
+      propertyPath: config
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a3cc203df6e21242a7afabde5f9a60a, type: 2}
     - target: {fileID: 6859151244572109404, guid: 9789188347bac5f42a2c08159db98e23, type: 3}
       propertyPath: m_Name
       value: BattleGreyboxProps

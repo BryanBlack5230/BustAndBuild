@@ -24,14 +24,12 @@ namespace BarkingBird.Runtime.Gameplay.AI
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            var config = SystemAPI.TryGetSingleton<SteeringConfig>(out var steeringConfig) ? steeringConfig : SteeringConfig.Default;
+
             var job = new ResolveJob
             {
-                // Tuning: How strong is the repulsion?
-                // 2.0 means "I'd rather lose 2.0 points of interest than step into 1.0 points of danger."
-                DangerMultiplier = 1f, 
-            
-                // Tuning: How far ahead to set the destination point?
-                LookAheadDistance = 2.0f 
+                DangerMultiplier = config.DangerMultiplier,
+                LookAheadDistance = config.LookAheadDistance,
             };
 
             state.Dependency = job.ScheduleParallel(state.Dependency);

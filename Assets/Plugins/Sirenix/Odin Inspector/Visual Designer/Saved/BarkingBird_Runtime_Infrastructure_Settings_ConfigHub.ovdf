@@ -1,0 +1,82 @@
+OVDF v1.1
+BarkingBird.Runtime.Infrastructure.Settings.ConfigHub, Runtime
+MetaGuid:1e3bd763e9d74ef08c9bc9db98559d26
+
+# $xEZGGtxIGsuV5wsFoMS6rN
+Position: $root:0
++ [Sirenix.OdinInspector.TabGroupAttribute]
+	GroupName = "ConfigTabs"
+
+# $4BWj82tqkTdVclqbsWwjgU
+Position: $xEZGGtxIGsuV5wsFoMS6rN:0
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "General"
+	Name = "General"
+	TextColor = "#66CCFFFF"
+
+# $pDkn64PjPbTZjjSAUZP2H3
+Position: $xEZGGtxIGsuV5wsFoMS6rN:1
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "World"
+	Name = "World"
+	TextColor = "#73D973FF"
+
+# $MEv7f1WR6YdQqASMGHTmYd
+Position: $xEZGGtxIGsuV5wsFoMS6rN:2
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "Battle"
+	Name = "Battle"
+	TextColor = "#FF8066FF"
+
+# $WxzUGpYdNE7f8NNscjRPxh
+Position: $xEZGGtxIGsuV5wsFoMS6rN:3
++ [Sirenix.OdinInspector.TabGroupAttribute+TabSubGroupAttribute]
+	GroupName = "City"
+	Name = "City"
+	TextColor = "#F2C759FF"
+
+# Rebake()
+Position: $4BWj82tqkTdVclqbsWwjgU:0
++ [Sirenix.OdinInspector.InfoBoxAttribute]
+	Message = "ConfigHub is the single source of truth for runtime balance. Rebake re-bakes every config into the live ECS world (play mode only)."
+	InfoMessageType = Info
+
+# DaylightConfig
+Position: $pDkn64PjPbTZjjSAUZP2H3:0
++ [Sirenix.OdinInspector.TitleAttribute]
+	Title = "Day / Night Cycle"
+	Bold = True
+	HorizontalLine = True
+
+# EnemyProfiles
+Position: $MEv7f1WR6YdQqASMGHTmYd:0
+
+# AllyProfiles
+Position: $MEv7f1WR6YdQqASMGHTmYd:1
+
+# Bounce
+Position: $MEv7f1WR6YdQqASMGHTmYd:2
+
+# Brain
+Position: $MEv7f1WR6YdQqASMGHTmYd:3
+
+# Steering
+Position: $MEv7f1WR6YdQqASMGHTmYd:4
+
+# CameraConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:5
+
+# PowerHitConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:6
+
+# ThrowConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:7
+
+# BeaconConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:8
+
+# WallSectionConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:9
+
+# PickupConfig
+Position: $MEv7f1WR6YdQqASMGHTmYd:10

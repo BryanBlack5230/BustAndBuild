@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8, type: 3}
+  m_Name: AllyProfile_Mage
+  m_EditorClassIdentifier: Runtime::AllyUnitProfile
+  Type: 2
+  Targeting:
+    DetectionRadius: 8
+    ViewAngleDegrees: 90
+    CheckInterval: 0.5
+    WeightEnemy: 80
+    WeightAlly: 0
+    WeightWall: 0
+    WeightBeacon: 0
+    DistanceWeight: 30
+    AggroBonus: 50
+    LineOfSightBonus: 10
+  Combat:
+    IncomingDamageScale: 0.25
+  Stats:
+    MoveSpeed: 2
+    TurnSpeed: 13
+    StoppingDistance: 1
+    Health: 100
+    AttackDamage: 20
+    AttackCooldown: 2
+    AttackRange: 1.5
+    BounceBaseDamage: 5
+    BounceMultiplier: 2
+    BounceElasticity: 0.8
+    AgentSize: 0.5
+    DangerWeight: 2
+    SurroundRadius: 12
+    VisionDistance: 5
+    ScanInterval: 1
+    ObstacleLayer:
+      serializedVersion: 2
+      m_Bits: 512
+    ObstacleDangerCurve: 3

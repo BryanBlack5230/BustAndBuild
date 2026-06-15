@@ -132,25 +132,62 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::EnemyAuthoring
   faction: 2
   enemyType: 0
-  moveSpeed: 3
-  turnSpeed: 13
-  stoppingDistance: 1
-  health: 50
-  attackDamage: 10
-  attackCooldown: 2
-  attackRange: 1.5
-  bounceBaseDamage: 5
-  bounceMultiplier: 2
-  bounceElasticity: 0.8
-  AgentSize: 0.5
-  DangerWeight: 2
-  SurroundRadius: 12
-  VisionDistance: 5
-  ScanInterval: 1
-  ObstacleLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  ObstacleDangerCurve: 1
+  profile: {fileID: 11400000, guid: 375ea42032c06964cbc7298b61b6cc0f, type: 2}
+  overrides:
+    MoveSpeed:
+      Override: 0
+      Value: 0
+    TurnSpeed:
+      Override: 0
+      Value: 0
+    StoppingDistance:
+      Override: 0
+      Value: 0
+    Health:
+      Override: 0
+      Value: 0
+    AttackDamage:
+      Override: 0
+      Value: 0
+    AttackCooldown:
+      Override: 0
+      Value: 0
+    AttackRange:
+      Override: 0
+      Value: 0
+    BounceBaseDamage:
+      Override: 0
+      Value: 0
+    BounceMultiplier:
+      Override: 0
+      Value: 0
+    BounceElasticity:
+      Override: 0
+      Value: 0
+    AgentSize:
+      Override: 0
+      Value: 0
+    DangerWeight:
+      Override: 0
+      Value: 0
+    SurroundRadius:
+      Override: 0
+      Value: 0
+    VisionDistance:
+      Override: 0
+      Value: 0
+    ScanInterval:
+      Override: 0
+      Value: 0
+    ObstacleLayer:
+      Override: 0
+      Value:
+        serializedVersion: 2
+        m_Bits: 0
+    ObstacleDangerCurve:
+      Override: 0
+      Value: 0
+  overrideDrops: 0
   drops:
   - type: 0
     minCount: 10

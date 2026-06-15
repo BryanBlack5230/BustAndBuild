@@ -7,10 +7,10 @@ High-level orientation map so future Claude doesn't need to re-derive folder str
 
 ## Project Root
 - `Assets/!_Game/` — all studio-authored content (note `!_` prefix sorts to top). Two asmdefs: `Runtime/Runtime.asmdef` (moved from `!_Game/` root during v0.1.0) and `Editor/Editor.asmdef`.
-- `Assets/!_Game/Editor/` — editor-only C#, namespace `BarkingBird.Editor` (`ConfigGenerator`, `EditorConstants`, `EditorSceneUtils`, `SceneChainEditor`, `ToolBox`, `SceneWorkflow/{EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox}`).
+- `Assets/!_Game/Editor/` — editor-only C#, namespace `BarkingBird.Editor` (`EditorConstants`, `EditorSceneUtils`, `SceneChainEditor`, `ToolBox`, `Formulas/{FormulaDrawer, FormulaReflectionResolver}`, `SceneWorkflow/{EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox}`). *(`ConfigGenerator` was deleted in the ConfigHub rework, 2026-06-14.)*
 - `Assets/!_Game/Runtime/Gameplay/!_Scripts/` — gameplay C#. `Components/` (ECS authoring + structs, root files in **global namespace**; `Components/AI/` subfolder in `Gameplay.AI`), `Systems/` (ISystem, root files in **global namespace**; `Systems/AI/` subfolder in `Gameplay.AI`), `_MonoWorld/` (non-ECS — `Camera/`, `Cursor/`, `DaylightCycle/`, `Input/` (+`GrabAndThrow/`), `Scenes/` (ISceneFlow + installers), `Settings/` (+`StateOverrides/`)).
-- `Assets/!_Game/Runtime/Infrastructure/` — framework services. Root files (`EventManager`, `InputManager`, `ReflexExtensions`, `StateOverride`) are `BarkingBird.Runtime.Infrastructure`; subfolders `GameLoop/`, `SceneWorkflow/`, `Settings/`, `Utilities/` get their own subnamespaces.
-- `Assets/!_Game/Runtime/Gameplay/Resources/` — runtime-loadable. `Cursors/Textures/*` + `Cursors/Sprites/*`, plus `Settings/{Config.json, SceneCollections/*, SceneRunConfigurations/*, TrajectoryPredictorSettings.asset}` and asset folders (Audio/Materials/Models/Prefabs/Shaders/Textures).
+- `Assets/!_Game/Runtime/Infrastructure/` — framework services. Root files (`InputManager`, `ReflexExtensions`, `StateOverride`, `StringExtensions`) are `BarkingBird.Runtime.Infrastructure`; subfolders `Commands/`, `EventBus/`, `Formulas/`, `GameLoop/`, `Pooling/`, `Save/`, `SceneWorkflow/`, `Settings/`, `Utilities/` get their own subnamespaces. *(`EventManager` was retired — replaced by `EventBus` + `CommandDispatcher`; see [[events-and-services]].)*
+- `Assets/!_Game/Runtime/Gameplay/Resources/` — runtime-loadable. `Cursors/Textures/*` + `Cursors/Sprites/*`, plus `Settings/{SceneCollections/*, SceneRunConfigurations/*, UnitProfiles/* + the ConfigHub SO assets (Camera/PowerHit/Throw/Daylight/Beacon/WallSection/Pickup), TrajectoryPredictorSettings.asset}` and asset folders (Audio/Materials/Models/Prefabs/Shaders/Textures). *(`Config.json` deleted with the JSON config, 2026-06-14.)*
 - `Assets/!_Game/Runtime/Gameplay/Scenes/` — `0.Bootstrap`, `1.Loading`, `2.World`, `3.Battleground`, `4.City` (+ legacy `3.BattleGroundScene.unity`, `WorldECS.unity`, `BattleGroundSceneECS.unity`). Indexed prefixes are load order.
 
 ## Build/Runtime Stack
@@ -41,7 +41,7 @@ All runtime code lives under `BarkingBird.Runtime.*` (except root-level ECS file
 
 ## Designed-But-Not-Started Refactors (agreed 2026-06-10)
 Full specs live next to this folder — read them before touching the affected systems:
-- `Claude/ConfigTask.md` — SO-based config hub (promoted `PrototypeConfigSetter`), per-unit-type profile SOs tied to enums, `*Config` naming for tunables vs `*Constants` for invariants, magic-number migration table, JSON-config-path delete list. Do this **before** the health/barracks/wall tasks.
+- ~~`Claude/ConfigTask.md`~~ — **DONE & removed (2026-06-14).** The SO-based ConfigHub (promoted from `PrototypeConfigSetter`, per-unit-type profile SOs tied to enums, `*Config` SOs for tunables vs `*Constants` for invariants, JSON config fully retired) shipped across Phases 1/2/3/5. Full reference: [[config-system]].
 - `Claude/CurrencyTask.md` — `Wallet` (multi-currency) + per-world `WorldSaveData` saves; wallet stays World-scoped, `SaveRepository` at Bootstrap.
 
 ## Code Style Quirks Observed

@@ -13,33 +13,12 @@ public class PickupSpawnerAuthoring : MonoBehaviour
     [SerializeField, Tooltip("One prefab per resource type. Resources without a prefab assigned simply won't drop.")]
     private List<PickupPrefabMapping> prefabs = new();
 
-    [Header("Lifetime")]
-    [SerializeField, Tooltip("Total seconds a pickup lives before disappearing.")]
-    private float lifetime = 10f;
-    [SerializeField, Tooltip(("Percent of lifetime that the pickup will blink for.")), Range(0f, 1f)]
-    private float blinkPercent = 0.15f;
-    [SerializeField, Tooltip("Toggle interval while blinking.")]
-    private float blinkInterval = 0.15f;
+    [Header("Tuning (from the ConfigHub)")]
+    [SerializeField, Tooltip("Pickup tuning. Editing it re-bakes the subscene. Leave unassigned to fall back to PickupTuning.Default.")]
+    private PickupConfigSO config;
 
-    [Header("Pickup")]
-    [SerializeField, Tooltip("World-space distance from cursor that triggers pickup.")]
-    private float pickupRadius = 1.5f;
-
-    [Header("Spawn")]
-    [SerializeField, Tooltip("XZ scatter radius around the source position when spawning.")]
-    private float scatter = 0.6f;
-    [SerializeField, Tooltip("Y position offset added to source spawn position.")]
-    private float spawnHeight = 0.5f;
-
-    [Header("Float")]
-    [SerializeField, Tooltip("Vertical bob amplitude in meters once settled.")]
-    private float floatAmplitude = 0.1f;
-    [SerializeField, Tooltip("Seconds per full bob cycle.")]
-    private float floatPeriod = 2.5f;
-    [SerializeField, Tooltip("Linear speed below which a disturbed pickup starts settling.")]
-    private float restSpeedThreshold = 0.1f;
-    [SerializeField, Tooltip("Seconds the pickup must stay below rest speed before re-entering float state.")]
-    private float restDuration = 0.1f;
+    [SerializeField, Tooltip("Optional per-instance overrides layered on top of the config's tuning.")]
+    private PickupTuningOverrides overrides;
 
     public class Baker : Baker<PickupSpawnerAuthoring>
     {
@@ -79,20 +58,23 @@ public class PickupSpawnerAuthoring : MonoBehaviour
                 prefabRefs[idx] = new PickupPrefabRef { Prefab = prefabEntity, Scale = scale };
             }
 
-            var blinkStart = Mathf.Max(0f, authoring.lifetime * authoring.blinkPercent);
+            if (authoring.config != null) DependsOn(authoring.config);
+            var t = authoring.overrides.Apply(authoring.config != null ? authoring.config.Tuning : PickupTuning.Default);
+
+            var blinkStart = Mathf.Max(0f, t.Lifetime * t.BlinkPercent);
 
             AddComponent(entity, new PickupSettings
             {
-                PickupRadius = authoring.pickupRadius,
-                Lifetime = authoring.lifetime,
+                PickupRadius = t.PickupRadius,
+                Lifetime = t.Lifetime,
                 BlinkStart = blinkStart,
-                BlinkInterval = authoring.blinkInterval,
-                Scatter = authoring.scatter,
-                SpawnHeight = authoring.spawnHeight,
-                FloatAmplitude = authoring.floatAmplitude,
-                FloatPeriod = Mathf.Max(0.01f, authoring.floatPeriod),
-                RestSpeedThreshold = Mathf.Max(0f, authoring.restSpeedThreshold),
-                RestDuration = Mathf.Max(0f, authoring.restDuration),
+                BlinkInterval = t.BlinkInterval,
+                Scatter = t.Scatter,
+                SpawnHeight = t.SpawnHeight,
+                FloatAmplitude = t.FloatAmplitude,
+                FloatPeriod = Mathf.Max(0.01f, t.FloatPeriod),
+                RestSpeedThreshold = Mathf.Max(0f, t.RestSpeedThreshold),
+                RestDuration = Mathf.Max(0f, t.RestDuration),
             });
         }
     }

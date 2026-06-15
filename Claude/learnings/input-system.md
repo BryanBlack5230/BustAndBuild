@@ -27,8 +27,8 @@
 - `CheckOverlap(entity)` → AABB overlap query with `_nonGroundFilter`, then XY-AABB overlap test (`PhysicsUtility.AabbsOverlapXY`, ignores Z because game plane is XY).
 - `DisplaceStep` averages "away" direction from all overlapping bodies, falls back to perpendicular if vectors cancel (`(-y, x)` rotation). Moves at `DisplaceSpeed = 15f`.
 
-## ThrowSettingsSetter (inspector-driven)
-MonoBehaviour in Bootstrap scene, registered as `IGameUpdateListener`. Exposes inspector knobs: `ThrowScale`, `ThrowThreshold`, `MinMaxVelocity` (with `[MinMaxSlider]`), `_velocityPowerCurve`, `Gravity`. Writes a `ThrowVelocitySettings` singleton each frame (64 curve samples baked) and updates `PhysicsStep.Gravity`.
+## Throw config (ConfigHub) + ThrowDebugTracker
+Throw tuning moved to the ConfigHub in 2026-06-14 (see [[config-system]]). `ThrowConfigSO` (`ThrowScale`, `ThrowThreshold`, `MinMaxVelocity` with `[MinMaxSlider]`, velocity-power curve, `Gravity`) is referenced from the hub and injected into `GrabbingInteractor` + `ThrowTrajectoryPredictor`. `BlobContainer` bakes the `ThrowVelocitySettings` singleton (64 curve samples + min/max) at bootstrap + Rebake. `ThrowSettingsSetter` was renamed (GUID-preserving) to **`ThrowDebugTracker`** — a slim `IGameUpdateListener` that keeps the inspector readouts + `OnThrow` (called by `GrabbingInteractor.Release`) and applies `PhysicsStep.Gravity` every frame from the SO (see "Gravity Sync" in [[ecs-combat-and-collisions]] — PhysicsStep loads with the battle subscene, so the apply can't be a one-shot bootstrap bake).
 **Why it matters:** Any system needing velocity-power scaling should `TryGetSingleton<ThrowVelocitySettings>` and use its `MinVelocity / MaxVelocity / CurveSamples`. `ScreenBounceSystem` and `InAirCollisionSystem` both do this.
 
 ## Shared Boundary Helpers — BoundaryConstraints + PhysicsUtility
@@ -70,7 +70,7 @@ Horizontal extent is unchanged (`ehw = entityHalfWidth`), but vertical extent mu
 Access `lineRenderer.material` once at construction and store it; modifying `.color.a` on the stored instance is allocation-free. Accessing `.material` every frame creates a new material instance each time.
 
 ## Camera Drag (BattleCameraMovement)
-Hold ground for `config.timeToHold` (1s default, configurable via `ConfigContainer.Battle.CameraConfig`) → `Countdown` ticks while waiting → `CameraInputHandler` raises `GroundGrabbedEvent(true)` via `EventBus` once → drag starts. `CameraDragHandler` reads mouse delta, scales by `moveSpeed`, applies to `CinemachineTransposer.m_FollowOffset`. `CameraBorderHandler` applies soft resistance via `borderPushCurve` when offset is outside `BorderRange` (derived from `BattleSceneData.sceneBoundary*` transforms). Release → snap back if outside bounds via `returnCurve`.
+Hold ground for `config.timeToHold` (1s default, configurable via the hub's `CameraConfigSO`) → `Countdown` ticks while waiting → `CameraInputHandler` raises `GroundGrabbedEvent(true)` via `EventBus` once → drag starts. `CameraDragHandler` reads mouse delta, scales by `moveSpeed`, applies to `CinemachineTransposer.m_FollowOffset`. `CameraBorderHandler` applies soft resistance via `borderPushCurve` when offset is outside `BorderRange` (derived from `BattleSceneData.sceneBoundary*` transforms). Release → snap back if outside bounds via `returnCurve`.
 
 ## ScrollController — Bird's-Eye Switch
 Scroll up/down → `CommandDispatcher.Send(new ChangeSceneCommand(bool switchUp))`. `WorldCameraHandler` (in World scene) registers a handler that toggles bird-view GO active. Used to switch between top-down strategic and tilted battle view. `ActiveCameraOverride` (a `StateOverride`) sends the same command from a `RunConfiguration` startup. See [[events-and-services]] for the notifications-vs-commands split.

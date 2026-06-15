@@ -7,6 +7,7 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 
 using BarkingBird.Runtime.Gameplay.AI;
+using BarkingBird.Runtime.Infrastructure.Utilities;
 
 [BurstCompile]
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
@@ -16,6 +17,7 @@ public partial struct ScreenBounceSystem : ISystem
     private BufferLookup<DamageBufferElement> _damageLookup;
     private BufferLookup<HitFeedbackBufferElement> _feedbackLookup;
     private ComponentLookup<Unit> _unitLookup;
+    private ComponentLookup<PhysicsCollider> _colliderLookup;
 
     // OnCreate is not [BurstCompile] — managed calls for RequireForUpdate setup
     public void OnCreate(ref SystemState state)
@@ -23,6 +25,7 @@ public partial struct ScreenBounceSystem : ISystem
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
         _feedbackLookup = state.GetBufferLookup<HitFeedbackBufferElement>();
         _unitLookup = state.GetComponentLookup<Unit>(true);
+        _colliderLookup = state.GetComponentLookup<PhysicsCollider>(true);
 
         state.RequireForUpdate<CameraFrustumData>();
         state.RequireForUpdate<BattleScreenCenter>();
@@ -38,9 +41,12 @@ public partial struct ScreenBounceSystem : ISystem
         _damageLookup.Update(ref state);
         _feedbackLookup.Update(ref state);
         _unitLookup.Update(ref state);
+        _colliderLookup.Update(ref state);
 
-        var minVel = 5f;
-        var maxVel = 10f;
+        var bounce = SystemAPI.TryGetSingleton<BounceConfig>(out var bounceCfg) ? bounceCfg : BounceConfig.Default;
+
+        var minVel = bounce.FallbackMinVelocity;
+        var maxVel = bounce.FallbackMaxVelocity;
         var curveSamples = new FixedList512Bytes<float>();
         if (SystemAPI.TryGetSingleton<ThrowVelocitySettings>(out var velSettings))
         {
@@ -55,8 +61,8 @@ public partial struct ScreenBounceSystem : ISystem
         var camUp      = camToWorld.c1.xyz;
         var tanHalfFov = math.tan(math.radians(camData.Fov * 0.5f));
 
-        const float hw = 0.25f; // here we assume that the shape of unit is a rectangle with 0.5f width and 1f height
-        const float hh = 0.5f;
+        // Fallback unit half-extents when an entity has no/invalid collider: a 0.5×1.0 rectangle.
+        var fallbackHalfExtents = new float2(0.25f, 0.5f);
 
         foreach (var (transform, velocity, bounceDmg, _, entity) in
                  SystemAPI.Query<RefRW<LocalTransform>, RefRW<PhysicsVelocity>, RefRW<BounceDamage>, EnabledRefRO<InAir>>()
@@ -64,6 +70,13 @@ public partial struct ScreenBounceSystem : ISystem
         {
             var worldPos = transform.ValueRO.Position;
             var rot = transform.ValueRO.Rotation;
+
+            // Half-extents from the real collider (avoids config drift); fall back to a 0.5×1.0 box.
+            var halfExtents = _colliderLookup.TryGetComponent(entity, out var collider)
+                ? PhysicsUtility.GetColliderHalfExtentsXY(collider, fallbackHalfExtents)
+                : fallbackHalfExtents;
+            var hw = halfExtents.x;
+            var hh = halfExtents.y;
 
             var camCenter = math.transform(worldToCam, worldPos);
             var depth = -camCenter.z;
@@ -135,7 +148,7 @@ public partial struct ScreenBounceSystem : ISystem
                 var isAlly = _unitLookup.TryGetComponent(entity, out var unit) && unit.faction == Faction.Ally;
                 if (!isAlly)
                 {
-                    var dmg = 0.5f * bounceDmg.ValueRO.BaseDamage * velocityPower;
+                    var dmg = bounce.BounceDamageFactor * bounceDmg.ValueRO.BaseDamage * velocityPower;
                     if (_damageLookup.HasBuffer(entity))
                         _damageLookup[entity].Add(new DamageBufferElement { Value = dmg });
 

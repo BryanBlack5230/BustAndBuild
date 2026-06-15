@@ -10,6 +10,7 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [DI Architecture](di-architecture.md) — Reflex installers, container parent chain, listener auto-collection, registration order
 - [Game Loop & Listeners](game-loop-listeners.md) — `IGameListener` interfaces, `GameLoopManager` state machine, `DotsGameLoopBridge`
 - [Events & Services](events-and-services.md) — `EventBus` + `CommandDispatcher` (decision guide), `Log`, `LoadingService`, `RuntimeConstants`, config pipeline
+- [Config / Balance System](config-system.md) — `ConfigHub` (SO profiles + flat singletons), `BlobContainer` baker, enum-slot baking, Rebake, what's still JSON, deferred phases
 - [Logging System](logging-system.md) — `Log`/`TagLog`, `[HideInCallstack]` + strip toggle, Console Pro `CPIGNORE`, `[CallerFilePath]` class prefix, color-key overload resolution gotcha
 - [Scene Flow System](scene-flow-system.md) — `ISceneFlow`, `RunConfiguration`, `SceneChain`, editor toolbox, state overrides
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
@@ -34,6 +35,6 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Play Mode & Hot Reload](play-mode-and-hot-reload.md) — domain/scene reload OFF, static-state reset pattern, Hot Reload limitations (DOTS, Reflex, ScriptableObjects)
 
 ### Editor Tooling
-- [Custom Inspector Patterns](custom-inspector-patterns.md) — `SceneChain` inspector, `FindPropertyRelative`, scene-open guards
+- [Custom Inspector Patterns](custom-inspector-patterns.md) — `SceneChain` inspector, `FindPropertyRelative`, scene-open guards; OVDF authoring (naming, tabs, hex-color locale fix, additive-only, empty-tab culling, InlineEditor propagation)
 - [Editor Window Patterns](editor-window-patterns.md) — IMGUI button highlights, `PingObject`, OVDF limitation, SceneWorkflowHandoff null guard
 - [ScriptableObject Patterns](scriptable-object-patterns.md) — editor-only buttons, `[ReadOnly]` vs `[HideInInspector]`, `SetDefault` cross-asset pattern

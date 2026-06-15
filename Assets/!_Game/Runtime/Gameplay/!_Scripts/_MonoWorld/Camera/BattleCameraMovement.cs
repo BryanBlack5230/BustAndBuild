@@ -5,7 +5,6 @@ using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Gameplay.Scenes;
 using BarkingBird.Runtime.Infrastructure;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
-using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.Camera
 {
@@ -41,11 +40,10 @@ namespace BarkingBird.Runtime.Gameplay.Camera
         
         private bool _isDragging;
 
-        public BattleCameraMovement(MousePositionProvider mouse, BattleSceneData battleSceneData, ConfigContainer configContainer)
+        public BattleCameraMovement(MousePositionProvider mouse, BattleSceneData battleSceneData, CameraConfigSO config)
         {
             _mouse = mouse;
-            var config = configContainer.Battle.CameraConfig;
-            _input = new CameraInputHandler(config.timeToHold);
+            _input = new CameraInputHandler(config.TimeToHold);
 
             _transposer = battleSceneData.sceneCamera.GetCinemachineComponent<CinemachineTransposer>();
             var center = _transposer.FollowTargetPosition;

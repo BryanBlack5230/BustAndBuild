@@ -28,7 +28,7 @@ The package itself is NOT part of the project — its bus/singleton architecture
 
 ## Architecture discipline worth keeping (from Vortex README)
 
-- **Preset → Model**: defs are immutable presets (SO, `get;` only); runtime state lives in mutable model instances created *from* presets (`CopyFrom`), never in the asset itself. Distinguish **singleton** records (one shared instance, persisted) from **multi-instance** records (fresh copy per request, not persisted). Maps to us: SO config → baked blob/runtime instance; never mutate the SO at runtime. Already aligned with ConfigTask; keep it that way when adding building/monster defs.
+- **Preset → Model**: defs are immutable presets (SO, `get;` only); runtime state lives in mutable model instances created *from* presets (`CopyFrom`), never in the asset itself. Distinguish **singleton** records (one shared instance, persisted) from **multi-instance** records (fresh copy per request, not persisted). Maps to us: SO config → baked blob/runtime instance; never mutate the SO at runtime. Already aligned with the ConfigHub ([[config-system]]); keep it that way when adding building/monster defs.
 - **Call accumulation / notify-once**: batch all field changes, then fire one explicit `NotifyChanged()` — never an event per setter (prevents recursive correction cascades and N redundant UI refreshes per frame). Corollaries: data-modification logic lives only in the owning controller; UI never decides, it only reports input and re-reads. Matches our ECS batching; apply to Wallet/world-state Mono services too.
 
 ## DatabaseSystem conventions (code not portable; conventions are)

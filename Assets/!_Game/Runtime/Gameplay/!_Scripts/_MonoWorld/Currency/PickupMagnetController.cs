@@ -19,17 +19,17 @@ namespace BarkingBird.Runtime.Gameplay.Currency
         [SerializeField] private ResourceCounterView[] _counters;
         [SerializeField] private FlyingPickup _flyingPickupPrefab;
         [SerializeField] private RectTransform _canvasRoot;
-        [SerializeField, Min(0.05f)] private float _magnetDuration = 0.4f;
-        [SerializeField] private Ease _magnetEase = Ease.InCubic;
 
         private readonly Dictionary<CurrencyType, ResourceCounterView> _byType = new();
         private Wallet _wallet;
+        private PickupMagnetConfigSO _config;
         private UnityEngine.Camera _camera;
 
         [Inject]
-        private void Construct(Wallet wallet)
+        private void Construct(Wallet wallet, PickupMagnetConfigSO config)
         {
             _wallet = wallet;
+            _config = config;
         }
 
         private void Awake()
@@ -74,7 +74,7 @@ namespace BarkingBird.Runtime.Gameplay.Currency
             var type = evt.Type;
             var target = counter.MagnetTarget;
 
-            Tween.Position(flying.RectTransform, target.position, _magnetDuration, _magnetEase)
+            Tween.Position(flying.RectTransform, target.position, _config.MagnetDuration, _config.MagnetEase)
                 .OnComplete(() =>
                 {
                     if (_wallet != null) _wallet.Add(type, amount);

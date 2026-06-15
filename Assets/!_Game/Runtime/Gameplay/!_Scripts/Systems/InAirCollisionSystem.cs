@@ -20,6 +20,8 @@ public partial struct InAirCollisionSystem : ISystem
     private ComponentLookup<PhysicsCollider> _colliderLookup;
     private ComponentLookup<BounceDamage> _bounceDamageLookup;
     private ComponentLookup<Unit> _unitLookup;
+    private ComponentLookup<EnemyUnitType> _enemyTypeLookup;
+    private ComponentLookup<AllyUnitType> _allyTypeLookup;
     private BufferLookup<DamageBufferElement> _damageLookup;
     private BufferLookup<HitFeedbackBufferElement> _feedbackLookup;
     private uint _groundLayerBit;
@@ -33,6 +35,8 @@ public partial struct InAirCollisionSystem : ISystem
         _colliderLookup = state.GetComponentLookup<PhysicsCollider>(true);
         _bounceDamageLookup = state.GetComponentLookup<BounceDamage>(true);
         _unitLookup = state.GetComponentLookup<Unit>(true);
+        _enemyTypeLookup = state.GetComponentLookup<EnemyUnitType>(true);
+        _allyTypeLookup = state.GetComponentLookup<AllyUnitType>(true);
         _damageLookup = state.GetBufferLookup<DamageBufferElement>();
         _feedbackLookup = state.GetBufferLookup<HitFeedbackBufferElement>();
 
@@ -55,14 +59,23 @@ public partial struct InAirCollisionSystem : ISystem
         _colliderLookup.Update(ref state);
         _bounceDamageLookup.Update(ref state);
         _unitLookup.Update(ref state);
+        _enemyTypeLookup.Update(ref state);
+        _allyTypeLookup.Update(ref state);
         _damageLookup.Update(ref state);
         _feedbackLookup.Update(ref state);
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
-        var minVel = 5f;
-        var maxVel = 10f;
+        var bounce = SystemAPI.TryGetSingleton<BounceConfig>(out var bounceCfg) ? bounceCfg : BounceConfig.Default;
+
+        // Per-unit-type incoming-damage scale lives in the targeting blob; absent (test scenes) → faction fallback.
+        var profilesBlob = SystemAPI.TryGetSingleton<TargetProfiles>(out var profiles)
+            ? profiles.Blob
+            : default;
+
+        var minVel = bounce.FallbackMinVelocity;
+        var maxVel = bounce.FallbackMaxVelocity;
         var curveSamples = new FixedList512Bytes<float>();
         if (SystemAPI.TryGetSingleton<ThrowVelocitySettings>(out var velSettings))
         {
@@ -78,6 +91,9 @@ public partial struct InAirCollisionSystem : ISystem
             ColliderLookup = _colliderLookup,
             BounceDamageLookup = _bounceDamageLookup,
             UnitLookup = _unitLookup,
+            EnemyTypeLookup = _enemyTypeLookup,
+            AllyTypeLookup = _allyTypeLookup,
+            ProfilesBlob = profilesBlob,
             DamageLookup = _damageLookup,
             FeedbackLookup = _feedbackLookup,
             GroundLayerBit = _groundLayerBit,
@@ -85,6 +101,7 @@ public partial struct InAirCollisionSystem : ISystem
             MinVelocity = minVel,
             MaxVelocity = maxVel,
             CurveSamples = curveSamples,
+            Bounce = bounce,
             Ecb = ecb,
         }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
     }
@@ -98,6 +115,9 @@ public struct InAirCollisionJob : ICollisionEventsJob
     [ReadOnly] public ComponentLookup<PhysicsCollider> ColliderLookup;
     [ReadOnly] public ComponentLookup<BounceDamage> BounceDamageLookup;
     [ReadOnly] public ComponentLookup<Unit> UnitLookup;
+    [ReadOnly] public ComponentLookup<EnemyUnitType> EnemyTypeLookup;
+    [ReadOnly] public ComponentLookup<AllyUnitType> AllyTypeLookup;
+    [ReadOnly] public BlobAssetReference<TargetProfilesBlob> ProfilesBlob;
     public BufferLookup<DamageBufferElement> DamageLookup;
     public BufferLookup<HitFeedbackBufferElement> FeedbackLookup;
     public EntityCommandBuffer Ecb;
@@ -106,6 +126,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
     public float MinVelocity;
     public float MaxVelocity;
     public FixedList512Bytes<float> CurveSamples;
+    public BounceConfig Bounce;
 
     public void Execute(CollisionEvent collisionEvent)
     {
@@ -128,8 +149,8 @@ public struct InAirCollisionJob : ICollisionEventsJob
         // Both actively flying → bounce off each other
         if (aInAir && bInAir)
         {
-            Bounce(entityA, normalBtoA);
-            Bounce(entityB, -normalBtoA);
+            DoBounce(entityA, normalBtoA);
+            DoBounce(entityB, -normalBtoA);
             return;
         }
 
@@ -153,7 +174,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
         if (isGround)
             Landed(thrownEntity);
         else
-            Bounce(thrownEntity, normal);
+            DoBounce(thrownEntity, normal);
     }
 
     private void Landed(Entity entity)
@@ -167,7 +188,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
         var finalDamage = bounceDmg.BaseDamage * velocityPower
                           + velocityPower * bounceDmg.BounceCount * bounceDmg.BounceDamageMultiplier;
 
-        if (IsAlly(entity)) finalDamage *= 0.25f;
+        finalDamage *= IncomingDamageScale(entity);
 
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = finalDamage });
@@ -183,7 +204,7 @@ public struct InAirCollisionJob : ICollisionEventsJob
         Ecb.SetComponent(entity, bounceDmg);
     }
 
-    private void Bounce(Entity entity, float3 normal)
+    private void DoBounce(Entity entity, float3 normal)
     {
         if (!VelocityLookup.TryGetComponent(entity, out var velocity)) return;
 
@@ -198,8 +219,8 @@ public struct InAirCollisionJob : ICollisionEventsJob
         velocity.Linear *= bounceDmg.BounceElasticity;
         Ecb.SetComponent(entity, velocity);
 
-        var dmg = 0.5f * bounceDmg.BaseDamage * velocityPower;
-        if (IsAlly(entity)) dmg *= 0.25f;
+        var dmg = Bounce.BounceDamageFactor * bounceDmg.BaseDamage * velocityPower;
+        dmg *= IncomingDamageScale(entity);
         if (DamageLookup.HasBuffer(entity))
             DamageLookup[entity].Add(new DamageBufferElement { Value = dmg });
 
@@ -218,16 +239,16 @@ public struct InAirCollisionJob : ICollisionEventsJob
 
         var originalLinear = flyingVelocity.Linear;
         var flyingSpeed    = math.length(originalLinear);
-        if (flyingSpeed < 2f) return;
+        if (flyingSpeed < Bounce.SoftLandMinSpeed) return;
 
         var velocityPower = ComputeVelocityPower(originalLinear);
         var finalDamage = bounceDmg.BaseDamage * velocityPower
                           + velocityPower * bounceDmg.BounceCount * bounceDmg.BounceDamageMultiplier;
 
-        var flyingDamage   = finalDamage * 0.8f;
-        var groundedDamage = finalDamage * 0.2f;
-        if (IsAlly(flyingEntity))   flyingDamage   *= 0.25f;
-        if (IsAlly(groundedEntity)) groundedDamage *= 0.25f;
+        var flyingDamage   = finalDamage * Bounce.SoftLandFlyingShare;
+        var groundedDamage = finalDamage * Bounce.SoftLandGroundedShare;
+        flyingDamage   *= IncomingDamageScale(flyingEntity);
+        groundedDamage *= IncomingDamageScale(groundedEntity);
 
         if (DamageLookup.HasBuffer(flyingEntity))
             DamageLookup[flyingEntity].Add(new DamageBufferElement { Value = flyingDamage });
@@ -246,25 +267,49 @@ public struct InAirCollisionJob : ICollisionEventsJob
         if (FeedbackLookup.HasBuffer(groundedEntity))
             FeedbackLookup[groundedEntity].Add(new HitFeedbackBufferElement { HitDirection = horizontalImpactDir });
 
-        flyingVelocity.Linear = -originalLinear * 0.15f;
+        flyingVelocity.Linear = -originalLinear * Bounce.ReboundElasticity;
         Ecb.SetComponent(flyingEntity, flyingVelocity);
 
         bounceDmg.BounceCount++;
         Ecb.SetComponent(flyingEntity, bounceDmg);
 
-        var knockMagnitude = flyingSpeed * 0.5f;
+        var knockMagnitude = flyingSpeed * Bounce.KnockMagnitudeFactor;
         var horizontalDir  = math.normalizesafe(new float3(originalLinear.x, 0f, originalLinear.z));
 
         if (VelocityLookup.TryGetComponent(groundedEntity, out var groundedVelocity))
         {
-            groundedVelocity.Linear += horizontalDir * knockMagnitude + new float3(0f, knockMagnitude * 0.5f, 0f);
+            groundedVelocity.Linear += horizontalDir * knockMagnitude + new float3(0f, knockMagnitude * Bounce.KnockUpwardFactor, 0f);
             Ecb.SetComponent(groundedEntity, groundedVelocity);
             Ecb.SetComponentEnabled<InAir>(groundedEntity, true);
         }
     }
 
-    private bool IsAlly(Entity entity)
-        => UnitLookup.TryGetComponent(entity, out var unit) && unit.faction == Faction.Ally;
+    // Per-unit-type incoming-damage multiplier (ally 0.25, enemy 1.0 by default), keyed via the targeting blob.
+    // When the blob is absent (test scenes without bootstrap) falls back to the old faction-only rule.
+    private float IncomingDamageScale(Entity entity)
+    {
+        if (!UnitLookup.TryGetComponent(entity, out var unit)) return 1f;
+
+        if (!ProfilesBlob.IsCreated)
+            return unit.faction == Faction.Ally ? 0.25f : 1f;
+
+        ref var blob = ref ProfilesBlob.Value;
+        switch (unit.faction)
+        {
+            case Faction.Ally:
+                if (AllyTypeLookup.TryGetComponent(entity, out var allyType)
+                    && (int)allyType.Value < blob.AllyProfiles.Length)
+                    return blob.AllyProfiles[(int)allyType.Value].IncomingDamageScale;
+                return 0.25f;
+            case Faction.Enemy:
+                if (EnemyTypeLookup.TryGetComponent(entity, out var enemyType)
+                    && (int)enemyType.Value < blob.EnemyProfiles.Length)
+                    return blob.EnemyProfiles[(int)enemyType.Value].IncomingDamageScale;
+                return 1f;
+            default:
+                return 1f;
+        }
+    }
 
     private bool IsPickUp(Entity entity)
         => ColliderLookup.TryGetComponent(entity, out var collider)

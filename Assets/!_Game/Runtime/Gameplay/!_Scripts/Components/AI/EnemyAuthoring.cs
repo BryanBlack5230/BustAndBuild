@@ -4,45 +4,44 @@ using Unity.Entities;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.Currency;
+using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
     public class EnemyAuthoring : MonoBehaviour
     {
+        [Header("Identity (per-instance)")]
         public Faction faction = Faction.Enemy;
         public EnemyType enemyType = EnemyType.Grunt;
-        public float moveSpeed = 3f;
-        public float turnSpeed = 15f;
-        public float stoppingDistance = 1f;
-        public float health = 50f;
-        public float attackDamage = 10f;
-        public float attackCooldown = 2f;
-        public float attackRange = 1.5f;
-        
-        public float bounceBaseDamage = 5f;
-        public float bounceMultiplier = 2f;
-        public float bounceElasticity = 0.8f;
 
-        public float AgentSize = 1f;
-        public float DangerWeight = 2.0f;
-        public float SurroundRadius = 6.0f;
-        public float VisionDistance = 3.0f;
-        public float ScanInterval = 0.5f;
-        public LayerMask ObstacleLayer;
-        public Curve ObstacleDangerCurve = Curve.Quadratic;
+        [Header("Stats (per-type, from the ConfigHub)")]
+        [Tooltip("Per-type stats + drop table. Editing it re-bakes the subscene. Leave unassigned to fall back to UnitStats.EnemyDefault.")]
+        public EnemyUnitProfile profile;
 
-        [Tooltip("Resources this enemy can drop on death. Each row is rolled independently.")]
-        public List<DropTableEntry> drops = new()
+        [Tooltip("Optional per-instance overrides layered on top of the profile's stats.")]
+        public UnitStatOverrides overrides;
+
+        [Header("Drops override (per-instance)")]
+        [Tooltip("When on, this instance drops the table below instead of the profile's.")]
+        public bool overrideDrops;
+        public List<DropTableEntry> drops = new();
+
+        private void OnValidate()
         {
-            new DropTableEntry { type = CurrencyType.Pearls, minCount = 10, maxCount = 20, chance = 1f, value = 1f },
-        };
+            if (profile != null && (int)profile.Type != (int)enemyType)
+                Log.Battle.W($"profile '{profile.name}' is type {profile.Type} but enemyType is {enemyType}; the runtime type tag and the stats will disagree.");
+        }
 
         public class Baker : Baker<EnemyAuthoring>
         {
             public override void Bake(EnemyAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
-                
+
+                var baseStats = authoring.profile != null ? authoring.profile.Stats : UnitStats.EnemyDefault;
+                if (authoring.profile != null) DependsOn(authoring.profile);
+                var stats = authoring.overrides.Apply(baseStats);
+
                 // tags
                 AddComponent(entity, new UnableToAct());
                 AddComponent(entity, new Grabbed());
@@ -67,53 +66,60 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 // components
                 AddComponent(entity, new Unit { faction = authoring.faction, });
                 AddComponent(entity, new EnemyUnitType { Value = authoring.enemyType, });
-                AddComponent(entity, new UnitMover { moveSpeed = authoring.moveSpeed, turnSpeed = authoring.turnSpeed});
-                AddComponent(entity, new Destination { StoppingDistanceSq = authoring.stoppingDistance * authoring.stoppingDistance});
+                AddComponent(entity, new UnitMover { moveSpeed = stats.MoveSpeed, turnSpeed = stats.TurnSpeed});
+                AddComponent(entity, new Destination { StoppingDistanceSq = stats.StoppingDistance * stats.StoppingDistance});
                 AddComponent(entity, new Target());
-                AddComponent(entity, new Health { Value = authoring.health, Max = authoring.health });
+                AddComponent(entity, new Health { Value = stats.Health, Max = stats.Health });
                 AddBuffer<DamageBufferElement>(entity);
                 AddBuffer<HitFeedbackBufferElement>(entity);
-                AddComponent(entity, new AttackData { Damage = authoring.attackDamage, CooldownTime = authoring.attackCooldown, AttackRange = authoring.attackRange});
+                AddComponent(entity, new AttackData { Damage = stats.AttackDamage, CooldownTime = stats.AttackCooldown, AttackRange = stats.AttackRange});
                 AddComponent(entity, new BattleBrain { CanAttack = false});
                 AddComponent(entity, new EmotionalState {Value = Emotion.Normal});
                 AddComponent(entity, new ActionState { Value = ActionType.Moving });
-                
+
                 AddComponent(entity, new BounceDamage
                 {
-                    BaseDamage = authoring.bounceBaseDamage,
+                    BaseDamage = stats.BounceBaseDamage,
                     BounceCount = 0,
-                    BounceDamageMultiplier = authoring.bounceMultiplier,
-                    BounceElasticity = authoring.bounceElasticity
+                    BounceDamageMultiplier = stats.BounceMultiplier,
+                    BounceElasticity = stats.BounceElasticity
                 });
 
                 AddComponent(entity, new SteerBehavior_Seek{Weight = 1f});
-                AddComponent(entity, new SteeringContext{AgentRadius = authoring.AgentSize});
+                AddComponent(entity, new SteeringContext{AgentRadius = stats.AgentSize});
                 AddComponent(entity, new SteerBehavior_Obstacle
                 {
-                    DangerWeight = authoring.DangerWeight,
-                    SurroundRadius = authoring.SurroundRadius,
-                    VisionSize = authoring.AgentSize,
-                    VisionDistance = authoring.VisionDistance,
-                    UpdateInterval = authoring.ScanInterval,
-                    ObstacleLayer = authoring.ObstacleLayer,
-                    Curve = authoring.ObstacleDangerCurve,
+                    DangerWeight = stats.DangerWeight,
+                    SurroundRadius = stats.SurroundRadius,
+                    VisionSize = stats.AgentSize,
+                    VisionDistance = stats.VisionDistance,
+                    UpdateInterval = stats.ScanInterval,
+                    ObstacleLayer = stats.ObstacleLayer,
+                    Curve = stats.ObstacleDangerCurve,
                 });
                 AddComponent(entity, new ObstacleShadow{Timer = 0});
-                
+
                 AddComponent(entity, new PathTarget());
                 AddComponent(entity, new FinalDestination());
 
+                var dropSource = authoring.overrideDrops
+                    ? authoring.drops
+                    : (authoring.profile != null ? authoring.profile.Drops : null);
+
                 var drops = AddBuffer<ResourceDrop>(entity);
-                foreach (var entry in authoring.drops)
+                if (dropSource != null)
                 {
-                    drops.Add(new ResourceDrop
+                    foreach (var entry in dropSource)
                     {
-                        Type = entry.type,
-                        MinCount = entry.minCount,
-                        MaxCount = entry.maxCount,
-                        Chance = entry.chance,
-                        Value = entry.value,
-                    });
+                        drops.Add(new ResourceDrop
+                        {
+                            Type = entry.type,
+                            MinCount = entry.minCount,
+                            MaxCount = entry.maxCount,
+                            Chance = entry.chance,
+                            Value = entry.value,
+                        });
+                    }
                 }
             }
         }

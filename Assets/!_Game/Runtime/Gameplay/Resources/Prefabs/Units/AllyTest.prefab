@@ -109,25 +109,61 @@ MonoBehaviour:
   m_EditorClassIdentifier: Runtime::AllyAuthoring
   faction: 1
   allyType: 0
-  moveSpeed: 2
-  turnSpeed: 13
-  stoppingDistance: 1
-  health: 100
-  attackDamage: 20
-  attackCooldown: 2
-  attackRange: 1.5
-  bounceBaseDamage: 5
-  bounceMultiplier: 2
-  bounceElasticity: 0.8
-  AgentSize: 0.5
-  DangerWeight: 2
-  SurroundRadius: 12
-  VisionDistance: 5
-  ScanInterval: 1
-  ObstacleLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  ObstacleDangerCurve: 3
+  profile: {fileID: 11400000, guid: a22f38eb0921c2f4489972539391cdd5, type: 2}
+  overrides:
+    MoveSpeed:
+      Override: 0
+      Value: 0
+    TurnSpeed:
+      Override: 0
+      Value: 0
+    StoppingDistance:
+      Override: 0
+      Value: 0
+    Health:
+      Override: 0
+      Value: 0
+    AttackDamage:
+      Override: 0
+      Value: 0
+    AttackCooldown:
+      Override: 0
+      Value: 0
+    AttackRange:
+      Override: 0
+      Value: 0
+    BounceBaseDamage:
+      Override: 0
+      Value: 0
+    BounceMultiplier:
+      Override: 0
+      Value: 0
+    BounceElasticity:
+      Override: 0
+      Value: 0
+    AgentSize:
+      Override: 0
+      Value: 0
+    DangerWeight:
+      Override: 0
+      Value: 0
+    SurroundRadius:
+      Override: 0
+      Value: 0
+    VisionDistance:
+      Override: 0
+      Value: 0
+    ScanInterval:
+      Override: 0
+      Value: 0
+    ObstacleLayer:
+      Override: 0
+      Value:
+        serializedVersion: 2
+        m_Bits: 0
+    ObstacleDangerCurve:
+      Override: 0
+      Value: 0
 --- !u!54 &3362322714341214501
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -202,9 +238,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd2f61cacbbe76748a0e554b7efed945, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::HitFeedbackAuthoring
-  _flashProfile: {fileID: 11400000, guid: 8949d53904178fa4c9dd07e4357b2983, type: 2}
-  _squashProfile: {fileID: 11400000, guid: 4f2e9b6efaa30094fb975334636c7ebb, type: 2}
-  _pushProfile: {fileID: 11400000, guid: 837ae33b6033d194ab01fbcb9006fac4, type: 2}
+  flashProfileSo: {fileID: 11400000, guid: 8949d53904178fa4c9dd07e4357b2983, type: 2}
+  squashProfileSo: {fileID: 11400000, guid: 4f2e9b6efaa30094fb975334636c7ebb, type: 2}
+  pushProfileSo: {fileID: 11400000, guid: 837ae33b6033d194ab01fbcb9006fac4, type: 2}
 --- !u!1001 &5285013733820473044
 PrefabInstance:
   m_ObjectHideFlags: 0

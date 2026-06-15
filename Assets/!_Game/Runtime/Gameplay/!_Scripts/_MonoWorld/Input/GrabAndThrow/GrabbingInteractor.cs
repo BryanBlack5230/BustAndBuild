@@ -11,7 +11,8 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
     public sealed class GrabbingInteractor : IGameUpdateListener
     {
         private readonly CursorMovementCalculations _cursorMovementCalculations;
-        private readonly ThrowSettingsSetter _throwSettingsSetter;
+        private readonly ThrowConfigSO _throwConfig;
+        private readonly ThrowDebugTracker _throwDebugTracker;
         private readonly GrabbedEntityMover _grabbedEntityMover;
         private readonly ReleaseCoordinator _releaseCoordinator;
         private readonly ThrowTrajectoryPredictor _trajectoryPredictor;
@@ -21,10 +22,11 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         private Entity _grabbedEntity;
         private PhysicsMass _originalMass;
 
-        public GrabbingInteractor(CursorMovementCalculations cursorMovementCalculations, ThrowSettingsSetter throwSettingsSetter, GrabbedEntityMover grabbedEntityMover, ReleaseCoordinator releaseCoordinator, ThrowTrajectoryPredictor trajectoryPredictor)
+        public GrabbingInteractor(CursorMovementCalculations cursorMovementCalculations, ThrowConfigSO throwConfig, ThrowDebugTracker throwDebugTracker, GrabbedEntityMover grabbedEntityMover, ReleaseCoordinator releaseCoordinator, ThrowTrajectoryPredictor trajectoryPredictor)
         {
             _cursorMovementCalculations = cursorMovementCalculations;
-            _throwSettingsSetter = throwSettingsSetter;
+            _throwConfig = throwConfig;
+            _throwDebugTracker = throwDebugTracker;
             _grabbedEntityMover = grabbedEntityMover;
             _releaseCoordinator = releaseCoordinator;
             _trajectoryPredictor = trajectoryPredictor;
@@ -57,13 +59,13 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 
             var vel = _cursorMovementCalculations.Velocity;
             var rawPower = vel.magnitude;
-            var isFastSpeed = rawPower > _throwSettingsSetter.ThrowThreshold;
-            var impulse = new float3(vel.normalized.x, vel.normalized.y, 0f) * (rawPower * _throwSettingsSetter.ThrowScale);
+            var isFastSpeed = rawPower > _throwConfig.ThrowThreshold;
+            var impulse = new float3(vel.normalized.x, vel.normalized.y, 0f) * (rawPower * _throwConfig.ThrowScale);
 
             _grabbedEntityMover.StopMoving();
             _trajectoryPredictor.StopTracking();
             _releaseCoordinator.HandleRelease(_grabbedEntity, impulse, isFastSpeed, _originalMass);
-            _throwSettingsSetter.OnThrow(_grabbedEntity, rawPower);
+            _throwDebugTracker.OnThrow(_grabbedEntity, rawPower);
 
             _grabbedEntity = Entity.Null;
         }

@@ -232,7 +232,7 @@ GameObject:
   - component: {fileID: 667487153}
   - component: {fileID: 667487152}
   m_Layer: 0
-  m_Name: PrototypeConfigSetter
+  m_Name: ConfigHub
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -251,73 +251,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::Game.Configs.PrototypeConfigSetter
   EnemyProfiles:
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 70
-    WeightAlly: 0
-    WeightWall: 40
-    WeightBeacon: 50
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 80
-    WeightAlly: 0
-    WeightWall: 25
-    WeightBeacon: 50
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 80
-    WeightAlly: 0
-    WeightWall: 25
-    WeightBeacon: 50
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
+  - {fileID: 11400000, guid: 375ea42032c06964cbc7298b61b6cc0f, type: 2}
+  - {fileID: 11400000, guid: 32c02065be75d6d43a415df90623ee38, type: 2}
+  - {fileID: 11400000, guid: bb1dd7da4c523dc46a9cda19bac475ad, type: 2}
   AllyProfiles:
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 80
-    WeightAlly: 0
-    WeightWall: 0
-    WeightBeacon: 0
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 80
-    WeightAlly: 0
-    WeightWall: 0
-    WeightBeacon: 0
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
-  - DetectionRadiusSq: 8
-    ViewAngleCos: 90
-    CheckInterval: 0.5
-    WeightEnemy: 80
-    WeightAlly: 0
-    WeightWall: 0
-    WeightBeacon: 0
-    DistanceWeight: 30
-    LowHealthBonus: 0
-    AggroBonus: 50
-    LineOfSightBonus: 10
+  - {fileID: 11400000, guid: a22f38eb0921c2f4489972539391cdd5, type: 2}
+  - {fileID: 11400000, guid: f33ef320f1cd3794d9ad6a952c32a041, type: 2}
+  - {fileID: 11400000, guid: deddfd053dff318459941d184196df5b, type: 2}
+  Bounce:
+    SoftLandFlyingShare: 0.8
+    SoftLandGroundedShare: 0.2
+    SoftLandMinSpeed: 2
+    KnockMagnitudeFactor: 0.5
+    KnockUpwardFactor: 0.5
+    ReboundElasticity: 0.15
+    BounceDamageFactor: 0.5
+    FallbackMinVelocity: 5
+    FallbackMaxVelocity: 10
+  FlashProfile: {fileID: 11400000, guid: 8949d53904178fa4c9dd07e4357b2983, type: 2}
+  SquashProfile: {fileID: 11400000, guid: 4f2e9b6efaa30094fb975334636c7ebb, type: 2}
+  PushProfile: {fileID: 11400000, guid: 837ae33b6033d194ab01fbcb9006fac4, type: 2}
+  Brain:
+    EvadeTriggerRangeMultiplier: 32
+    EvadeRetreatDistance: 3
+    EscapeDwellSeconds: 2
+  Steering:
+    DangerMultiplier: 1
+    LookAheadDistance: 2
+  CameraConfig: {fileID: 11400000, guid: 091a6fcc1f6a1bc40af982ce5c4fe343, type: 2}
+  PowerHitConfig: {fileID: 11400000, guid: 07faf065e54ab7f43ad85c0f763e6cdf, type: 2}
+  ThrowConfig: {fileID: 11400000, guid: ee1aed7a78f63f04d9cdb7acd3a4494b, type: 2}
+  DaylightConfig: {fileID: 11400000, guid: f9ab00434a6b4ea4986f94ba0b681ddb, type: 2}
+  TrajectoryPredictor: {fileID: 11400000, guid: 597a2c9ce7de27049bf10585929615af, type: 2}
+  BeaconConfig: {fileID: 11400000, guid: 66ad6814b68c7824d8c2a5cf12ca289c, type: 2}
+  WallSectionConfig: {fileID: 11400000, guid: 5a3cc203df6e21242a7afabde5f9a60a, type: 2}
+  PickupConfig: {fileID: 11400000, guid: 12c2676f2da4813468f3d87e830b6bba, type: 2}
+  PickupMagnetConfig: {fileID: 11400000, guid: 86572485032127349aae74a944b39bbc, type: 2}
 --- !u!4 &667487153
 Transform:
   m_ObjectHideFlags: 0
@@ -1285,8 +1254,8 @@ MonoBehaviour:
   _gameLoopManager: {fileID: 1181312369}
   _gameManagerUIController: {fileID: 669851394}
   _bootstrapFlow: {fileID: 1778888967}
-  _prototypeConfigSetter: {fileID: 667487152}
-  _throwSettingsSetter: {fileID: 2002722188}
+  _configHub: {fileID: 667487152}
+  _throwDebugTracker: {fileID: 2002722188}
 --- !u!1 &1763959280
 GameObject:
   m_ObjectHideFlags: 0
@@ -1563,7 +1532,7 @@ GameObject:
   - component: {fileID: 2002722189}
   - component: {fileID: 2002722188}
   m_Layer: 0
-  m_Name: ThrowSettingsSetter
+  m_Name: ThrowDebug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1581,42 +1550,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e706e968b020234594d7bd8f92de82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::ThrowSettingsSetter
-  ThrowScale: 0.1
-  ThrowThreshold: 100
-  MinMaxVelocity: {x: 5, y: 75}
-  _velocityPowerCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _velocityMin: 5
-  _velocityMax: 75
   _lastThrowRawPower: 0
   _scaledThrowForce: 0
   _throwImpulse: 0
   _thrownEntityMass: 0
   _currentEntitySpeed: 0
   _computedVelocityPower: 0
-  Gravity: 30
 --- !u!4 &2002722189
 Transform:
   m_ObjectHideFlags: 0

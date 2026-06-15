@@ -120,6 +120,23 @@ A plain `static class` method **is callable from inside Burst-compiled `IJobEnti
 `RequireForUpdate<T>` is "this system can't run without T". Use when the system is meaningless absent the singleton (e.g. `PickupSpawnOnDeathSystem` requires `PickupSettings`). Co-location trick: the `PickupPrefabRef` buffer is baked onto the **same** spawner entity as `PickupSettings`, so gating on `PickupSettings` implicitly guarantees the buffer too — no separate require needed.
 **Avoid** `RequireForUpdate` when the system has independent responsibilities and the singleton is *optional*. Example: `EnemyEscapeSystem` runs unconditionally to destroy escaped enemies; it only optionally drops loot if a spawner exists. Hard-requiring the spawner there would silently break escape in spawner-less scenes. Use `HasSingleton<PickupSettings>()` + `default` fallbacks (an empty `PickupPrefabMap`, whose zero-length `Entries` makes the drop loop a no-op).
 
+## Config singletons — behavior-preserving `Default`, not `default(T)`
+For a settings `IComponentData` read by a system that may run before/without the baker (e.g. an isolated battle test scene that skips bootstrap), the fallback must be **meaningful values, not zeros** (dots-new-system §6). Pattern used by `BounceConfig`/`BattleBrainConfig`/`SteeringConfig`:
+```csharp
+public static BounceConfig Default => new() { SoftLandFlyingShare = 0.8f, ... }; // mirrors the pre-config literals
+// in the system (works inside [BurstCompile] — same shape as float3.zero):
+var cfg = SystemAPI.TryGetSingleton<BounceConfig>(out var c) ? c : BounceConfig.Default;
+```
+A static get-only property returning a struct via object-initializer is Burst-callable (it's the `float3.zero`/`quaternion.identity` pattern). `default(T)` would zero every field → silently broken physics/AI. See [[config-system]].
+
+## IComponentData can double as an inline-serialized MonoBehaviour field
+A `[Serializable] struct X : IComponentData` of blittable fields can be **both** a serialized field on a MonoBehaviour (the `ConfigHub` edits `BounceConfig`/`BattleBrainConfig`/`SteeringConfig` inline) **and** the ECS singleton pushed from it — no separate DTO. `[Header]`/`[Tooltip]` attributes on the fields are fine; Burst ignores them. Field initializer `= X.Default` gives sensible defaults on first add and survives across newly-added fields (Unity runs initializers then overlays serialized data).
+
+## Config-baking gotchas (BlobContainer)
+- **`BlobBuilder` is passed by VALUE, never `ref`.** Helper methods that allocate into the builder take `BlobBuilder builder` (by value); passing `ref BlobBuilder` does not compile here. `builder.Allocate(ref dest, n)` still mutates the shared native storage correctly through the by-value copy. The `ref` is only on the `BlobArray<T>` destination (`ref root.Foo`), not the builder.
+- **Idempotent singleton push for live re-bake:** `BlobContainer.Initialize()` (re-run by the `ConfigHub` Rebake button) **finds-or-creates** each singleton — query `ComponentType.ReadWrite<T>()`, reuse `GetSingletonEntity()` if non-empty, else `CreateEntity` + `AddComponent`, then `SetComponentData`. Always-`CreateEntity` would duplicate `Global_Target_Profiles`/`Config_*` on every Rebake.
+- **Job field vs method name clash:** carrying a config struct as a job field named after a method causes a C# collision — `InAirCollisionJob` has `public BounceConfig Bounce;` so its bounce method had to be renamed `DoBounce()`. Name the field for the data, the method for the verb.
+
 ## Pattern — Capture Boundary-Crossing Position via Per-Frame Field Write
 When a system needs to remember "the position where the entity crossed back into region X", don't track a `bool TransitionedThisFrame` + position pair. Instead, write the current position into the struct field **every frame while outside**:
 ```csharp

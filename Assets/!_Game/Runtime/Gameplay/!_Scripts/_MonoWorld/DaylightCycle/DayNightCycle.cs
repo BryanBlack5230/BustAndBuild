@@ -16,7 +16,7 @@ namespace BarkingBird.Runtime.Gameplay.Daylight
     {
         private enum Phase { Idle, Day, Sundown }
 
-        private readonly DayNightSetting _setting;
+        private readonly DaylightConfigSO _setting;
         private readonly DaylightHandler _daylight;
 
         private Phase _phase = Phase.Idle;
@@ -33,7 +33,7 @@ namespace BarkingBird.Runtime.Gameplay.Daylight
         private readonly IDisposable _startDaySub;
         private readonly IDisposable _forceFinishSub;
 
-        public DayNightCycle(DayNightSetting setting, DaylightHandler daylight, CommandDispatcher dispatcher)
+        public DayNightCycle(DaylightConfigSO setting, DaylightHandler daylight, CommandDispatcher dispatcher)
         {
             _setting = setting;
             _daylight = daylight;

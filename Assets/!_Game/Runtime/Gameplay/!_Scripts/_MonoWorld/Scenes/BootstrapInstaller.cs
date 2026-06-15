@@ -1,6 +1,7 @@
 using System;
 using Reflex.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 using BarkingBird.Runtime.Gameplay.Settings;
 using BarkingBird.Runtime.Infrastructure;
@@ -15,18 +16,51 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
         [SerializeField] private GameLoopManager _gameLoopManager = null!;
         [SerializeField] private GameManagerUIController _gameManagerUIController = null!;
         [SerializeField] private BootstrapFlow _bootstrapFlow = null!;
-        [SerializeField] private PrototypeConfigSetter _prototypeConfigSetter = null!;
-        [SerializeField] private ThrowSettingsSetter _throwSettingsSetter = null!;
+        [FormerlySerializedAs("_prototypeConfigSetter")]
+        [SerializeField] private ConfigHub _configHub = null!;
+        [FormerlySerializedAs("_throwSettingsSetter")]
+        [SerializeField] private ThrowDebugTracker _throwDebugTracker = null!;
 
         public void InstallBindings(ContainerBuilder builder)
         {
             InstallGameLoop(builder);
-            builder.AddSingleton(_prototypeConfigSetter, typeof(PrototypeConfigSetter));
+            builder.AddSingleton(_configHub, typeof(ConfigHub));
+            InstallHubConfigs(builder);
             builder.AddSingleton(typeof(BlobContainer), typeof(BlobContainer), typeof(IDisposable));
             builder.AddSingleton(_bootstrapFlow, typeof(BootstrapFlow));
-            builder.AddSingleton(_throwSettingsSetter, typeof(ThrowSettingsSetter), typeof(IGameListener));
+            builder.AddSingleton(_throwDebugTracker, typeof(ThrowDebugTracker), typeof(IGameListener));
             builder.AddSingleton(typeof(ActiveSlot), typeof(ActiveSlot));
             builder.AddSingleton(typeof(DummySaveSystem), typeof(ISaveSystem));
+        }
+
+        // Plain SO configs live on the hub (single editing surface) but are bound as their own types so
+        // descendant-scope consumers depend on exactly what they need, not the whole hub. Each gets a
+        // null-guard so an unassigned hub field fails fast at install instead of NRE'ing deep in a scene.
+        private void InstallHubConfigs(ContainerBuilder builder)
+        {
+            if (_configHub.CameraConfig == null)
+                throw new InvalidOperationException("ConfigHub.CameraConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.CameraConfig, typeof(CameraConfigSO));
+
+            if (_configHub.PowerHitConfig == null)
+                throw new InvalidOperationException("ConfigHub.PowerHitConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.PowerHitConfig, typeof(PowerHitConfigSO));
+
+            if (_configHub.ThrowConfig == null)
+                throw new InvalidOperationException("ConfigHub.ThrowConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.ThrowConfig, typeof(ThrowConfigSO));
+
+            if (_configHub.DaylightConfig == null)
+                throw new InvalidOperationException("ConfigHub.DaylightConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.DaylightConfig, typeof(DaylightConfigSO));
+
+            if (_configHub.TrajectoryPredictor == null)
+                throw new InvalidOperationException("ConfigHub.TrajectoryPredictor is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.TrajectoryPredictor, typeof(TrajectoryPredictorSettings));
+
+            if (_configHub.PickupMagnetConfig == null)
+                throw new InvalidOperationException("ConfigHub.PickupMagnetConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.PickupMagnetConfig, typeof(PickupMagnetConfigSO));
         }
 
         private void InstallGameLoop(ContainerBuilder builder)

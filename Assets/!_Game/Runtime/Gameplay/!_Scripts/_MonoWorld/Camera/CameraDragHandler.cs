@@ -1,18 +1,16 @@
 using Cinemachine;
 using UnityEngine;
 
-using BarkingBird.Runtime.Infrastructure.Settings;
-
 namespace BarkingBird.Runtime.Gameplay.Camera
 {
     public class CameraDragHandler
     {
         private readonly CinemachineTransposer _transposer;
-        private readonly CameraConfig _config;
+        private readonly CameraConfigSO _config;
 
         private Vector3 _lastPos;
 
-        public CameraDragHandler(CinemachineTransposer transposer, CameraConfig config)
+        public CameraDragHandler(CinemachineTransposer transposer, CameraConfigSO config)
         {
             _transposer = transposer;
             _config = config;
@@ -26,7 +24,7 @@ namespace BarkingBird.Runtime.Gameplay.Camera
         public Vector2 GetRawMovement(Vector3 mousePos)
         {
             var delta = mousePos - _lastPos;
-            var movement = -new Vector2(delta.x, delta.y) * _config.moveSpeed;
+            var movement = -new Vector2(delta.x, delta.y) * _config.MoveSpeed;
             _lastPos = mousePos;
 
             return movement;
