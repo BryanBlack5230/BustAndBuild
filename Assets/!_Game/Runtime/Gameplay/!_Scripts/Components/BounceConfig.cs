@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
 
@@ -10,27 +11,27 @@ using UnityEngine;
 [Serializable]
 public struct BounceConfig : IComponentData
 {
-    [Header("Soft landing (one unit flying onto a grounded unit)")]
+    [Title("Soft landing (one unit flying onto a grounded unit)")]
     [Tooltip("Share of the impact damage dealt to the flying unit.")]
-    public float SoftLandFlyingShare;
+    [PropertyRange(0f, 1f)] public float SoftLandFlyingShare;
     [Tooltip("Share of the impact damage dealt to the grounded unit.")]
-    public float SoftLandGroundedShare;
+    [PropertyRange(0f, 1f)] public float SoftLandGroundedShare;
     [Tooltip("Minimum flying speed for a soft-land to register.")]
-    public float SoftLandMinSpeed;
+    [SuffixLabel("m/s", Overlay = true)] public float SoftLandMinSpeed;
     [Tooltip("Fraction of the flying speed converted into knockback on the grounded unit.")]
-    public float KnockMagnitudeFactor;
+    [PropertyRange(0f, 1f)] public float KnockMagnitudeFactor;
     [Tooltip("Upward fraction of that knockback.")]
-    public float KnockUpwardFactor;
+    [PropertyRange(0f, 1f)] public float KnockUpwardFactor;
 
-    [Header("Bounce")]
+    [Title("Bounce")]
     [Tooltip("Fraction of velocity retained when a flying unit rebounds off another flying unit.")]
-    public float ReboundElasticity;
+    [PropertyRange(0f, 1f)] public float ReboundElasticity;
     [Tooltip("Bounce damage = this * BaseDamage * velocityPower.")]
-    public float BounceDamageFactor;
+    [SuffixLabel("x", Overlay = true)] public float BounceDamageFactor;
 
-    [Header("Velocity-power fallback (used only when ThrowVelocitySettings is missing)")]
-    public float FallbackMinVelocity;
-    public float FallbackMaxVelocity;
+    [Title("Velocity-power fallback (used only when ThrowVelocitySettings is missing)")]
+    [SuffixLabel("m/s", Overlay = true)] public float FallbackMinVelocity;
+    [SuffixLabel("m/s", Overlay = true)] public float FallbackMaxVelocity;
 
     public static BounceConfig Default => new()
     {

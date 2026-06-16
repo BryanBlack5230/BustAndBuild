@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.AI;
@@ -13,28 +14,28 @@ using BarkingBird.Runtime.Gameplay.AI;
 [Serializable]
 public struct UnitStats
 {
-    [Header("Movement")]
-    public float MoveSpeed;
-    public float TurnSpeed;
-    public float StoppingDistance;
+    [Title("Movement")]
+    [SuffixLabel("m/s", Overlay = true)] public float MoveSpeed;
+    [SuffixLabel("deg/s", Overlay = true)] public float TurnSpeed;
+    [SuffixLabel("m", Overlay = true)] public float StoppingDistance;
 
-    [Header("Combat")]
-    public float Health;
-    public float AttackDamage;
-    public float AttackCooldown;
-    public float AttackRange;
+    [Title("Combat")]
+    [SuffixLabel("HP", Overlay = true)] public float Health;
+    [SuffixLabel("dmg", Overlay = true)] public float AttackDamage;
+    [SuffixLabel("s", Overlay = true)] public float AttackCooldown;
+    [SuffixLabel("m", Overlay = true)] public float AttackRange;
 
-    [Header("Bounce")]
-    public float BounceBaseDamage;
-    public float BounceMultiplier;
-    public float BounceElasticity;
+    [Title("Bounce")]
+    [SuffixLabel("dmg", Overlay = true)] public float BounceBaseDamage;
+    [SuffixLabel("x", Overlay = true)] public float BounceMultiplier;
+    [PropertyRange(0f, 1f)] public float BounceElasticity;
 
-    [Header("Steering / obstacle avoidance")]
-    public float AgentSize;
-    public float DangerWeight;
-    public float SurroundRadius;
-    public float VisionDistance;
-    public float ScanInterval;
+    [Title("Steering / obstacle avoidance")]
+    [SuffixLabel("m", Overlay = true)] public float AgentSize;
+    [SuffixLabel("x", Overlay = true)] public float DangerWeight;
+    [SuffixLabel("m", Overlay = true)] public float SurroundRadius;
+    [SuffixLabel("m", Overlay = true)] public float VisionDistance;
+    [SuffixLabel("s", Overlay = true)] public float ScanInterval;
     public LayerMask ObstacleLayer;
     public Curve ObstacleDangerCurve;
 

@@ -28,7 +28,7 @@ public sealed class ThrowConfigSO : ScriptableObject
 
     [Title("Physics")]
     [Tooltip("Downward gravity magnitude applied to the physics world (PhysicsStep.Gravity = -y).")]
-    [SerializeField, Min(0f)] private float _gravity = 30f;
+    [SerializeField, Min(0f), SuffixLabel("m/s2", Overlay = true)] private float _gravity = 30f;
 
     public float ThrowScale => _throwScale;
     public float ThrowThreshold => _throwThreshold;

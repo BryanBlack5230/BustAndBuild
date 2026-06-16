@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -9,7 +10,7 @@ using UnityEngine;
 public sealed class BeaconConfigSO : ScriptableObject
 {
     [Tooltip("Beacon hit points.")]
-    [SerializeField, Min(0f)] private float _health = 6000f;
+    [SerializeField, Min(0f), SuffixLabel("HP", Overlay = true)] private float _health = 6000f;
 
     public float Health => _health;
 }

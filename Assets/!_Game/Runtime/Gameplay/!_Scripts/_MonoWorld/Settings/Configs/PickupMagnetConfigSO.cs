@@ -1,4 +1,5 @@
 using PrimeTween;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -9,7 +10,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PickupMagnetConfig", menuName = "Game/Config/Pickup Magnet Config")]
 public sealed class PickupMagnetConfigSO : ScriptableObject
 {
-    [SerializeField, Min(0.05f)] private float _magnetDuration = 0.4f;
+    [Tooltip("Seconds the collected resource takes to fly from the world to its HUD counter.")]
+    [SerializeField, Min(0.05f), SuffixLabel("s", Overlay = true)] private float _magnetDuration = 0.4f;
+
+    [Tooltip("Easing applied to the fly-to-counter tween.")]
     [SerializeField] private Ease _magnetEase = Ease.InCubic;
 
     public float MagnetDuration => _magnetDuration;

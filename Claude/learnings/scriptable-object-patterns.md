@@ -80,3 +80,23 @@ if (other == null || other == this) continue; // no chain check
 other._isBuildConfig = false;
 ```
 **Why it matters:** When a flag must be globally unique (not scoped to a sub-group), drop the equality guard on the grouping field.
+
+## Config Inspector Readability Convention (Odin)
+**Context:** Styling ConfigHub + ~17 config SO/struct types in one pass for readability.
+**Finding:** Project vocabulary for tunable configs — reuse instead of re-deciding per field:
+- Bounded `[0,1]` values (shares, elasticity, damage scale) → `[PropertyRange(0f, 1f)]`
+- Real-world units → `[SuffixLabel("s"|"m"|"m/s"|"HP"|"dmg"|"x"|"u/px", Overlay = true)]` — **ASCII only** (avoid `°`/`²` in source; use `deg`/`m/s2`)
+- Must-have object refs → `[Required]`; bools → `[ToggleLeft]`; small enums → `[EnumToggleButtons]`
+- Section headers → `[Title]`; one `[InfoBox]` only where a mechanic is a non-obvious *sequence* (e.g. flash white→red→normal)
+- Do NOT pair `SuffixLabel` with a slider (`Range`/`ProgressBar`) — right-edge alignment breaks.
+**Why it matters:** Consistent look across all configs; new configs inherit the same drawer choices.
+
+## Odin Attributes on ECS IComponentData Structs Are Safe
+**Context:** Added `[PropertyRange]`/`[SuffixLabel]`/`[Title]` to `BounceConfig`/`SteeringConfig`/`BattleBrainConfig` (all `[Serializable] struct : IComponentData`, drawn inline on ConfigHub).
+**Finding:** Sirenix attributes are editor-only metadata — zero impact on baking, Burst, or blittability. Adding `using Sirenix.OdinInspector;` to Component files compiles fine (the `Runtime` asmdef already references Sirenix).
+**Why it matters:** Style ECS tuning structs exactly like SOs without fear of breaking DOTS.
+
+## Reordering Serialized Fields Is Safe (Name-Keyed)
+**Context:** Regrouped `CameraConfigSO` fields into Drag/Return/Border clusters to add clean `[Title]` dividers.
+**Finding:** Unity serializes by field **name**, not declaration order — reordering C# fields keeps existing asset values intact; only inspector display order changes. (Renames still need `[FormerlySerializedAs]`; reorders don't.)
+**Why it matters:** Free to cluster fields under section titles for readability with no data migration.

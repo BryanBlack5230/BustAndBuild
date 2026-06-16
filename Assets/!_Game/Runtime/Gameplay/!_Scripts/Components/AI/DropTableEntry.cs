@@ -16,6 +16,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public struct DropTableEntry
     {
         [Tooltip("Resource granted when one of these pickups is collected.")]
+        [EnumToggleButtons]
         public CurrencyType type;
         [Tooltip("Minimum/Maximum number of pickups spawned when this row hits.")]
         [MinMaxSlider(1f, "@100f",  true)]

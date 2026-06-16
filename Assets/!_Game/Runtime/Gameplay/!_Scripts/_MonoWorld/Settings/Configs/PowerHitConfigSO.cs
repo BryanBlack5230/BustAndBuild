@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +9,7 @@ using UnityEngine;
 public sealed class PowerHitConfigSO : ScriptableObject
 {
     [Tooltip("How long, in seconds, a power-hit stays active after the press.")]
-    [SerializeField, Min(0f)] private float _duration = 1f;
+    [SerializeField, Min(0f), SuffixLabel("s", Overlay = true)] private float _duration = 1f;
 
     [Tooltip("Impulse strength applied by the power-hit.")]
     [SerializeField, Min(0f)] private float _force = 2f;

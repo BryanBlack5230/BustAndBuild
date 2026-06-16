@@ -61,7 +61,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public DaylightConfigSO DaylightConfig;
 
-        [Title("Common")]
+        [Title("Trajectory Preview")]
         [Tooltip("Throw-arc preview tuning. Bound in DI at bootstrap and injected into ThrowTrajectoryPredictor.")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public TrajectoryPredictorSettings TrajectoryPredictor;

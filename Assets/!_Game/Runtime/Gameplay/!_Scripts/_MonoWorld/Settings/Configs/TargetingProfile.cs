@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -10,21 +11,21 @@ using UnityEngine;
 public struct TargetingProfile
 {
     [Tooltip("Detection range in meters.")]
-    [Min(0f)] public float DetectionRadius;
+    [Min(0f), SuffixLabel("m", Overlay = true)] public float DetectionRadius;
 
     [Tooltip("Full field-of-view angle in degrees. The line-of-sight bonus applies inside half this angle.")]
     [Range(0f, 360f)] public float ViewAngleDegrees;
 
     [Tooltip("Seconds between target re-evaluations for this unit type.")]
-    [Min(0f)] public float CheckInterval;
+    [Min(0f), SuffixLabel("s", Overlay = true)] public float CheckInterval;
 
-    [Header("Category weights (> 0 pursue, 0 ignores the category)")]
-    public float WeightEnemy;
-    public float WeightAlly;
-    public float WeightWall;
-    public float WeightBeacon;
+    [Title("Category weights"), PropertyTooltip("> 0 pursue, 0 ignores the category")]
+    [Min(0f)] public float WeightEnemy;
+    [Min(0f)] public float WeightAlly;
+    [Min(0f)] public float WeightWall;
+    [Min(0f)] public float WeightBeacon;
 
-    [Header("Modifiers")]
+    [Title("Modifiers")]
     [Tooltip("Scales the 'prefer closer' bias: (1 - distSq/detectionRadiusSq) * this.")]
     public float DistanceWeight;
     [Tooltip("Score bonus when the candidate is already targeting me.")]
@@ -41,7 +42,7 @@ public struct TargetingProfile
 public struct CombatProfile
 {
     [Tooltip("Scales incoming bounce/landing damage for this unit type. 1 = full, 0.25 = quarter, 0 = immune.")]
-    [Min(0f)] public float IncomingDamageScale;
+    [PropertyRange(0f, 1f)] public float IncomingDamageScale;
 }
 
 /// <summary>

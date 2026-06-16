@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -10,7 +11,7 @@ using UnityEngine;
 public sealed class WallSectionConfigSO : ScriptableObject
 {
     [Tooltip("Wall-section hit points.")]
-    [SerializeField, Min(0f)] private float _health = 200f;
+    [SerializeField, Min(0f), SuffixLabel("HP", Overlay = true)] private float _health = 200f;
 
     public float Health => _health;
 }

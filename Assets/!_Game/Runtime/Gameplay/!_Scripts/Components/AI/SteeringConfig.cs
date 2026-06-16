@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
 
@@ -12,9 +13,9 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public struct SteeringConfig : IComponentData
     {
         [Tooltip("How strongly danger repels: score = interest - danger * this.")]
-        public float DangerMultiplier;
+        [SuffixLabel("x", Overlay = true)] public float DangerMultiplier;
         [Tooltip("Distance ahead of the unit at which the resolved destination point is placed.")]
-        public float LookAheadDistance;
+        [SuffixLabel("m", Overlay = true)] public float LookAheadDistance;
 
         public static SteeringConfig Default => new()
         {

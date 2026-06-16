@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.AI;
@@ -12,12 +13,14 @@ using BarkingBird.Runtime.Gameplay.AI;
 public sealed class EnemyUnitProfile : ScriptableObject, IUnitProfile
 {
     [Tooltip("Which enemy type this profile configures. Must be unique within the hub's enemy list.")]
+    [EnumToggleButtons]
     public EnemyType Type;
     public TargetingProfile Targeting;
     public CombatProfile Combat;
     public UnitStats Stats;
 
     [Tooltip("Resources this enemy type drops on death. Each row is rolled independently.")]
+    [ListDrawerSettings(ShowFoldout = true, DraggableItems = true, ShowItemCount = true)]
     public List<DropTableEntry> Drops = new();
 
     int IUnitProfile.TypeValue => (int)Type;

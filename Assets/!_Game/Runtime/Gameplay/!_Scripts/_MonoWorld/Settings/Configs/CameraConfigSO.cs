@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -8,28 +9,31 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CameraConfig", menuName = "Game/Config/Camera Config")]
 public sealed class CameraConfigSO : ScriptableObject
 {
+    [Title("Drag")]
     [Tooltip("Drag sensitivity: world units of camera offset per pixel of mouse movement.")]
-    [SerializeField, Min(0f)] private float _moveSpeed = 0.1f;
+    [SerializeField, Min(0f), SuffixLabel("u/px", Overlay = true)] private float _moveSpeed = 0.1f;
 
+    [Tooltip("Seconds the pointer must be held before a grab is treated as a camera drag.")]
+    [SerializeField, Min(0f), SuffixLabel("s", Overlay = true)] private float _timeToHold = 1f;
+
+    [Title("Return to bounds")]
     [Tooltip("Seconds the camera takes to ease back inside the bounds after an out-of-bounds drag.")]
-    [SerializeField, Min(0f)] private float _returnDuration = 1f;
+    [SerializeField, Min(0f), SuffixLabel("s", Overlay = true)] private float _returnDuration = 1f;
 
     [Tooltip("Easing curve for the snap-back to bounds.")]
     [SerializeField] private AnimationCurve _returnCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    [Tooltip("Seconds the pointer must be held before a grab is treated as a camera drag.")]
-    [SerializeField, Min(0f)] private float _timeToHold = 1f;
-
+    [Title("Border resistance")]
     [Tooltip("Distance past the border at which drag resistance reaches full strength.")]
-    [SerializeField, Min(0f)] private float _maxOutsideDistance = 15f;
+    [SerializeField, Min(0f), SuffixLabel("m", Overlay = true)] private float _maxOutsideDistance = 15f;
 
     [Tooltip("Maps how far past the border the camera is (0..1) to drag resistance.")]
     [SerializeField] private AnimationCurve _borderPushCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     public float MoveSpeed => _moveSpeed;
+    public float TimeToHold => _timeToHold;
     public float ReturnDuration => _returnDuration;
     public AnimationCurve ReturnCurve => _returnCurve;
-    public float TimeToHold => _timeToHold;
     public float MaxOutsideDistance => _maxOutsideDistance;
     public AnimationCurve BorderPushCurve => _borderPushCurve;
 }

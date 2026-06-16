@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -10,33 +11,33 @@ using UnityEngine;
 [Serializable]
 public struct PickupTuning
 {
-    [Header("Lifetime")]
+    [Title("Lifetime")]
     [Tooltip("Total seconds a pickup lives before disappearing.")]
-    public float Lifetime;
+    [SuffixLabel("s", Overlay = true)] public float Lifetime;
     [Tooltip("Percent of lifetime that the pickup will blink for.")]
     [Range(0f, 1f)] public float BlinkPercent;
     [Tooltip("Toggle interval while blinking.")]
-    public float BlinkInterval;
+    [SuffixLabel("s", Overlay = true)] public float BlinkInterval;
 
-    [Header("Pickup")]
+    [Title("Pickup")]
     [Tooltip("World-space distance from cursor that triggers pickup.")]
-    public float PickupRadius;
+    [SuffixLabel("m", Overlay = true)] public float PickupRadius;
 
-    [Header("Spawn")]
+    [Title("Spawn")]
     [Tooltip("XZ scatter radius around the source position when spawning.")]
-    public float Scatter;
+    [SuffixLabel("m", Overlay = true)] public float Scatter;
     [Tooltip("Y position offset added to source spawn position.")]
-    public float SpawnHeight;
+    [SuffixLabel("m", Overlay = true)] public float SpawnHeight;
 
-    [Header("Float")]
+    [Title("Float")]
     [Tooltip("Vertical bob amplitude in meters once settled.")]
-    public float FloatAmplitude;
+    [SuffixLabel("m", Overlay = true)] public float FloatAmplitude;
     [Tooltip("Seconds per full bob cycle.")]
-    public float FloatPeriod;
+    [SuffixLabel("s", Overlay = true)] public float FloatPeriod;
     [Tooltip("Linear speed below which a disturbed pickup starts settling.")]
-    public float RestSpeedThreshold;
+    [SuffixLabel("m/s", Overlay = true)] public float RestSpeedThreshold;
     [Tooltip("Seconds the pickup must stay below rest speed before re-entering float state.")]
-    public float RestDuration;
+    [SuffixLabel("s", Overlay = true)] public float RestDuration;
 
     public static PickupTuning Default => new PickupTuning
     {

@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.AI;
@@ -11,6 +12,7 @@ using BarkingBird.Runtime.Gameplay.AI;
 public sealed class AllyUnitProfile : ScriptableObject, IUnitProfile
 {
     [Tooltip("Which ally type this profile configures. Must be unique within the hub's ally list.")]
+    [EnumToggleButtons]
     public AllyType Type;
     public TargetingProfile Targeting;
     public CombatProfile Combat;

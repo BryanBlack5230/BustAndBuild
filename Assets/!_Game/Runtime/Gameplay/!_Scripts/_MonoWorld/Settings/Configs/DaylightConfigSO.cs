@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -9,13 +10,13 @@ using UnityEngine;
 public sealed class DaylightConfigSO : ScriptableObject
 {
     [Tooltip("Real seconds for a full in-game day.")]
-    [SerializeField, Min(0f)] private float _dayLength = 60f;
+    [SerializeField, Min(0f), SuffixLabel("s", Overlay = true)] private float _dayLength = 60f;
 
     [Tooltip("Real seconds for the sundown fade after the day ends or is force-finished.")]
-    [SerializeField, Min(0f)] private float _sunDownDuration = 3f;
+    [SerializeField, Min(0f), SuffixLabel("s", Overlay = true)] private float _sunDownDuration = 3f;
 
     [Tooltip("Restart the day automatically when it completes.")]
-    [SerializeField] private bool _isLooping;
+    [SerializeField, ToggleLeft] private bool _isLooping;
 
     public float DayLength => _dayLength;
     public float SunDownDuration => _sunDownDuration;

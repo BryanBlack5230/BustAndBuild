@@ -66,3 +66,18 @@ if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 **Context:** Profile SOs render inline in the ConfigHub Battle tab via `[InlineEditor(Foldout)]`.
 **Finding:** OVDF config is type-level, so a type's tabs/layout also render when it's drawn inside another inspector's `[InlineEditor]` (nested, a bit cramped). Opening the asset directly gives full width.
 **Why it matters:** Configure the type once; the layout shows everywhere it's drawn — no per-host work.
+
+## Odin [MinMaxSlider] — a String Arg Is a Value-Resolver, Not a Literal
+**Context:** `[MinMaxSlider(1f, "Max", true)]` on `DropTableEntry.minMaxCount` threw "Could not match the given string 'Max' to any possible value resolution in the context of the type 'DropTableEntry'".
+**Finding:** `MinMaxSlider` has overloads where a **string** argument is a *getter* (member name or `@`-expression), NOT a literal. `(1f, "Max", true)` binds to `(float minValue, string maxValueGetter, bool showFields)`, so Odin tries to resolve `"Max"` as a member and fails. Fixes: numeric literal `[MinMaxSlider(1f, 10f, true)]`, an `@`-expression `[MinMaxSlider(1f, "@100f", true)]` (literal-via-expression), or a real member name. Same trap on any Odin param that accepts "value OR member name" (`ProgressBar.Max/MinMember`, `PropertyRange.Min/MaxMember`, `GUIColor.GetColor`, etc.).
+**Why it matters:** The error renders the inspector inert with a cryptic message; recognise the value-resolver pattern on sight.
+
+## C# Odin Attribute Floats Are Locale-Safe (Only OVDF Strings Aren't)
+**Context:** Worried the comma-decimal locale (see OVDF color note) would break `[GUIColor(0.4f, 0.8f, 1f)]` in ConfigHub.cs.
+**Finding:** The locale bug only hits Sirenix's **runtime string parser** (`RGBA("0.4,...")` written in OVDF). C# float literals compile culture-invariantly, so `[GUIColor(0.4f, 0.8f, 1f)]`, `[PropertyRange(0f, 1f)]`, etc. in source are always safe. Prefer the C# attribute when you can; only OVDF needs the hex workaround.
+**Why it matters:** Don't avoid C# colour/number attributes out of locale fear — the hex workaround is OVDF-only.
+
+## OVDF Tabs: MultiRow Works Here; Nested TabGroups Need a GroupName
+**Context:** Rebuilding the ConfigHub OVDF; the Odin skill ref warns "don't set TabLayouting".
+**Finding:** `TabLayouting = MultiRow` is valid and renders fine in this project's Sirenix version (worth it for 5+ tabs) — the skill's warning is about *unknown* enum values, and MultiRow is now known-good here. A **nested** `TabGroupAttribute` (a tab group placed inside another tab) still needs its own `GroupName`; a group entry without one is a latent bug. The Visual Designer also writes some `Position:` refs quoted-without-`$` (`Position: "groupId":0`) alongside the documented `$groupId:N`; both resolve, but normalise to `$id:N` when hand-authoring.
+**Why it matters:** MultiRow is safe to use here despite the generic warning; the missing GroupName and Position-syntax drift are the real foot-guns.
