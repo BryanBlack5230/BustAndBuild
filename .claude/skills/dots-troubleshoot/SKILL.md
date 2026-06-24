@@ -19,7 +19,7 @@ Match the symptom, jump to the fix. Most entries have a full writeup in `Claude/
 → Main-thread code reads T via `ComponentLookup` while a scheduled job writes T (often via an aspect's `EnabledRefRW<T>`). `lookup.Update(ref state)` does NOT sync. Fix: read T through `SystemAPI.Query<EnabledRefRO<T>>` (syncs via state.Dependency) instead of a lookup; `state.CompleteDependency()` is the heavy-handed fallback. (`ecs-patterns.md` → "Aspects")
 
 **`ArgumentException: A component with type:T has not been added to the entity` from `IsComponentEnabled<T>`**
-→ A cross-frame tracked `Entity` whose archetype isn't guaranteed. Guard: `Exists && HasComponent<T> && IsComponentEnabled<T>`. (`ecs-combat-and-collisions.md` → "ThrowSettingsSetter Entity-Tracking Pitfall")
+→ A cross-frame tracked `Entity` whose archetype isn't guaranteed. Guard: `Exists && HasComponent<T> && IsComponentEnabled<T>`. (`ecs-combat-and-collisions.md` → "ThrowDebugTracker Entity-Tracking Pitfall")
 
 **`EntityQueryDescValidationException: duplicate component type name T`**
 → Job uses an aspect containing `EnabledRefRW<T>` AND a `[WithAll/WithDisabled(typeof(T))]` attribute. The aspect already registered T. Move the condition inside the aspect method. (`ecs-patterns.md` → "Aspects")

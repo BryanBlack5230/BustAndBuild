@@ -58,10 +58,10 @@ Runtime code is split into two trees:
 
 | Installer | Scope | Binds |
 |---|---|---|
-| `ProjectInstaller` | Global | `InputManager`, `LoadingService`, `ConfigContainer`, `CursorSetter` |
-| `BootstrapInstaller` | Bootstrap scene | `GameLoopManager`, `GameManagerUIController`, `BootstrapFlow`, `PrototypeConfigSetter`, `BlobContainer`, `ThrowSettingsSetter`, `DotsGameLoopBridge`, `GameManager` (NonLazy) |
+| `ProjectInstaller` | Global | `InputManager`, `LoadingService`, `CursorSetter`, `CommandDispatcher` |
+| `BootstrapInstaller` | Bootstrap scene | `GameLoopManager`, `GameManagerUIController`, `DotsGameLoopBridge`, `GameManager` (NonLazy); `ConfigHub` + its plain-SO configs (`CameraConfigSO`, `PowerHitConfigSO`, `ThrowConfigSO`, `DaylightConfigSO`, `TrajectoryPredictorSettings`, `PickupMagnetConfigSO` — each bound as its own type via `InstallHubConfigs`); `BlobContainer`, `BootstrapFlow`, `ThrowDebugTracker`, `ActiveSlot`, `DummySaveSystem` (`ISaveSystem`) |
 | `WorldSceneInstaller` | World scene | `WorldFlow`, `DayNightCycle`, `WorldSceneData`, `ScrollController`, `WorldCameraHandler` |
-| `BattleGroundSceneInstaller` | Battle scene | `BattleSceneData`, `BattleGroundSceneFlow`, `MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `TrajectoryPredictorSettings`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge` (registration order matters — `ThrowTrajectoryPredictor` must precede `GrabbingInteractor`) |
+| `BattleGroundSceneInstaller` | Battle scene | `BattleSceneData`, `BattleGroundSceneFlow`, `MousePositionProvider`, `CursorMovementCalculations`, `GrabbedEntityMover`, `OverlapResolver`, `TunnelTeleporter`, `ReleaseCoordinator`, `ThrowTrajectoryPredictor`, `GrabbingInteractor`, `InteractController`, `PowerHitController`, `BattleCameraMovement`, `BattleCameraBorderSyncBridge` (registration order matters — `ThrowTrajectoryPredictor` must precede `GrabbingInteractor`) |
 
 Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesAndSelf<T>()` and `NonLazy<T>()` extensions defined in `Runtime/Infrastructure/ReflexExtensions.cs` (namespace `BarkingBird.Runtime.Infrastructure`).
 
@@ -99,9 +99,9 @@ Containers are hierarchical: Bootstrap → World → Battle. Use `AddInterfacesA
 
 ### Configuration Pipeline
 
-JSON configs are loaded at bootstrap via `AssetService` (Resources), parsed with Newtonsoft.Json into `ConfigContainer`. `BlobContainer.Initialize()` then builds a `BlobAssetReference<TargetProfilesBlob>` on a singleton entity for Burst-safe target scoring.
+Balance/config lives in **`ConfigHub`** (a Bootstrap-scene MonoBehaviour, the single editing surface) backed by ScriptableObject profiles in `Resources/Settings/`. The old JSON `Config.json` / `ConfigContainer` / `ConfigGenerator` pipeline (and `BlobConfigConverter`) is **deleted** — nothing reads JSON for config anymore. `ConfigHub` feeds three delivery paths: `BlobContainer.Initialize()` bakes per-unit-type profiles into a `BlobAssetReference<TargetProfilesBlob>` + flat `IComponentData` singletons (Burst-safe, live-`Rebake`-able) at bootstrap; plain Mono-world SOs (Camera/PowerHit/Throw/Daylight/Trajectory/PickupMagnet) bind via DI; and unit/structure/pickup stats bake into prefabs at subscene-bake time.
 
-**Caveat:** `BlobContainer` currently sources `EnemyProfiles`/`AllyProfiles` from `PrototypeConfigSetter` (a MonoBehaviour in the Bootstrap scene) — the `ConfigContainer.Battle.*Profiles` path is commented out. Editing `Config.json` does **not** currently change AI behaviour. The generic `BlobConfigConverter` helper exists but is not invoked anywhere yet.
+See `learnings/config-system.md` for the full model (profile SOs, enum-slot baking contract, bake-time vs runtime delivery, Rebake, pending Unity-side wiring).
 
 ### Authoring / Baker Pattern
 
@@ -133,8 +133,6 @@ Non-ECS gameplay code lives under `Runtime/Gameplay/!_Scripts/_MonoWorld/`. Each
 
 ## Skills & Tools
 
-| Task                         | Skill                   | Overview                                                                 |
-|------------------------------|-------------------------|--------------------------------------------------------------------------|
-| **write code for Unity**     | /unity-coding-standards | Enforce BarkingBird studio development standards                         |
-| **review**                   | /code-review-unity      | Review Unity C# code against Unity's official style guide                |
-| **write code for inspector** | /odin-visual-designer   | Configure Unity inspectors, attributes, layout, and Odin Visual Designer |
+Don't pick a skill from a static list — **ask the router**. `/ask-bryan` maps situation → skill across
+the whole toolbox (Unity skills, the vendored + global mattpocock pack, caveman) and is the single
+source of truth for "which skill when." It stays current as skills are added; this table would not.

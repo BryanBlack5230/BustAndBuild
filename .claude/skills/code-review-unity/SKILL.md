@@ -135,6 +135,12 @@ void PlayExplosion(ParticleSystem particles, AudioClip sound, Vector3 position)
 - Delete unused code, don't comment it out
 - Remove TODOs you'll never complete
 
+**The polymorphism test — this project's sharpened YAGNI for abstractions.** Before extracting *any* abstraction — an interface, a base class, a reusable "engine", or a promotion from `Gameplay/` to `Infrastructure/` — require a **named second consumer that exists, or is concretely planned, right now**: a system in this codebase that would use the extracted part with *identical control logic*.
+- "Might be useful later" fails the test — keep the code shaped for its single caller.
+- Dependency ≠ polymorphism: a system merely *consuming* `EventBus`/`WorldSaveService` is not a reason to split it.
+- The inverse also holds — a real second consumer justifies extraction even when the shared core is thin (a dictionary + an event).
+- Speculative abstractions create *false extension points*: one-implementation interfaces that route every reader through a contract while guaranteeing nothing ever swaps. Flag them as a finding. (Full rationale: `Claude/learnings/design-heuristics.md`.)
+
 ### 7. Extension Methods
 
 Extension methods are a clean way to extend UnityEngine API:
@@ -186,6 +192,12 @@ block-name__element-name--modifier-name
   - Using `Start` when `Awake` is appropriate (causes ordering issues)
   - Not cleaning up in `OnDestroy` (memory leaks, null ref errors)
   - Missing `[RuntimeInitializeOnLoadMethod]` for auto-init patterns
+- **Scene-unload / pooled-object teardown — these pass play-mode smoke tests, then spam exceptions on scene transitions:**
+  - `OnDestroy` must **not** touch member GameObjects — during hierarchy destruction the children's `OnDisable` already ran and they may be gone; `SetActive`/`.gameObject` then throws `MissingReferenceException`. Clear the C# collections only.
+  - No `SetActive` from inside the **same** object's `OnEnable`/`OnDisable` — Unity throws "GameObject is already being activated or deactivated". A return-to-pool path triggered by `OnDisable` needs a variant that skips deactivation.
+  - Guard `OnDisable` side effects with `gameObject.scene.isLoaded` — it's `false` during scene unload; skip pool-return/event work while peers are half-destroyed.
+  - Free-lists holding `UnityEngine.Object` must skip fake-null on dequeue — an externally `Destroy`d pooled item lingers in the queue as a destroyed reference; loop `Dequeue` until the implicit-bool check passes.
+  - (Full writeup: `Claude/learnings/unity-csharp-patterns.md` → "Pooled MonoBehaviours — Teardown Order & SetActive Re-entrancy".)
 
 ### Coroutine Patterns
 

@@ -55,7 +55,7 @@ Walk this top to bottom whenever creating ECS code. Each step has a wrong defaul
 
 ## 7. Values & config
 
-- **No magic numbers in jobs/systems.** Tunables → config (see `Claude/ConfigTask.md`: `*Config` SOs → blob for per-unit-type arrays, `IComponentData` singleton for flat scalar groups, `ThrowSettingsSetter`/`PearlSettings` as the reference pattern). Per-unit-type values (damage multipliers, body extents) belong in unit profiles, not system globals.
+- **No magic numbers in jobs/systems.** Tunables → config via `ConfigHub` (see `Claude/learnings/config-system.md`): per-unit-type arrays → profile SOs baked into `TargetProfilesBlob`; flat scalar groups → `[Serializable] IComponentData` singletons with a behavior-preserving `static Default` (e.g. `BounceConfig`/`SteeringConfig`/`BattleBrainConfig`). Per-unit-type values (damage multipliers, body extents) belong in unit profiles, not system globals.
 - `Random` in jobs: do NOT seed from `(uint)ElapsedTime` (truncates to seconds → shared seeds). Seed from a stored per-component `Random` state, or at minimum mix entity index AND a frame-unique value.
 
 ## 8. Baking

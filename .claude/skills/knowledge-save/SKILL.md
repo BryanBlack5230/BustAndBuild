@@ -32,10 +32,11 @@ Organize by topic, not by date. Use kebab-case filenames.
 
 ```
 Claude/learnings/
+├── README.md                  ← index (one line per file) — keep in sync
 ├── scene-flow-system.md       ← how scene loading / ISceneFlow works
-├── physics-interactions.md    ← grabbing, collisions, forces discovered
-├── di-patterns.md             ← Reflex gotchas specific to this project
-├── input-system.md            ← input handling quirks
+├── unity-physics-gotchas.md   ← AABB / baking / collision-layer gotchas
+├── di-architecture.md         ← Reflex installers, container chain, NonLazy
+├── input-system.md            ← grab/throw, cursor, camera-drag quirks
 └── ...
 ```
 
@@ -59,13 +60,16 @@ Each file should have a short header and use `##` sections:
 
 Keep entries tight — 3–6 lines each. Code snippets are fine when the pattern isn't obvious from prose.
 
+Cross-link related files with `[[file-stem]]` wikilinks (e.g. `[[design-heuristics]]`, `[[currency-and-saves]]`) — the existing files use these for navigation. Link liberally, even to a file that doesn't exist yet; it marks something worth writing later.
+
 ## Process (Step by Step)
 
 1. **Scan the conversation** for technical findings: bugs fixed, patterns used, system behaviors explained, gotchas hit, decisions made with rationale.
 2. **Filter** — only keep facts a future Claude would actually use. Skip one-off trivia.
 3. **Check existing files** in `Claude/learnings/` — update rather than duplicate.
 4. **Write or update** files using the format above.
-5. **Report back** to the user: list what was saved and to which file(s), in one short paragraph.
+5. **Update the index & routing.** Add or refresh the file's one-line entry in `Claude/learnings/README.md`. If you created a **new** file (not just updated one), also add a row to the routing table in `CLAUDE.md` (the "Learnings Routing" section) so future sessions load it for the matching task — an unindexed learning is one nobody finds.
+6. **Report back** to the user: list what was saved and to which file(s), in one short paragraph.
 
 ## Output to User
 

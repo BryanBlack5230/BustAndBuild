@@ -16,7 +16,7 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
 
 ### Testing
-- [Testing Methodology](testing-methodology.md) — test-layer assignment, ECS systems as the unit-test sweet spot (World/`Update`/assert pattern + enableable & domain-reload arrange traps), technique selection, PRNG strategies, naming; current state: no test asmdef yet
+- [Testing Methodology](testing-methodology.md) — test-layer assignment, ECS systems as the unit-test sweet spot (World/`Update`/assert pattern + enableable & domain-reload arrange traps), TDD red-green loop, technique selection, PRNG strategies, naming; current state: `Tests` + `Editor.Tests` asmdefs seeded with one tracer
 
 ### ECS / Battle
 - [ECS Architecture](ecs-architecture.md) — the map: system groups, battle pipeline order, enableable components, `BattleCoordinator`, spawning, walls, namespaces
@@ -38,3 +38,6 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Custom Inspector Patterns](custom-inspector-patterns.md) — `SceneChain` inspector, `FindPropertyRelative`, scene-open guards; OVDF authoring (naming, tabs, hex-color locale fix, additive-only, empty-tab culling, InlineEditor propagation)
 - [Editor Window Patterns](editor-window-patterns.md) — IMGUI button highlights, `PingObject`, OVDF limitation, SceneWorkflowHandoff null guard
 - [ScriptableObject Patterns](scriptable-object-patterns.md) — editor-only buttons, `[ReadOnly]` vs `[HideInInspector]`, `SetDefault` cross-asset pattern
+
+### Workflow / Version Control
+- [Merge Conflicts in Unity Files](merge-conflicts.md) — never hand-merge `.unity`/`.prefab` (graph, not text); defer to UnityYAMLMerge / the user; no Smart Merge configured yet

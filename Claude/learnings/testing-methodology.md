@@ -3,10 +3,16 @@
 Distilled test-design methodology for this project. Use it when designing or writing tests so the suite stays maintainable instead of becoming a refactor anchor. Cross-cutting like [[design-heuristics]]; the SUTs it talks about live in [[ecs-architecture]], [[ecs-combat-and-collisions]], [[steering-and-ai]], and [[events-and-services]].
 
 ## Current state (read first)
-There are **no tests, no test asmdef, and no MCP test runner** in this project today. `com.unity.test-framework` (1.6.0) and Rider are installed, but nothing uses them. So before any of the below is actionable:
-- Create a `Tests` asmdef referencing `Runtime` (+ `Unity.Entities`, `Unity.Entities.Hybrid`, `nunit.framework`, `UnityEngine.TestRunner`, `UnityEditor.TestRunner`) with `"defineConstraints": ["UNITY_INCLUDE_TESTS"]`. Editor-only tests go in a second asmdef referencing `Editor`.
+The test seam now exists — seeded but near-empty (`com.unity.test-framework` 1.6.0 + Rider installed):
+- **`Tests`** asmdef (`Assets/!_Game/Tests/`, Play Mode) — refs `Runtime`, `Unity.Entities`(+`.Hybrid`), `Unity.Collections`, `Unity.Mathematics`, `UnityEngine.TestRunner`, `UnityEditor.TestRunner`; `overrideReferences` + `precompiledReferences:["nunit.framework.dll"]`, `autoReferenced:false`, `defineConstraints:["UNITY_INCLUDE_TESTS"]`. The ECS one-tick-harness + unit-test home; seeded by one tracer (`MathHelperTests`).
+- **`Editor.Tests`** asmdef (`Assets/!_Game/Tests/Editor/`, Edit Mode) — same flags, additionally refs `Editor`. Empty, awaiting its first `[Formula]`-parser / asset-validation test.
 - `com.nowsprinting.test-helper` / `.ui` are **not** installed — the screenshot/statistical-sampling helpers the upstream guide assumes don't exist here. Stick to plain NUnit + an Entities test `World` until that changes.
 - No JetBrains MCP (`run_unity_tests`) is configured — run via the Unity Test Runner window or `-runTests` on the CLI.
+
+## TDD loop (red-green)
+The workflow when building test-first. The `/tdd` skill runs it in full; this is the nugget so the principle survives outside the skill.
+
+Work in **vertical** slices, never horizontal: don't write all the tests then all the code — bulk tests verify *imagined* behavior and outrun your understanding. **Tracer-bullet** one behavior at a time — `RED:` one test for one behavior fails → `GREEN:` minimal code makes it pass → repeat, each cycle learning from the last. One test → one implementation; don't anticipate future tests. **Never refactor while RED** — reach GREEN first, then deepen modules / extract duplication with the tests holding you.
 
 ## Layer assignment — map each SUT to the cheapest layer that can witness it
 1. **Editor tests** — `Assets/!_Game/Editor/` code (SceneChainEditor, Formula drawers) and asset validation: `*Config`/profile-SO sanity (enum-slot coverage, no null/duplicate types — the kind of thing `ConfigHub.OnValidate` warns on), SceneCollection/RunConfiguration consistency. `[Formula]` parsing (`FormulaParser`/`FormulaEvaluator`) is pure → cheapest, highest-value first tests. *(`ConfigGenerator`/`Config.json` are gone — no JSON-shape test target anymore.)*
@@ -64,4 +70,4 @@ xUTP vocabulary, noted only where it matters in output: **stub** (canned respons
 
 Testability is mostly already good here: Reflex DI ([[di-architecture]]) makes dependencies injectable, the `ISaveSystem`→`DummySaveSystem` seam ([[currency-and-saves]]) is the model to copy, and ECS component state is observable by construction. Flag a design (don't just write an awkward test) when you hit: hidden state with no external read, dependencies that can't be injected (static/global coupling, `new` in a constructor), or test-case count growing faster than O(n) in the conditions.
 
-*(Adapted from the `test-designing-guide` skill in nowsprinting/unity-coding-skills (Koji Hasegawa, Unlicense), reduced to the tool-agnostic methodology and re-framed for this project's ECS/Reflex stack. The skill's MCP/`test-helper`-dependent workflow — `run-tests`, `edit-scene`, the test-first agents — was not adopted; revisit it if a real test assembly + JetBrains MCP get set up.)*
+*(Adapted from the `test-designing-guide` skill in nowsprinting/unity-coding-skills (Koji Hasegawa, Unlicense), reduced to the tool-agnostic methodology and re-framed for this project's ECS/Reflex stack. The skill's MCP/`test-helper`-dependent workflow — `run-tests`, `edit-scene`, the test-first agents — was not adopted; revisit it if JetBrains MCP gets set up. The **TDD loop** section is distilled from the `tdd` skill in the mattpocock skill pack — the red-green / vertical-slice nugget that `/tdd` owns in full.)*
