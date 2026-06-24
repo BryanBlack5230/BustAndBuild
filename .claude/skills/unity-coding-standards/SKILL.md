@@ -8,7 +8,10 @@ description: Enforces BarkingBird studio Unity development standards including C
 You are a Unity C# architect-level developer.
 ⚠️ **Unity 6 (C# 9):** All patterns and examples must be compatible with Unity 6, which uses C# 9. No C# 10+ features.
 
-**Deep references:** project-specific discoveries and system maps live in `Claude/learnings/` (start at `README.md` there). Pending design decisions live in `Claude/ConfigTask.md` and `Claude/CurrencyTask.md` — check them before touching config/balance or currency code.
+**Deep references** — the skill is the rules; their *why/how* live in the three knowledge sinks (ADR-0001):
+- `Claude/learnings/` (index: `README.md`) — how-it-works, gotchas, system maps.
+- `Claude/docs/adr/` — decisions behind rules with real trade-offs (messaging split → 0002, domain-reload-off → 0003, config-in-SOs → 0004).
+- `CONTEXT.md` — domain vocabulary, so names match the ubiquitous language.
 
 ## 🔴 PRIORITY 1: Code Quality & Hygiene (check FIRST)
 
@@ -16,12 +19,12 @@ You are a Unity C# architect-level developer.
 2. **Least accessible access modifier** — private by default, explicit everywhere.
 3. **Zero compiler warnings.**
 4. **Throw exceptions for errors — never log errors and continue.** A required `[SerializeField]` that is null at install time → throw `InvalidOperationException`, no silent `Resources.Load` fallback.
-5. **`Log.<Context>.D/W/E()` for all logging** — static utility, no injection, never in constructors. Tags: `Log.Battle` (combat/AI/ECS), `Log.Loading`, `Log.Boot`, `Log.World`, `Log.City`, `Log.Default`, and **`Log.Editor`** for editor-only tools (the `Editor` assembly — auto-prefixes `[ClassName]`). `.D()` is auto-stripped in PROD via `[Conditional]` — never wrap it in `#if` guards. `.E(exception)` for caught exceptions; `.ThrowException(msg)` for tagged throws. **Avoid raw `Debug.Log`** — the one sanctioned `Debug.*` use is `Debug.LogError(msg, authoring)` in a Baker, whose context-object overload makes the console entry select the offending authoring.
+5. **`Log.<Context>.D/W/E()` for all logging** — static utility, no injection, never in constructors. Tags: `Log.Battle` (combat/AI/ECS), `Log.Loading`, `Log.Boot`, `Log.World`, `Log.City`, `Log.Default`, and **`Log.Editor`** for editor-only tools (the `Editor` assembly — auto-prefixes `[ClassName]`). `.D()` is auto-stripped in PROD via `[Conditional]` — never wrap it in `#if` guards. `.E(exception)` for caught exceptions; `.ThrowException(msg)` for tagged throws. **Avoid raw `Debug.Log`** — the one sanctioned `Debug.*` use is `Debug.LogError(msg, authoring)` in a Baker, whose context-object overload makes the console entry select the offending authoring. TagLog auto-prefixes a colored `[ClassName]` (all tags, via `[CallerFilePath]`) — **don't repeat the class name in the message text**.
 6. **readonly for non-reassigned fields, const for constants, nameof over string literals.**
 7. **No inline comments** — use descriptive names. Comment only constraints the code can't express. The one sanctioned comment is a **"why-not"**: when a natural/standard approach was tried and rejected (an API misbehaves here, a guard exists for a framework constraint, a slower path is chosen for correctness), leave a short note so reviewers and a future Claude don't re-suggest the dead end.
 8. **No LINQ anywhere** — explicit loops, always.
-9. **No magic numbers** (agreed 2026-06-10): tunable values do NOT get hardcoded in systems/jobs. They live in config (see `Claude/ConfigTask.md`: `*Config` ScriptableObjects → blob/singleton components; `*Constants` static classes are reserved for true compile-time invariants). If the config plumbing for a value doesn't exist yet, put the value in a clearly named field/SO rather than inline, and flag it.
-10. **One Unity-serialized class per file, filename = class name** — applies to every `MonoBehaviour` and `ScriptableObject`. Multiple serialized types in one file silently break inspector reference wiring (no error — references just don't persist through bake). Plain ECS structs, enums, and POCOs may share files. Project SO filename convention: `%Name%SO.cs` for profile-style SOs.
+9. **No magic numbers**: tunable values do NOT get hardcoded in systems/jobs. They live in config — `*Config` ScriptableObjects → blob/singleton components; `*Constants` static classes are reserved for true compile-time invariants (decision: ADR-0004; how: `Claude/learnings/config-system.md`). If the config plumbing for a value doesn't exist yet, put the value in a clearly named field/SO rather than inline, and flag it.
+10. **One Unity-serialized class per file, filename = class name** — applies to every `MonoBehaviour` and `ScriptableObject`. Multiple serialized types in one file silently break inspector reference wiring (no error — references just don't persist through bake). Plain ECS structs, enums, and POCOs may share files. Project SO filename convention: `%Name%SO.cs` for profile-style SOs. *(Mechanism + `[FormerlySerializedAs]` recovery: `Claude/learnings/scriptable-object-patterns.md`.)*
 11. **Unity fake-null with `#nullable`:** use the implicit bool operator (`if (_thing)`) instead of `!= null` on `UnityEngine.Object` fields — it performs the destroyed-object check without CS8073 warnings.
 
 ## 🟡 PRIORITY 2: Modern C# (C# 9 ceiling)
@@ -29,6 +32,7 @@ You are a Unity C# architect-level developer.
 - Expression bodies for simple members; null-coalescing; pattern matching (`is T x`).
 - `readonly struct` for events/commands; `in` parameters for struct payloads.
 - Private serialized fields `_camelCase`; properties PascalCase. Match the file you're editing (some older files use tabs — keep them).
+- Prefer `var` when the right-hand side makes the type obvious; early-`return`/`continue` over nested `if`.
 
 ## 🟢 PRIORITY 3: Unity Architecture
 
@@ -105,6 +109,7 @@ File placement: one type → own file next to the owner; multiple types per owne
 ### Resources
 - All `Resources.Load*` goes through `AssetService.R.Load<T>(path)`.
 - All Resources/asset path strings live in `RuntimeConstants` — no string literals at call sites.
+- *Why + the `Resources` naming-collision gotcha:* `Claude/learnings/events-and-services.md` (AssetService + RuntimeConstants sections).
 
 ## Review Severity
 

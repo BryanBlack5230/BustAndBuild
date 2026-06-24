@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Skill(code-review-unity)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Read(//c/ClaudeBrain/**)",
+      "Read(//c/Users/523/.claude/**)"
     ]
   }
 }

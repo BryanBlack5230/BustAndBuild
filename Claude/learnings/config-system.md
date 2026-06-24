@@ -1,5 +1,7 @@
 # Config / Balance System (ConfigHub)
 
+> **Decision:** the "SO config over JSON + bake-vs-blob delivery" rationale is recorded in `Claude/docs/adr/0004-balance-config-in-scriptableobjects.md`. This file is the how-it-works.
+
 Replaces the old JSON `ConfigContainer` path for balance tuning. Built across the 2026-06-14 refactor — Phases 1/2/3/5 all landed (no remaining phases; the original spec `Claude/ConfigTask.md` was removed once done). Supersedes the "Config Pipeline" notes in [[events-and-services]].
 
 ## The Shape

@@ -81,6 +81,16 @@ private bool IsPickUp(Entity entity)
 ```
 Mirrors the existing `_groundLayerBit` pattern in `InAirCollisionSystem` — keep them consistent so the file stays readable.
 
+## Broadphase Distance Queries (`CalculateDistance` + custom `ICollector<DistanceHit>`)
+**Context:** Distance-Calc refactor (see [[steering-and-ai]]). Replacing N×M center-distance loops and 8-way `SphereCast` fans with a single point-distance query that returns exact **surface** distances. Verified against `com.unity.physics@1.4.2`.
+
+- **`CollisionWorld.CalculateDistance<T>(PointDistanceInput input, ref T collector)`** is the overload to use (also on `PhysicsWorld.CollisionWorld`). `PointDistanceInput { float3 Position; float MaxDistance; CollisionFilter Filter; }` — `MaxDistance` does the culling.
+- **`DistanceHit.Distance => Fraction`, and for *distance* queries `Fraction` is the ABSOLUTE metric distance**, not a normalized 0..1 raycast fraction. (For casts it *is* a 0..1 fraction — don't carry raycast intuition over.) Other fields: `.Position` (world-space closest point on the hit surface), `.Entity`, `.SurfaceNormal`. So `distSq = hit.Distance*hit.Distance` and direction `= normalizesafe(hit.Position - myPos)` are both valid.
+- **"Collect every hit in range" collector:** make `MaxFraction` a fixed get-only property == the query radius (never shrink it) and `EarlyOutOnFirstHit => false`. `MaxFraction` shrinking is how you'd narrow toward a single closest hit; keeping it constant + letting `PointDistanceInput.MaxDistance` cull delivers *all* in-range hits to `AddHit`. `AddHit` returns true=accept / false=reject (only affects `NumHits` when you don't shrink).
+- **Self-exclusion is mandatory:** the query returns the querying body's own collider at distance 0 — `if (hit.Entity == Self) return false` in `AddHit`.
+- **A compound/multi-collider body returns its child colliders too.** A wall whose root has a full-size box *and* small `WallChild` detail colliders on the same layer yields multiple hits; discriminate the ones you want by `ComponentLookup.HasComponent` on `hit.Entity` (e.g. `WallSection` only) and `return false` for the rest. Arena bound cubes on the same Obstacle layer are rejected the same way.
+- The collector is a plain struct holding **copies** of the job's `[ReadOnly]` `ComponentLookup`s / hashmaps; no extra `[ReadOnly]` attribute needed on its fields — access is governed by the owning job's field declarations. Works under Burst + `ScheduleParallel` (read-only `PhysicsWorld`).
+
 ## DynamicsManager.asset Collision Matrix — Hex Format
 `ProjectSettings/DynamicsManager.asset` stores `m_LayerCollisionMatrix` as a single hex string of 32 × 4 bytes (256 chars). Each layer's mask is a 32-bit uint encoded **little-endian** (LSB byte first). To toggle collision between layers A and B you must edit BOTH rows symmetrically — Unity's editor manages this, but if you edit the YAML directly you have to do both yourself, or the asymmetric mask will fail the collision check (Unity Physics builds `CollisionFilter.CollidesWith` per body from one row of the matrix; both directions must agree).
 

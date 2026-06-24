@@ -131,6 +131,15 @@ Non-ECS gameplay code lives under `Runtime/Gameplay/!_Scripts/_MonoWorld/`. Each
 | `Newtonsoft.Json` | Config parsing |
 | `Odin` | Inspector toolset |
 
+## Knowledge Base & Docs
+
+Project knowledge lives in **three sinks** (model + rationale: `Claude/docs/adr/0001-adopting-mattpocock-skills.md`):
+- **Glossary** — domain term meanings → `CONTEXT.md` (repo root)
+- **Decisions** — real trade-offs → `Claude/docs/adr/`
+- **How-it-works / gotchas / system maps** → `Claude/learnings/`
+
+Coding **rules/standards** → the `unity-coding-standards` skill. The task→file **Knowledge Routing** table lives in `CLAUDE.md` (don't duplicate it here). Agent configs (issues / triage / domain) → `Claude/docs/agents/`.
+
 ## Skills & Tools
 
 Don't pick a skill from a static list — **ask the router**. `/ask-bryan` maps situation → skill across

@@ -1,5 +1,7 @@
 # Events, Commands, Services, Utilities
 
+> **Decision:** the EventBus/CommandDispatcher split + custom-bus rationale is recorded in `Claude/docs/adr/0002-eventbus-vs-commanddispatcher.md`. This file is the how-it-works.
+
 ## EventBus — Static Notification Hub With Priorities
 `BarkingBird.Runtime.Infrastructure.EventBus` (at `Runtime/Infrastructure/EventBus/EventBus.cs`) is a static, type-keyed event hub for **past-tense notifications** ("X happened"). Replaced the old `EventManager` (which exposed loose `Action`s grouped by nested static classes).
 
@@ -98,7 +100,7 @@ Both buses give you type-safe payloads and `IDisposable` subscription tokens (no
 Wraps `ILoadUnit.Load()` and `ILoadUnit<T>.Load(param)` with stopwatch timing + main-thread switch + exception logging. Has a `CompositeDisposable Disposable` field for collecting `IDisposableLoadUnit`. Used by `BootstrapFlow` to load `CursorSetter` (cursor textures); after the load chain it calls `_blobContainer.Initialize()`. (The old `ConfigContainer` JSON load was removed with the ConfigHub rework, 2026-06-14.)
 
 ## AssetService — Required Wrapper For All Resources Loads
-**Convention:** every `Resources.Load*` call in the project goes through `AssetService.R.Load<T>(path)` / `AssetService.R.LoadAll<T>(path)`. Direct `UnityEngine.Resources.Load*` calls are only allowed inside `AssetService.cs` itself.
+> **Rule** (`Resources.Load*` → `AssetService.R`) is canonical in `unity-coding-standards` P3 Resources; this section is the *why + gotcha*. Direct `UnityEngine.Resources.Load*` is allowed only inside `AssetService.cs` itself.
 **Why it matters:** Centralizes the Resources entry point so future caching/profiling/Addressables migration touches one file. New `LoadAll<T>` was added when `SceneWorkflowRunner` was routed through it — extend `AssetService.Resources` if you need another Resources API.
 
 **Naming-collision gotcha:** the wrapper class is `BarkingBird.Runtime.Infrastructure.Utilities.Resources` (intentionally shadows `UnityEngine.Resources`). Files that need both must alias one (`using Resources = UnityEngine.Resources;`) or fully qualify — but consumer code should never need `UnityEngine.Resources` at all once it uses `AssetService.R`.
@@ -125,7 +127,7 @@ Single static class collecting collider-geometry reads and PhysicsWorld overlap 
 **JSON config is fully dead (Phase 3, 2026-06-14).** `ConfigContainer`, `Config.json`, `ConfigGenerator` (BarkingBird → Generate Configs), `BlobConfigConverter`/`[BlobConfig]`, and the `RuntimeConstants.Configs` paths are all **deleted**. The last JSON holdouts — camera and power-hit — moved to plain SOs (`CameraConfigSO`, `PowerHitConfigSO`) referenced from the hub and bound as their own types in `BootstrapInstaller`. Nothing reads JSON for config anymore. Full reference: [[config-system]].
 
 ## RuntimeConstants
-At `Runtime/Infrastructure/Settings/RuntimeConstants.cs`, namespace `BarkingBird.Runtime.Infrastructure.Settings`. **All Resources paths and Assets-relative paths must live here** — no string literals at call sites.
+At `Runtime/Infrastructure/Settings/RuntimeConstants.cs`, namespace `BarkingBird.Runtime.Infrastructure.Settings`. *(The rule — all Resources/Assets path strings live here, no string literals at call sites — is canonical in `unity-coding-standards` P3 Resources.)*
 - `Scenes.Bootstrap/Loading/World/Battle/City` — int build indices, resolved at static init via `SceneUtility.GetBuildIndexByScenePath`.
 - `PhysicLayers.Unit/Grabbable/Ground/Obstacle/PickUps` — string names; resolved via `LayerMask.NameToLayer` at use sites.
 - `SceneWorkflow.RunConfigurationsPath = "Settings/SceneRunConfigurations"` — Resources-relative path for run-config assets.

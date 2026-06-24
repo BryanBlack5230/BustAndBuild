@@ -1,5 +1,7 @@
 # Play Mode Options & Hot Reload
 
+> **Decision:** the "Domain Reload off + reset static state explicitly" trade-off is recorded in `Claude/docs/adr/0003-play-mode-domain-reload-off.md`. This file is the how-it-works.
+
 ## Current Project Settings
 **Enter Play Mode Options** — both flags **disabled**:
 - Reload Domain: **OFF**

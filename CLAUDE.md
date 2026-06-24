@@ -4,60 +4,66 @@ When reporting information to me, be extremely concise and sacrifice grammar for
 This is a game project by BarkingBird studio. For more information, load the [Project.md](Claude/Project.md) file.
 
 ## Folder Structure
+Descriptions say **what kind of file belongs** in each folder (a placement guide), not a snapshot of current contents.
 ```
 Bust and Build/
-├── CLAUDE.md                                       ← You are here (always loaded)
-├── `Claude/`                                       ← Folder for claude related files
-│   ├── `learnings/`                                ← Your knowledge database (see "Learnings Routing" below)
-│   ├── Project.md                                  ← Task router
-│   ├── Input.md                                    ← User inputed prompt
-│   └── DistanceCalculationsRefactorTask.md         ← Agreed design: surface-distance (AABB/broadphase) for brain/scorer/steering (read before touching attack-range/target-detection/obstacle-avoidance)
+├── CLAUDE.md            ← always loaded: router, conventions, knowledge index (you are here)
+├── CONTEXT.md           ← glossary: ubiquitous domain language (term meanings only — no how-it-works)
+├── `Claude/`            ← Claude's working dir — knowledge & planning, not shipped in builds
+│   ├── Project.md       ← deep architecture reference (orientation; loaded on demand)
+│   ├── `learnings/`     ← how-it-works KB: verified discoveries, gotchas, system maps (see "Knowledge Routing")
+│   ├── `docs/`
+│   │   ├── `adr/`       ← Architecture Decision Records — choices with real trade-offs (`0001`+)
+│   │   └── `agents/`    ← agent configs: issue-tracker, triage-labels, domain conventions
+│   └── Input.md · TaskBreakdown.md · *Task.md   ← transient planning/scratch notes (not durable knowledge)
 │
-├── `Assets/`                                       ← Assets for Unity
-│   ├── `!_Game/`                                   ← Assets made in BarkingBird studio
-│   │   ├── ProjectScope.prefab                     ← Reflex ProjectScope (ProjectInstaller lives here)
-│   │   ├── `Editor/`                               ← Editor-only code, assembly `Editor`, namespace `BarkingBird.Editor`
-│   │   │   ├── EditorConstants.cs / EditorSceneUtils.cs / MissingScriptsFinder.cs / SceneChainEditor.cs / ToolBox.cs
-│   │   │   ├── `Formulas/`                         ← FormulaDrawer + FormulaReflectionResolver (inspector for `[Formula]` fields)
-│   │   │   └── `SceneWorkflow/`                    ← EditorSceneCollectionRunner, SceneWorkflowHandoff, SceneWorkflowToolbox
-│   │   └── `Runtime/`                              ← Runtime code split into Gameplay/ and Infrastructure/
-│   │       ├── Runtime.asmdef                      ← Assembly: `Runtime` (covers everything under Runtime/)
-│   │       ├── `Gameplay/`                         ← namespace `BarkingBird.Runtime.Gameplay.*`
-│   │       │   ├── Data/                           ← InputActions.inputactions, PostProcessing Profile
-│   │       │   ├── Resources/                      ← Audio, Cursors, Materials, Models, Prefabs, Shaders, Textures
-│   │       │   │   └── Settings/                   ← `*Config.asset` SO profiles (ConfigHub) + UnitProfiles/ + HitFeedback/, SceneCollections/, SceneRunConfigurations/, TrajectoryPredictorSettings.asset
-│   │       │   ├── Scenes/                         ← 0.Bootstrap, 1.Loading, 2.World, 3.Battleground, 4.City (+ ECS scenes)
-│   │       │   └── !_Scripts/                      ← All gameplay C#
-│   │       │       ├── Components/                 ← ECS component structs + Authoring (root files are in global namespace)
-│   │       │       │   └── AI/                     ← AI-specific authoring (`...Gameplay.AI`)
-│   │       │       ├── Systems/                    ← ECS systems (root files are in global namespace)
-│   │       │       │   └── AI/                     ← AI-pipeline systems (`...Gameplay.AI`)
-│   │       │       └── _MonoWorld/                 ← Non-ECS gameplay (MonoBehaviours)
-│   │       │           ├── Camera/                 ← Camera controlls
-│   │       │           ├── Cursor/                 ← Cursor movement and representation
-│   │       │           ├── DaylightCycle/          ← Day and night cycle
-│   │       │           ├── Input/                  ← User inputs, with `GrabAndThrow/` subnamespace
-│   │       │           ├── Scenes/                 ← Scene flows and installers
-│   │       │           └── Settings/               ← `...Gameplay.Settings` (incl. StateOverrides/)
-│   │       └── `Infrastructure/`                   ← namespace `BarkingBird.Runtime.Infrastructure.*`
-│   │           ├── InputManager.cs / ReflexExtensions.cs / StateOverride.cs / StringExtensions.cs   ← root `...Infrastructure`
-│   │           ├── Commands/                       ← `...Infrastructure.Commands` (CommandDispatcher)
-│   │           ├── EventBus/                       ← `...Infrastructure` (static EventBus + IEvent)
-│   │           ├── Formulas/                       ← `...Infrastructure.Formulas` (`[Formula]` strings, FormulaParser/FormulaEvaluator)
-│   │           ├── GameLoop/                       ← `...Infrastructure.GameLoop`
-│   │           ├── Pooling/                        ← `...Infrastructure.Pooling` (UiPool/UiPoolItem — data-keyed UI list rows)
-│   │           ├── Save/                           ← `...Infrastructure.Save` (ISaveSystem, DummySaveSystem, ActiveSlot)
-│   │           ├── SceneWorkflow/                  ← `...Infrastructure.SceneWorkflow`
-│   │           ├── Settings/                       ← `...Infrastructure.Settings` (ConfigHub, BlobContainer, constants)
-│   │           └── Utilities/                      ← `...Infrastructure.Utilities` (Log, AssetService, MathHelper, etc.)
-│   └── Tasks.md                                    ← Task management memos (lives under !_Game/)
+├── `Assets/`            ← Unity project root (everything outside `!_Game/` is third-party packages)
+│   └── `!_Game/`        ← first-party content authored in-studio
+│       ├── ProjectScope.prefab   ← Reflex ProjectScope (ProjectInstaller lives here)
+│       ├── Tasks.md              ← first-party task memos
+│       ├── `Editor/`             ← editor-only C# (assembly `Editor`, ns `BarkingBird.Editor`): custom inspectors, menu tools, asset/scene utilities
+│       │   ├── `Formulas/`       ← PropertyDrawer + resolver for `[Formula]` string fields
+│       │   └── `SceneWorkflow/`  ← editor tooling for the scene-chain workflow (collection runner, toolbox window, handoff)
+│       └── `Runtime/`            ← all shipped runtime C# (assembly `Runtime`)
+│           ├── `Gameplay/`       ← scene/gameplay-bound code — ns `BarkingBird.Runtime.Gameplay.*`
+│           │   ├── Data/         ← non-code gameplay assets: input action maps, post-processing profiles
+│           │   ├── Resources/    ← runtime-loaded assets (always via `AssetService.R`): audio, cursors, materials, models, prefabs, shaders, textures
+│           │   │   └── Settings/ ← ScriptableObject config/profile assets: ConfigHub `*Config`, UnitProfiles, HitFeedback, SceneCollections, SceneRunConfigurations
+│           │   ├── Scenes/       ← Unity scenes (`0.Bootstrap`→`4.City`) + their ECS subscenes
+│           │   └── !_Scripts/    ← all gameplay C#
+│           │       ├── Components/   ← ECS data: `IComponentData`/buffer structs + their `*Authoring`+`Baker` (root files = global namespace)
+│           │       │   └── AI/       ← AI-pipeline components & authoring (`...Gameplay.AI`)
+│           │       ├── Systems/      ← ECS behaviour: `ISystem`/`SystemBase` (root files = global namespace)
+│           │       │   └── AI/       ← AI pipeline: brain → steering → targeting → mover (`...Gameplay.AI`)
+│           │       └── _MonoWorld/   ← non-ECS gameplay MonoBehaviours (each subfolder = one `Gameplay.*` namespace)
+│           │           ├── Camera/        ← battle camera: drag, border constraints, ECS frustum-sync bridge
+│           │           ├── Cursor/        ← cursor world-projection, throw-velocity tracking, visual representation
+│           │           ├── DaylightCycle/ ← day/night cycle driver + ECS bridge
+│           │           ├── Input/         ← player input: raycast grab, grab/throw (`GrabAndThrow/`), release routing
+│           │           ├── Scenes/        ← per-scene `*Flow` (init) + `*Installer` (DI wiring)
+│           │           └── Settings/      ← gameplay settings + `StateOverride` subclasses (`StateOverrides/`)
+│           └── `Infrastructure/`  ← framework services, subdomain-agnostic — ns `BarkingBird.Runtime.Infrastructure.*`
+│               ├── (root files)   ← cross-cutting services tied to no subdomain: `InputManager`, `ReflexExtensions`, `StateOverride` (base), `StringExtensions`
+│               ├── Commands/      ← `CommandDispatcher` + `ICommand` — imperative 1-to-1 requests
+│               ├── EventBus/      ← static `EventBus` + `IEvent` — 1-to-many notifications (root namespace)
+│               ├── Formulas/      ← `[Formula]` string parsing/evaluation (`FormulaParser`/`FormulaEvaluator`)
+│               ├── GameLoop/      ← `GameLoopManager` + `IGameListener` interfaces
+│               ├── Pooling/       ← `UiPool`/`UiPoolItem` — data-keyed UI list rows
+│               ├── Save/          ← persistence seam: `ISaveSystem`, `DummySaveSystem`, `ActiveSlot`
+│               ├── SceneWorkflow/ ← runtime scene-chain runner + `RunConfiguration`/`SceneChain` SOs
+│               ├── Settings/      ← `ConfigHub`, `BlobContainer`, `RuntimeConstants`
+│               └── Utilities/     ← shared statics: `Log`, `AssetService`, `MathHelper`, `CoreHelper`, `PhysicsUtility`
 ```
+**Keep this tree honest:** if you add a package/tech or a new top-level area not reflected above, ask whether to record it here.
 
-## Learnings Routing (read BEFORE coding, not after getting stuck)
-`Claude/learnings/` holds verified project knowledge from past sessions — **how-it-works, gotchas, and system maps** (one of the three knowledge sinks; glossary terms live in `CONTEXT.md`, decisions in `Claude/docs/adr/` — see Agent skills › Domain docs). **Do not re-derive from source what is already written there.** Before non-trivial work, load the matching file:
+## Knowledge Routing (read BEFORE coding, not after getting stuck)
+Project knowledge lives in **three sinks** + the standards skill — load the right one before non-trivial work; **don't re-derive what's already written.** (What each sink *is* and who writes it: Agent skills › Domain docs.)
 
 | Task touches | Load |
 |---|---|
+| Meaning/naming of a domain term (Faction, Structure, Base, Pearl…) | `CONTEXT.md` (glossary, repo root) |
+| Why a past architectural decision was made / a real trade-off | `Claude/docs/adr/` (scan the index; `0001` = knowledge architecture) |
+| Coding rules / standards (always-never, hygiene, architecture patterns) | `unity-coding-standards` skill (auto-loads when writing/reviewing C#) |
 | Anything (orientation) | `learnings/README.md` (index) + `learnings/project-overview.md` |
 | ECS systems/components/pipeline | `learnings/ecs-architecture.md`, `learnings/ecs-patterns.md` |
 | Damage, death, collisions, hit feedback, throwing | `learnings/ecs-combat-and-collisions.md` |
@@ -74,7 +80,7 @@ Bust and Build/
 | Writing/running tests, TDD, test asmdefs | `learnings/testing-methodology.md` |
 | Merging Unity files, `.unity`/`.prefab` conflicts | `learnings/merge-conflicts.md` |
 
-After completing work that produced non-obvious discoveries, offer to run `/knowledge-save`.
+After completing work that produced non-obvious discoveries, offer to run `/knowledge-save`. When you add/rename/remove a file in `Claude/learnings/`, update this table and `learnings/README.md` so the index doesn't drift.
 
 ## Namespace Conventions
 - Two assemblies: `Runtime` (everything under `Assets/!_Game/Runtime/`) and `Editor` (`Assets/!_Game/Editor/`).

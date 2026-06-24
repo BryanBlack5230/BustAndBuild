@@ -22,6 +22,21 @@ The single most load-bearing decision. Each sink has a distinct shape and owner:
 - **`Claude/learnings/`** — how-it-works + gotchas + system maps. Written by `knowledge-save`.
   Unchanged.
 
+These three are **doc-sinks**. Imperative coding rules ("always/never X") are **not** a fourth
+doc-sink — they consolidate into the **`unity-coding-standards` skill**, which auto-loads when
+writing/reviewing C# (the right delivery moment) and already holds most of them. Learnings keep the
+*rationale* and point back; the skill carries only enough "why" to make each rule self-actuating.
+**Deliberately rejected (2026-06-24):** a `Claude/rules/` folder and a `Claude/docs/guidelines.md` —
+the granularity split doesn't earn its context/cognitive load when the rules are small and mostly
+already in the skill (single source of truth *without* a new surface). `feedback_*` agent-memories
+that merely restate a skill rule are deleted (the repo now records them); a memory that is really a
+how-it-works gotcha (e.g. boundary-checks-use-edges) migrates to `learnings/`, not the skill.
+The skill is **project-native, not portable** (it encodes Reflex/Log-tag/EventBus/AssetService specifics),
+so it keeps concrete links co-located with each rule — **but only to the stable sinks** (`learnings/` via
+its README index, immutable ADR numbers, `CONTEXT.md`); it must **never link transient/pending docs**
+(the deleted `ConfigTask.md`/`CurrencyTask.md` were exactly that staleness). Task-area routing stays
+CLAUDE.md's job; rule→rationale pointers stay the skill's.
+
 Stray "agreed-design" notes currently lodged in `learnings/` (e.g. distance-calc, design
 heuristics) migrate to ADRs lazily, as they're next touched.
 
