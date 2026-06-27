@@ -2,9 +2,12 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Physics;
 using Unity.Transforms;
+using UnityEngine;
 
 using BarkingBird.Runtime.Infrastructure.GameLoop;
+using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.AI
 {
@@ -13,20 +16,35 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public partial struct TargetSearchSystem : ISystem
     {
         private EntityQuery _coordinatorQuery;
-        private EntityQuery _wallQuery;
         private EntityQuery _beaconQuery;
+        private CollisionFilter _targetFilter;
 
-        [BurstCompile]
+        // Not [BurstCompile] — LayerMask.NameToLayer is a managed call.
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<BattleCoordinator>();
-        
+            state.RequireForUpdate<PhysicsWorldSingleton>();
+
             _coordinatorQuery = SystemAPI.QueryBuilder()
                 .WithAll<BattleCoordinator, EnemyUnitReference, AllyUnitReference>()
                 .Build();
 
-            _wallQuery = SystemAPI.QueryBuilder().WithAll<WallSection, LocalToWorld>().Build();
             _beaconQuery = SystemAPI.QueryBuilder().WithAll<BeaconTag, LocalToWorld>().Build();
+
+            // Targeting broadphase filter. Units actually live on the GRABBABLE layer (8) — they're grabbable/
+            // throwable, NOT on the "Unit" layer (which no unit prefab uses) — plus walls on Obstacle (9). The
+            // Unit bit is kept defensively in case a future unit is placed there. The beacon sits on Default and
+            // is excluded (scored separately, no range gate, D6). Non-unit/non-wall hits on these layers are
+            // rejected by UnitLookup/WallLookup in the collector, so the extra membership is safe.
+            var unitBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Unit);
+            var grabbableBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Grabbable);
+            var obstacleBit = 1u << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Obstacle);
+            _targetFilter = new CollisionFilter
+            {
+                BelongsTo = ~0u,
+                CollidesWith = unitBit | grabbableBit | obstacleBit,
+                GroupIndex = 0,
+            };
         }
 
         [BurstCompile]
@@ -47,9 +65,8 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
             var enemies = state.EntityManager.GetBuffer<EnemyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
             var allies = state.EntityManager.GetBuffer<AllyUnitReference>(coordEntity, true).Reinterpret<Entity>().AsNativeArray();
-        
-            var wallEntities = _wallQuery.ToEntityArray(Allocator.TempJob);
-            var wallTransforms = _wallQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
+
+            var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
             var beaconEnt = Entity.Null;
             if (_beaconQuery.CalculateEntityCount() > 0) beaconEnt = _beaconQuery.GetSingletonEntity();
@@ -66,22 +83,20 @@ namespace BarkingBird.Runtime.Gameplay.AI
             var job = new TargetScorerJob
             {
                 ProfilesBlob = profilesConfig.Blob,
-            
-                GlobalEnemies = enemies,
-                GlobalAllies = allies,
-            
-                WallEntities = wallEntities,
-                WallTransforms = wallTransforms,
-            
+
+                PhysicsWorld = physicsWorld.PhysicsWorld,
+                TargetFilter = _targetFilter,
+
                 BeaconEntity = beaconEnt,
-            
+
                 UnitLookup = SystemAPI.GetComponentLookup<Unit>(true),
+                WallLookup = SystemAPI.GetComponentLookup<WallSection>(true),
                 EnemyTypeLookup = SystemAPI.GetComponentLookup<EnemyUnitType>(true),
                 AllyTypeLookup = SystemAPI.GetComponentLookup<AllyUnitType>(true),
-                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
+                BeaconBoundsLookup = SystemAPI.GetComponentLookup<TargetBounds>(true),
                 TargetSnapshot = targetSnapshot,
-            
+
                 ElapsedTime = elapsedTime,
                 IsBattleActive = coord.IsBattleActive,
                 ForceUpdate = coord.ForceGlobalReevaluation,
@@ -96,9 +111,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
             }
 
             state.Dependency = job.ScheduleParallel(state.Dependency);
-        
-            state.Dependency = wallEntities.Dispose(state.Dependency);
-            state.Dependency = wallTransforms.Dispose(state.Dependency);
+
             state.Dependency = targetSnapshot.Dispose(state.Dependency);
         }
 

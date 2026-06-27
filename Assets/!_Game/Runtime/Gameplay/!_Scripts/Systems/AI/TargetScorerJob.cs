@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 
 using BarkingBird.Runtime.Infrastructure.Settings;
@@ -14,21 +15,24 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public partial struct TargetScorerJob : IJobEntity
     {
         [ReadOnly] public BlobAssetReference<TargetProfilesBlob> ProfilesBlob;
-        [ReadOnly] public NativeArray<Entity> GlobalEnemies;
-        [ReadOnly] public NativeArray<Entity> GlobalAllies;
 
-        [ReadOnly] public NativeArray<Entity> WallEntities;
-        [ReadOnly] public NativeArray<LocalToWorld> WallTransforms;
+        // Broadphase discovery: one point-distance query per unit returns every unit/wall surface within
+        // DetectionRadius, with the exact surface distance — so a unit pressed against a big wall scores as
+        // adjacent instead of center-far. The beacon is NOT in this query (it's on the Default layer); it's
+        // scored separately below with no range gate (D6).
+        [ReadOnly] public PhysicsWorld PhysicsWorld;
+        public CollisionFilter TargetFilter;
 
         [ReadOnly] public Entity BeaconEntity;
 
         [ReadOnly] public ComponentLookup<Unit> UnitLookup;
+        [ReadOnly] public ComponentLookup<WallSection> WallLookup;
         [ReadOnly] public ComponentLookup<EnemyUnitType> EnemyTypeLookup;
         [ReadOnly] public ComponentLookup<AllyUnitType> AllyTypeLookup;
 
         [ReadOnly] public NativeParallelHashMap<Entity, Entity> TargetSnapshot;
-        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
+        [ReadOnly] public ComponentLookup<TargetBounds> BeaconBoundsLookup;
 
         [ReadOnly] public double ElapsedTime;
         [ReadOnly] public bool IsBattleActive;
@@ -49,7 +53,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
             var shouldSearch = ForceUpdate || (IsBattleActive && !cooldownEnabled.ValueRO);
             if (!shouldSearch) return;
-        
+
             ref var globalProfiles = ref ProfilesBlob.Value;
             ref var settings = ref globalProfiles.EnemyProfiles[0];
 
@@ -78,79 +82,65 @@ namespace BarkingBird.Runtime.Gameplay.AI
                     break;
                 }
             }
-        
+
             cooldownTimestamp.Value = ElapsedTime + settings.CheckInterval;
             cooldownEnabled.ValueRW = true;
 
-            var bestScore = float.MinValue;
-            TargetCandidate bestCandidate = default;
-            var myPos = transform.Position;
             var myWorldPos = worldTransform.Position;
             var myForward = transform.Forward();
 
-            var hostiles = faction == Faction.Ally ? GlobalEnemies : GlobalAllies;
-            var friends = faction == Faction.Ally ? GlobalAllies : GlobalEnemies;
-
-            if (settings.WeightEnemy > 0) 
+            // Units + walls via the broadphase query; the collector folds each in-range surface into a
+            // best-score pick. Surface distance comes straight from the narrowphase (DistanceHit.Distance),
+            // so the old center-distance gate/weighting bug dissolves with no AABB approximation here.
+            var collector = new TargetScoringCollector(settings.DetectionRadius)
             {
-                ProcessUnitList(entity, hostiles, myPos, myForward, ref settings, settings.WeightEnemy, isHostileList: true, ref bestScore, ref bestCandidate);
-            }
+                Self = entity,
+                MyFaction = faction,
+                MyPos = myWorldPos,
+                MyForward = myForward,
+                WeightEnemy = settings.WeightEnemy,
+                WeightAlly = settings.WeightAlly,
+                WeightWall = settings.WeightWall,
+                DistanceWeight = settings.DistanceWeight,
+                LineOfSightBonus = settings.LineOfSightBonus,
+                AggroBonus = settings.AggroBonus,
+                ViewAngleCos = settings.ViewAngleCos,
+                DetectionRadiusSq = settings.DetectionRadiusSq,
+                CastleIsBreached = CastleIsBreached,
+                UnitLookup = UnitLookup,
+                WallLookup = WallLookup,
+                TargetSnapshot = TargetSnapshot,
+            };
 
-            if (settings.WeightAlly > 0)
-            {
-                ProcessUnitList(entity, friends, myPos, myForward, ref settings, settings.WeightAlly, isHostileList: false, ref bestScore, ref bestCandidate);
-            }
+            PhysicsWorld.CollisionWorld.CalculateDistance(
+                new PointDistanceInput { Position = myWorldPos, MaxDistance = settings.DetectionRadius, Filter = TargetFilter },
+                ref collector);
 
-            if (settings.WeightWall > 0 && WallEntities.Length > 0 && !CastleIsBreached)
-            {
-                for (var i = 0; i < WallEntities.Length; i++)
-                {
-                    var wallWorldPos = WallTransforms[i].Position;
-                    var distSq = math.distancesq(myWorldPos, wallWorldPos);
-                    if (distSq > settings.DetectionRadiusSq) continue;
-
-                    var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
-                    var score = settings.WeightWall + distanceWeight;
-                
-                    var dirToTarget = math.normalize(wallWorldPos - myWorldPos);
-            
-                    if (math.dot(myForward, dirToTarget) >= settings.ViewAngleCos)
-                    {
-                        score += settings.LineOfSightBonus;
-                    }
-                
-                    if (score < bestScore) continue;
-                
-                    bestScore = score;
-                    bestCandidate = new TargetCandidate 
-                    { 
-                        Entity = WallEntities[i], 
-                        Type = TargetType.Wall, 
-                        DistanceSq = distSq,
-                        Score = score
-                    };
-                }
-            }
-        
+            // Beacon: unconditional candidate, NO range gate (D6). Surface distance via its cached world AABB
+            // (falls back to center for the one tick before StructureBoundsSystem populates TargetBounds).
             if (settings.WeightBeacon > 0 && BeaconEntity != Entity.Null)
             {
-                var beaconWorldPos = LocalToWorldLookup[BeaconEntity].Position;
-                var distSq = math.distancesq(myWorldPos, beaconWorldPos);
-                var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
-                var score = settings.WeightBeacon + distanceWeight;
-            
-                if (score > bestScore)
+                var beaconPos = BeaconBoundsLookup.HasComponent(BeaconEntity)
+                    ? BeaconBoundsLookup[BeaconEntity].World.ClosestPoint(myWorldPos)
+                    : LocalToWorldLookup[BeaconEntity].Position;
+                var distSq = math.distancesq(myWorldPos, beaconPos);
+                var score = settings.WeightBeacon + (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
+
+                if (score > collector.BestScore)
                 {
-                    bestCandidate = new TargetCandidate { Entity = BeaconEntity, Type = TargetType.Beacon, DistanceSq = distSq, Score = score };
+                    collector.BestScore = score;
+                    collector.BestEntity = BeaconEntity;
+                    collector.BestType = TargetType.Beacon;
+                    collector.BestDistSq = distSq;
                 }
             }
-        
-            if (bestCandidate.Type != TargetType.None)
+
+            if (collector.BestType != TargetType.None)
             {
-                target.TargetEntity = bestCandidate.Entity;
-                target.Type = bestCandidate.Type;
-                target.CurrentScore = bestCandidate.Score;
-                target.DistanceToTarget = bestCandidate.DistanceSq;
+                target.TargetEntity = collector.BestEntity;
+                target.Type = collector.BestType;
+                target.CurrentScore = collector.BestScore;
+                target.DistanceToTarget = collector.BestDistSq;
             }
             else
             {
@@ -158,52 +148,82 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 target.Type = TargetType.None;
             }
         }
+    }
 
-        private void ProcessUnitList(Entity me, NativeArray<Entity> list, float3 myPos, float3 myForward, ref TargetProfileBlob settings, float baseWeight, bool isHostileList, ref float bestScore, ref TargetCandidate bestCandidate)
+    // Folds every in-range unit/wall surface from a PointDistanceInput query into a single best-score pick.
+    // MaxFraction is fixed at DetectionRadius (never shrinks) so all in-range hits are delivered; the query's
+    // MaxDistance does the culling. hit.Distance is the absolute surface distance (Physics 1.4.2: for distance
+    // queries DistanceHit.Distance == the metric distance, not a normalized raycast fraction).
+    struct TargetScoringCollector : ICollector<DistanceHit>
+    {
+        public bool  EarlyOutOnFirstHit => false;
+        public float MaxFraction { get; }
+        public int   NumHits { get; private set; }
+
+        public Entity  Self;
+        public Faction MyFaction;
+        public float3  MyPos, MyForward;
+
+        public float WeightEnemy, WeightAlly, WeightWall;
+        public float DistanceWeight, LineOfSightBonus, AggroBonus, ViewAngleCos, DetectionRadiusSq;
+        public bool  CastleIsBreached;
+
+        public ComponentLookup<Unit>        UnitLookup;
+        public ComponentLookup<WallSection> WallLookup;
+        public NativeParallelHashMap<Entity, Entity> TargetSnapshot;
+
+        public float      BestScore;
+        public Entity     BestEntity;
+        public TargetType BestType;
+        public float      BestDistSq;
+
+        public TargetScoringCollector(float maxDistance) : this()
         {
-            for (var i = 0; i < list.Length; i++)
-            {
-                var other = list[i];
-                if (!TransformLookup.HasComponent(other)) continue;
-
-                var otherPos = TransformLookup[other].Position;
-                var distSq = math.distancesq(myPos, otherPos);
-                if (distSq > settings.DetectionRadiusSq) continue;
-            
-                var distanceWeight = (1 - distSq / settings.DetectionRadiusSq) * settings.DistanceWeight;
-                var score = baseWeight + distanceWeight;
-
-                if (isHostileList && settings.AggroBonus > 0 && TargetSnapshot.TryGetValue(other, out var otherTarget) && otherTarget == me)
-                {
-                    score += settings.AggroBonus;
-                }
-            
-                var dirToTarget = math.normalize(otherPos - myPos);
-            
-                if (math.dot(myForward, dirToTarget) >= settings.ViewAngleCos)
-                {
-                    score += settings.LineOfSightBonus;
-                }
-
-                if (!(score > bestScore)) continue;
-            
-                bestScore = score;
-                bestCandidate = new TargetCandidate
-                {
-                    Entity = other,
-                    Type = TargetType.Unit,
-                    DistanceSq = distSq,
-                    Score = score
-                };
-            }
+            MaxFraction = maxDistance;
+            BestScore = float.MinValue;
         }
-    
-        struct TargetCandidate
+
+        public bool AddHit(DistanceHit hit)
         {
-            public Entity Entity;
-            public TargetType Type;
-            public float DistanceSq;
-            public float Score;
+            var e = hit.Entity;
+            if (e == Self) return false;                       // the query returns our own collider at dist 0
+
+            float baseWeight;
+            TargetType type;
+            var isHostile = false;
+            if (WallLookup.HasComponent(e))
+            {
+                if (CastleIsBreached || WeightWall <= 0f) return false;
+                baseWeight = WeightWall;
+                type = TargetType.Wall;
+            }
+            else if (UnitLookup.HasComponent(e))
+            {
+                isHostile  = UnitLookup[e].faction != MyFaction;
+                baseWeight = isHostile ? WeightEnemy : WeightAlly;
+                if (baseWeight <= 0f) return false;
+                type = TargetType.Unit;
+            }
+            else return false;                                 // wall-child/arena/debris colliders — not scored
+
+            var distSq = hit.Distance * hit.Distance;          // surface distance, straight from the query
+            var score  = baseWeight + (1f - distSq / DetectionRadiusSq) * DistanceWeight;
+
+            var dir = math.normalizesafe(hit.Position - MyPos);
+            if (math.dot(MyForward, dir) >= ViewAngleCos) score += LineOfSightBonus;
+
+            if (isHostile && AggroBonus > 0f &&
+                TargetSnapshot.TryGetValue(e, out var theirTarget) && theirTarget == Self) score += AggroBonus;
+
+            NumHits++;
+            if (score > BestScore)
+            {
+                BestScore = score;
+                BestEntity = e;
+                BestType = type;
+                BestDistSq = distSq;
+            }
+            return true;
         }
     }
 }

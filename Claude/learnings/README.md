@@ -16,7 +16,7 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha
 
 ### Testing
-- [Testing Methodology](testing-methodology.md) — test-layer assignment, ECS systems as the unit-test sweet spot (World/`Update`/assert pattern + enableable & domain-reload arrange traps), TDD red-green loop, technique selection, PRNG strategies, naming; current state: `Tests` + `Editor.Tests` asmdefs seeded with one tracer
+- [Testing Methodology](testing-methodology.md) — test-layer assignment, ECS systems as the unit-test sweet spot (World/`Update`/assert pattern + enableable & domain-reload arrange traps), TDD red-green loop, technique selection, PRNG strategies, naming; **ECS test harness recipes** (LookupSource for `ComponentLookup`, fabricating `DistanceHit`s to drive `ICollector` folds, manual `CollisionWorld` build for filter tests, deep-gate one-tick arrange, `InternalsVisibleTo`); now holds the 26-test broadphase-refactor suite
 
 ### ECS / Battle
 - [ECS Architecture](ecs-architecture.md) — the map: system groups, battle pipeline order, enableable components, `BattleCoordinator`, spawning, walls, namespaces

@@ -133,6 +133,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
 
         private static TargetProfileBlob ConvertToStruct(in TargetingProfile source, in CombatProfile combat) => new TargetProfileBlob
         {
+            DetectionRadius = source.DetectionRadius,
             DetectionRadiusSq = source.DetectionRadius * source.DetectionRadius,
             ViewAngleCos = math.cos(math.radians(source.ViewAngleDegrees * 0.5f)),
             CheckInterval = source.CheckInterval,
@@ -157,6 +158,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
     public struct TargetProfileBlob
     {
         // Derived forms, computed only in BlobContainer.ConvertToStruct.
+        public float DetectionRadius;     // as authored, in metres (broadphase query MaxDistance)
         public float DetectionRadiusSq;   // DetectionRadius squared
         public float ViewAngleCos;        // cos(radians(ViewAngleDegrees * 0.5))
         public float CheckInterval;

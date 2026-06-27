@@ -25,6 +25,7 @@ public class WallSectionAuthoring : MonoBehaviour
             var health = authoring.healthOverride.Resolve(authoring.config != null ? authoring.config.Health : DefaultHealth);
 
             AddComponent(entity, new WallSection { CastleEntity = castle, });
+            AddComponent(entity, new Structure());
             AddComponent(entity, new Health{ Max = health, Value = health });
             AddComponent(entity, new IsDead());
             SetComponentEnabled<IsDead>(entity, false);

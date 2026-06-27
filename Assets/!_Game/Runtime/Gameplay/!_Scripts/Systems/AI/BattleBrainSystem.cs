@@ -36,6 +36,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 EvadeTriggerRangeMultiplier = config.EvadeTriggerRangeMultiplier,
                 EvadeRetreatDistance = config.EvadeRetreatDistance,
                 LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
+                BoundsLookup = SystemAPI.GetComponentLookup<TargetBounds>(true),
                 UnableToActLookup = SystemAPI.GetComponentLookup<UnableToAct>(true),
                 CooldownLookup = SystemAPI.GetComponentLookup<AttackCooldownExpirationTimestamp>(true),
                 IsInvulnerableLookup = SystemAPI.GetComponentLookup<IsInvulnerable>(true),
@@ -49,6 +50,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
     public partial struct BrainDecisionJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalToWorld> LocalToWorldLookup;
+        [ReadOnly] public ComponentLookup<TargetBounds> BoundsLookup;
         [ReadOnly] public ComponentLookup<UnableToAct> UnableToActLookup;
         [ReadOnly] public ComponentLookup<AttackCooldownExpirationTimestamp> CooldownLookup;
         [ReadOnly] public ComponentLookup<IsInvulnerable> IsInvulnerableLookup;
@@ -113,9 +115,14 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 return;
             }
             
-            var targetWorldPos = LocalToWorldLookup[target.TargetEntity].Position;
-            
-            var distToTargetSq = math.distancesq(myWorldPos, targetWorldPos);
+            // Structures (walls/beacon) carry a cached world AABB; measure to their nearest surface point so
+            // a unit pressed against a big collider counts as "in range". Units have no TargetBounds → center,
+            // unchanged. Discriminate by HasComponent<TargetBounds>, not Target.Type (new structures need no edit).
+            var effectiveTargetPos = LocalToWorldLookup[target.TargetEntity].Position;
+            if (BoundsLookup.HasComponent(target.TargetEntity))
+                effectiveTargetPos = BoundsLookup[target.TargetEntity].World.ClosestPoint(myWorldPos);
+
+            var distToTargetSq = math.distancesq(myWorldPos, effectiveTargetPos);
             var attackRangeSq = attackData.AttackRange * attackData.AttackRange;
 
             action.Value = CooldownLookup.IsComponentEnabled(entity) ? ActionType.Evading : ActionType.Attacking;
@@ -132,7 +139,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 else
                 {
                     action.Value = ActionType.Moving;
-                    finalDestination.Value = targetWorldPos;
+                    finalDestination.Value = effectiveTargetPos;
                     brain.CanAttack = false;
                 }
             }
@@ -141,14 +148,14 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 if (distToTargetSq <= attackRangeSq * EvadeTriggerRangeMultiplier) //TODO this is a quick-fix, need a proper evasion system
                 {
                     action.Value = ActionType.Evading;
-                    var dirAway = math.normalize(myWorldPos - targetWorldPos);
+                    var dirAway = math.normalize(myWorldPos - effectiveTargetPos);
                     finalDestination.Value = myWorldPos + (dirAway * EvadeRetreatDistance);
                     brain.CanAttack = false;
                 }
                 else
                 {
                     action.Value = ActionType.Moving;
-                    finalDestination.Value = targetWorldPos;
+                    finalDestination.Value = effectiveTargetPos;
                     brain.CanAttack = false;
                 }
             }

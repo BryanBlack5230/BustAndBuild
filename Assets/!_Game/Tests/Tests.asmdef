@@ -7,8 +7,10 @@
         "Unity.Entities",
         "Unity.Entities.Hybrid",
         "Unity.Mathematics",
+        "Unity.Physics",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.Transforms"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
