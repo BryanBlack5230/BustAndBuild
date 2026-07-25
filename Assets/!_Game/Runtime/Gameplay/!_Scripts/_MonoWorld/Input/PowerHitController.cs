@@ -11,7 +11,7 @@ using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Input
 {
-    public class PowerHitController : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
+    public class PowerHitController : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameUpdateListener, IWorldInitializable, IDisposable
     {
         private readonly InputActions _inputActions;
         private readonly PowerHitConfigSO _powerHitSettings;
@@ -30,9 +30,9 @@ namespace BarkingBird.Runtime.Gameplay.Input
             _powerHitSettings = powerHitConfig;
         }
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _entityManager = em;
             _collisionFilter = CreateCollisionFilter();
         }
         

@@ -15,7 +15,7 @@ namespace BarkingBird.Runtime.Gameplay.Settings
     /// once) because <c>PhysicsStep</c> is authored in the battle subscene and only appears once that scene
     /// loads — a bootstrap-only bake would miss it.
     /// </summary>
-    public class ThrowDebugTracker : MonoBehaviour, IGameUpdateListener
+    public class ThrowDebugTracker : MonoBehaviour, IGameUpdateListener, IWorldInitializable
     {
         [Header("Read Only")]
         [SerializeField] private float _lastThrowRawPower;
@@ -35,19 +35,16 @@ namespace BarkingBird.Runtime.Gameplay.Settings
         [Inject]
         private void Construct(ThrowConfigSO config) => _config = config;
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            var world = World.DefaultGameObjectInjectionWorld;
-            if (world == null || !world.IsCreated) return;
-
-            _entityManager = world.EntityManager;
+            _entityManager = em;
             _physicsStepQuery = _entityManager.CreateEntityQuery(ComponentType.ReadWrite<PhysicsStep>());
             _initialized = true;
         }
 
         public void OnThrow(Entity entity, float rawPower)
         {
-            if (!_initialized) Initialize();
+            if (!_initialized) return;
 
             _trackedEntity = entity;
             _lastThrowRawPower = rawPower;
@@ -60,9 +57,7 @@ namespace BarkingBird.Runtime.Gameplay.Settings
 
         public void OnUpdate(float deltaTime)
         {
-            var world = World.DefaultGameObjectInjectionWorld;
-            if (world == null || !world.IsCreated) return;
-            if (!_initialized) Initialize();
+            if (!_initialized) return;
 
             SyncGravity();
 

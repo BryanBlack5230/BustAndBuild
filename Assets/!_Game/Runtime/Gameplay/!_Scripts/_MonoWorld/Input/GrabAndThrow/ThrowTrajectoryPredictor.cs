@@ -16,17 +16,17 @@ using Object = UnityEngine.Object;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class ThrowTrajectoryPredictor : IGameUpdateListener, IDisposable
+    public sealed class ThrowTrajectoryPredictor : IGameUpdateListener, IWorldInitializable, IDisposable
     {
         private const float DefaultBounceElasticity = 0.8f;
 
         private readonly CursorMovementCalculations _cursorMovements;
         private readonly ThrowConfigSO _throwConfig;
         private readonly TrajectoryPredictorSettings _settings;
-        private readonly EntityManager _entityManager;
-        private readonly EntityQuery _cameraFrustumQuery;
-        private readonly EntityQuery _battleCenterQuery;
-        private readonly EntityQuery _physicsWorldQuery;
+        private EntityManager _entityManager;
+        private EntityQuery _cameraFrustumQuery;
+        private EntityQuery _battleCenterQuery;
+        private EntityQuery _physicsWorldQuery;
 
         private readonly LineRenderer _trajectoryLine;
         private readonly LineRenderer _impactCircle;
@@ -51,11 +51,6 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             _throwConfig = throwConfig;
             _settings = settings;
 
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            _cameraFrustumQuery = _entityManager.CreateEntityQuery(typeof(CameraFrustumData));
-            _battleCenterQuery = _entityManager.CreateEntityQuery(typeof(BattleScreenCenter));
-            _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
-
             _linePoints = new Vector3[settings.SimSteps + 1];
             _circlePoints = new Vector3[settings.CircleSegments];
 
@@ -66,6 +61,14 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             _impactCircle = Object.Instantiate(settings.ImpactCirclePrefab);
             _impactCircle.enabled = false;
             _impactMat = _impactCircle.material;
+        }
+
+        public void Initialize(EntityManager em)
+        {
+            _entityManager = em;
+            _cameraFrustumQuery = _entityManager.CreateEntityQuery(typeof(CameraFrustumData));
+            _battleCenterQuery = _entityManager.CreateEntityQuery(typeof(BattleScreenCenter));
+            _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
         }
 
         public void Dispose()

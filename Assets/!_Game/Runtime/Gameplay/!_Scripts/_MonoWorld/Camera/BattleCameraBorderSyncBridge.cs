@@ -7,7 +7,7 @@ using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Camera
 {
-    public class BattleCameraBorderSyncBridge : IGameUpdateListener
+    public class BattleCameraBorderSyncBridge : IGameUpdateListener, IWorldInitializable
     {
         private readonly CinemachineVirtualCamera _camera;
         
@@ -19,9 +19,9 @@ namespace BarkingBird.Runtime.Gameplay.Camera
             _camera = battleSceneData.sceneCamera;
         }
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _entityManager = em;
             _queryEntity = _entityManager.CreateEntity(typeof(CameraFrustumData));
         }
 

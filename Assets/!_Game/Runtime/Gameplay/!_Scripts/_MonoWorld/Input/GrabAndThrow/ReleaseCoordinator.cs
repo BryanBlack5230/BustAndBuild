@@ -8,23 +8,25 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 
+using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class ReleaseCoordinator : IDisposable
+    public sealed class ReleaseCoordinator : IDisposable, IWorldInitializable
     {
         private readonly OverlapResolver _overlapResolver;
         private readonly TunnelTeleporter _tunnelTeleporter;
-        private readonly EntityManager _entityManager;
+        private EntityManager _entityManager;
         private readonly Dictionary<Entity, CancellationTokenSource> _inflight = new();
 
         public ReleaseCoordinator(OverlapResolver overlapResolver, TunnelTeleporter tunnelTeleporter)
         {
             _overlapResolver = overlapResolver;
             _tunnelTeleporter = tunnelTeleporter;
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         }
+
+        public void Initialize(EntityManager em) => _entityManager = em;
 
         public void Dispose()
         {

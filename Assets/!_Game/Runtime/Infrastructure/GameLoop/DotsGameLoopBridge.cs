@@ -7,16 +7,16 @@ namespace BarkingBird.Runtime.Infrastructure.GameLoop
     [UpdateAfter(typeof(BeginSimulationEntityCommandBufferSystem))]
     public partial class GameLoopSystemGroup : ComponentSystemGroup { }
     
-    public class DotsGameLoopBridge : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener, IDisposable
+    public class DotsGameLoopBridge : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener, IWorldInitializable, IDisposable
     {
         private World _world;
         private GameLoopSystemGroup _gameLoopGroup;
-    
+
         private bool _isInitialized;
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            _world = World.DefaultGameObjectInjectionWorld;
+            _world = em.World;
             if (_world == null || !_world.IsCreated) return;
         
             _gameLoopGroup = _world.GetExistingSystemManaged<GameLoopSystemGroup>();

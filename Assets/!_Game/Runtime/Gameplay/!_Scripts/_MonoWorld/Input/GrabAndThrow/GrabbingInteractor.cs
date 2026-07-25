@@ -8,7 +8,7 @@ using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class GrabbingInteractor : IGameUpdateListener
+    public sealed class GrabbingInteractor : IGameUpdateListener, IWorldInitializable
     {
         private readonly CursorMovementCalculations _cursorMovementCalculations;
         private readonly ThrowConfigSO _throwConfig;
@@ -17,7 +17,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         private readonly ReleaseCoordinator _releaseCoordinator;
         private readonly ThrowTrajectoryPredictor _trajectoryPredictor;
 
-        private readonly EntityManager _entityManager;
+        private EntityManager _entityManager;
 
         private Entity _grabbedEntity;
         private PhysicsMass _originalMass;
@@ -30,8 +30,9 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             _grabbedEntityMover = grabbedEntityMover;
             _releaseCoordinator = releaseCoordinator;
             _trajectoryPredictor = trajectoryPredictor;
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         }
+
+        public void Initialize(EntityManager em) => _entityManager = em;
 
         public void Grab(Entity grabbedEntity)
         {
@@ -40,7 +41,11 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
             _entityManager.SetComponentEnabled<Grabbed>(_grabbedEntity, true);
             _entityManager.SetComponentEnabled<InAir>(_grabbedEntity, false);
             _grabbedEntityMover.StartMoving(_grabbedEntity);
-            _trajectoryPredictor.StartTracking(_grabbedEntity, _originalMass);
+
+            // The Beacon Core is placed (settle-check), not thrown — suppress the throw-arc preview while
+            // carrying it. StopTracking in Release is harmless when tracking never started.
+            if (!_entityManager.HasComponent<BeaconCore>(_grabbedEntity))
+                _trajectoryPredictor.StartTracking(_grabbedEntity, _originalMass);
         }
 
         public void Release()

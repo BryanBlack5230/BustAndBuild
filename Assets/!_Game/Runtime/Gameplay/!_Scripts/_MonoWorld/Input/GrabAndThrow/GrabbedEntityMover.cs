@@ -4,15 +4,16 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
+using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class GrabbedEntityMover : IDisposable
+    public sealed class GrabbedEntityMover : IDisposable, IWorldInitializable
     {
         private readonly MousePositionProvider _mousePositionProvider;
-        private readonly EntityManager _entityManager;
-        private readonly EntityQuery _physicsWorldQuery;
+        private EntityManager _entityManager;
+        private EntityQuery _physicsWorldQuery;
 
         private Entity _entity;
         private float _entityHalfHeight;
@@ -21,7 +22,11 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
         public GrabbedEntityMover(MousePositionProvider mousePositionProvider)
         {
             _mousePositionProvider = mousePositionProvider;
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        }
+
+        public void Initialize(EntityManager em)
+        {
+            _entityManager = em;
             _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
         }
 

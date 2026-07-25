@@ -3,10 +3,9 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Reflex.Attributes;
+using Unity.Entities;
 using UnityEngine;
 
-using BarkingBird.Runtime.Gameplay.Camera;
-using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.SceneWorkflow;
 using BarkingBird.Runtime.Infrastructure.Utilities;
@@ -17,33 +16,30 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
     {
         private readonly UniTaskCompletionSource _initCompleted = new();
 
-        private InteractController _interactController = null!;
-        private PowerHitController _powerHitController = null!;
-        private BattleCameraMovement _battleCameraMovement = null!;
-        private BattleCameraBorderSyncBridge _battleCameraBorderSyncBridge = null!;
         private IEnumerable<IGameListener>? _listeners;
+        private IEnumerable<IWorldInitializable>? _worldInitializables;
         private GameLoopManager _gameLoopManager = null!;
 
         UniTask ISceneFlow.WaitForInit() => _initCompleted.Task;
 
         [Inject]
-        private void Construct(GameLoopManager gameLoopManager, InteractController interactController, PowerHitController powerHitController, BattleCameraMovement battleCameraMovement, IEnumerable<IGameListener> listeners, BattleCameraBorderSyncBridge battleCameraBorderSyncBridge)
+        private void Construct(GameLoopManager gameLoopManager, IEnumerable<IGameListener> listeners, IEnumerable<IWorldInitializable> worldInitializables)
         {
             _gameLoopManager = gameLoopManager;
-            _interactController = interactController;
-            _powerHitController = powerHitController;
-            _battleCameraMovement = battleCameraMovement;
-            _battleCameraBorderSyncBridge = battleCameraBorderSyncBridge;
             _listeners = listeners;
+            _worldInitializables = worldInitializables;
         }
 
         private void Start()
         {
             Log.Battle.D("BattlegroundFlow.Start()");
-            _interactController.Initialize();
-            _powerHitController.Initialize();
-            _battleCameraMovement.Initialize();
-            _battleCameraBorderSyncBridge.Initialize();
+
+            if (_worldInitializables != null)
+            {
+                var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+                foreach (var initializable in _worldInitializables)
+                    initializable.Initialize(entityManager);
+            }
 
             if (_listeners != null)
                 _gameLoopManager.AddListeners(_listeners);

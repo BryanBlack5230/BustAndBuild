@@ -2,6 +2,7 @@ using System;
 using Reflex.Core;
 using UnityEngine;
 
+using BarkingBird.Runtime.Gameplay.Beacon;
 using BarkingBird.Runtime.Gameplay.Camera;
 using BarkingBird.Runtime.Gameplay.Currency;
 using BarkingBird.Runtime.Gameplay.Daylight;
@@ -27,6 +28,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             builder.AddSingleton(typeof(ScrollController), typeof(ScrollController), typeof(IDisposable));
             builder.AddSingleton(typeof(WorldCameraHandler), typeof(WorldCameraHandler), typeof(IGameListener));
             builder.AddSingleton(typeof(Wallet), typeof(Wallet));
+            builder.AddSingleton(typeof(BeaconCoreState), typeof(BeaconCoreState));
             builder.AddSingleton(typeof(WorldSaveService), typeof(WorldSaveService), typeof(IDisposable)).NonLazy<WorldSaveService>();
         }
     }

@@ -6,6 +6,9 @@ using Reflex.Attributes;
 using Reflex.Core;
 using UnityEngine;
 
+using Unity.Entities;
+
+using BarkingBird.Runtime.Gameplay.Daylight;
 using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.SceneWorkflow;
@@ -19,25 +22,29 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
 
         private GameLoopManager _gameLoopManager = null!;
         private ScrollController _scrollController = null!;
+        private DaylightEcsBridge _daylightEcsBridge = null!;
         private IEnumerable<IGameListener>? _listeners;
         private Container _worldSceneContainer = null!;
 
         UniTask ISceneFlow.WaitForInit() => _initCompleted.Task;
 
         [Inject]
-        private void Construct(Container container, GameLoopManager gameLoopManager, ScrollController scrollController, IEnumerable<IGameListener> listeners)
+        private void Construct(Container container, GameLoopManager gameLoopManager, ScrollController scrollController, DaylightEcsBridge daylightEcsBridge, IEnumerable<IGameListener> listeners)
         {
             SceneScope.OnSceneContainerBuilding += OverrideParent;
             _worldSceneContainer = container;
             _gameLoopManager = gameLoopManager;
             _scrollController = scrollController;
+            _daylightEcsBridge = daylightEcsBridge;
             _listeners = listeners;
         }
 
         private void Start()
         {
             Log.World.D("WorldFlow.Start()");
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             _scrollController.Initialize();
+            _daylightEcsBridge.Initialize(entityManager);
 
             if (_listeners != null)
                 _gameLoopManager.AddListeners(_listeners);

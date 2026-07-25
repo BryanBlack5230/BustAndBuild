@@ -11,7 +11,7 @@ using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.Input
 {
-    public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IDisposable
+    public class InteractController : IGameStartListener, IGamePauseListener, IGameResumeListener, IWorldInitializable, IDisposable
     {
         // Near/far bounds of the interaction ray along the camera ray (meters from the camera).
         private const float RayStartDistance = 9f;
@@ -32,9 +32,9 @@ namespace BarkingBird.Runtime.Gameplay.Input
             _inputActions = inputManager.Actions;
         }
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _entityManager = em;
             _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
             _collisionFilter = CreateCollisionFilter();
         }

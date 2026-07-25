@@ -61,6 +61,10 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
             if (_configHub.PickupMagnetConfig == null)
                 throw new InvalidOperationException("ConfigHub.PickupMagnetConfig is not assigned in the Bootstrap scene.");
             builder.AddSingleton(_configHub.PickupMagnetConfig, typeof(PickupMagnetConfigSO));
+
+            if (_configHub.BeaconCoreConfig == null)
+                throw new InvalidOperationException("ConfigHub.BeaconCoreConfig is not assigned in the Bootstrap scene.");
+            builder.AddSingleton(_configHub.BeaconCoreConfig, typeof(BeaconCoreConfigSO));
         }
 
         private void InstallGameLoop(ContainerBuilder builder)

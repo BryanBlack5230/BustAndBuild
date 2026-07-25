@@ -5,7 +5,7 @@ using BarkingBird.Runtime.Infrastructure.GameLoop;
 
 namespace BarkingBird.Runtime.Gameplay.Input
 {
-    public sealed class CursorEcsBridge : IGameUpdateListener
+    public sealed class CursorEcsBridge : IGameUpdateListener, IWorldInitializable
     {
         private const float MinRayDirYAbs = 1e-4f;
 
@@ -20,9 +20,15 @@ namespace BarkingBird.Runtime.Gameplay.Input
             _mousePositionProvider = mousePositionProvider;
         }
 
+        public void Initialize(EntityManager em)
+        {
+            _entityManager = em;
+            _singletonEntity = _entityManager.CreateEntity(typeof(CursorWorldPosition));
+            _initialized = true;
+        }
+
         public void OnUpdate(float deltaTime)
         {
-            if (!_initialized) Initialize();
             if (!_initialized) return;
 
             var ray = _mousePositionProvider.screenPointToRay;
@@ -33,16 +39,6 @@ namespace BarkingBird.Runtime.Gameplay.Input
                 RayDirection = ray.direction,
                 IsValid = math.abs(ray.direction.y) >= MinRayDirYAbs,
             });
-        }
-
-        private void Initialize()
-        {
-            var world = World.DefaultGameObjectInjectionWorld;
-            if (world == null || !world.IsCreated) return;
-
-            _entityManager = world.EntityManager;
-            _singletonEntity = _entityManager.CreateEntity(typeof(CursorWorldPosition));
-            _initialized = true;
         }
     }
 }

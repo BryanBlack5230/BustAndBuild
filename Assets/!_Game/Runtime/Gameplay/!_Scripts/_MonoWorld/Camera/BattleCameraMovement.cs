@@ -1,5 +1,6 @@
 using System;
 using Cinemachine;
+using Unity.Entities;
 
 using BarkingBird.Runtime.Gameplay.Input;
 using BarkingBird.Runtime.Gameplay.Scenes;
@@ -29,7 +30,7 @@ namespace BarkingBird.Runtime.Gameplay.Camera
         }
     }
 
-    public class BattleCameraMovement : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IDisposable
+    public class BattleCameraMovement : IGamePauseListener, IGameResumeListener, IGameUpdateListener, IWorldInitializable, IDisposable
     {
         private readonly CinemachineTransposer _transposer;
         private readonly CameraInputHandler _input;
@@ -54,7 +55,9 @@ namespace BarkingBird.Runtime.Gameplay.Camera
             _border = new CameraBorderHandler(_transposer, rangeX, rangeY, config);
         }
 
-        public void Initialize() => Register();
+        // em unused: this class touches no ECS — it implements IWorldInitializable only to share the flow's
+        // single post-construction init hook, deferring its EventBus wiring out of the Reflex ctor.
+        public void Initialize(EntityManager em) => Register();
         public void OnResume() => Register();
         public void OnPause() => Unregister();
         public void Dispose() => Unregister();

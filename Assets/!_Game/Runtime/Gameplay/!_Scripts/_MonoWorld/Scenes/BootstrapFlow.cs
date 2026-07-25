@@ -3,9 +3,11 @@
 using Cysharp.Threading.Tasks;
 using Reflex.Attributes;
 using Reflex.Core;
+using Unity.Entities;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.Cursor;
+using BarkingBird.Runtime.Gameplay.Settings;
 using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.SceneWorkflow;
 using BarkingBird.Runtime.Infrastructure.Settings;
@@ -21,29 +23,33 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
         private CursorSetter _cursorSetter = null!;
         private Container _bootSceneContainer = null!;
         private DotsGameLoopBridge _dotsGameLoopBridge = null!;
+        private ThrowDebugTracker _throwDebugTracker = null!;
         private BlobContainer _blobContainer = null!;
 
         UniTask ISceneFlow.WaitForInit() => _initCompleted.Task;
 
         [Inject]
-        private void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, DotsGameLoopBridge dotsGameLoopBridge, BlobContainer blobContainer)
+        private void Construct(Container container, LoadingService loadingService, CursorSetter cursorSetter, DotsGameLoopBridge dotsGameLoopBridge, ThrowDebugTracker throwDebugTracker, BlobContainer blobContainer)
         {
             SceneScope.OnSceneContainerBuilding += OverrideParent;
             _bootSceneContainer = container;
             _loadingService = loadingService;
             _cursorSetter = cursorSetter;
             _dotsGameLoopBridge = dotsGameLoopBridge;
+            _throwDebugTracker = throwDebugTracker;
             _blobContainer = blobContainer;
         }
 
         private async void Start()
         {
             Log.Boot.D("BootstrapFlow.Start()");
-            _dotsGameLoopBridge.Initialize();
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _dotsGameLoopBridge.Initialize(entityManager);
+            _throwDebugTracker.Initialize(entityManager);
 
             await _loadingService.BeginLoading(_cursorSetter);
 
-            _blobContainer.Initialize();
+            _blobContainer.Initialize(entityManager);
             _initCompleted.TrySetResult();
         }
 

@@ -7,23 +7,28 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
+using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.Settings;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class TunnelTeleporter : IDisposable
+    public sealed class TunnelTeleporter : IDisposable, IWorldInitializable
     {
-        private readonly EntityManager _entityManager;
-        private readonly EntityQuery _physicsWorldQuery;
+        private EntityManager _entityManager;
+        private EntityQuery _physicsWorldQuery;
         private readonly CollisionFilter _queryFilter;
 
         public TunnelTeleporter()
         {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
             var groundMask = (uint)(1 << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground));
             _queryFilter = new CollisionFilter { BelongsTo = ~0u, CollidesWith = ~groundMask, GroupIndex = 0 };
+        }
+
+        public void Initialize(EntityManager em)
+        {
+            _entityManager = em;
+            _physicsWorldQuery = _entityManager.CreateEntityQuery(typeof(PhysicsWorldSingleton));
         }
 
         public void Dispose()
