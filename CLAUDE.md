@@ -12,6 +12,7 @@ Bust and Build/
 ├── `Claude/`            ← Claude's working dir — knowledge & planning, not shipped in builds
 │   ├── Project.md       ← deep architecture reference (orientation; loaded on demand)
 │   ├── `learnings/`     ← how-it-works KB: verified discoveries, gotchas, system maps (see "Knowledge Routing")
+│   ├── `wayfinder/`     ← wayfinder map and tickets
 │   ├── `docs/`
 │   │   ├── `adr/`       ← Architecture Decision Records — choices with real trade-offs (`0001`+)
 │   │   └── `agents/`    ← agent configs: issue-tracker, triage-labels, domain conventions
@@ -36,10 +37,12 @@ Bust and Build/
 │           │       ├── Systems/      ← ECS behaviour: `ISystem`/`SystemBase` (root files = global namespace)
 │           │       │   └── AI/       ← AI pipeline: brain → steering → targeting → mover (`...Gameplay.AI`)
 │           │       └── _MonoWorld/   ← non-ECS gameplay MonoBehaviours (each subfolder = one `Gameplay.*` namespace)
+│           │           ├── Beacon/        ← Beacon Core insert loop: `BeaconCoreController` + `BeaconEcsBridge` + World-scoped `BeaconCoreState`
 │           │           ├── Camera/        ← battle camera: drag, border constraints, ECS frustum-sync bridge
 │           │           ├── Cursor/        ← cursor world-projection, throw-velocity tracking, visual representation
 │           │           ├── DaylightCycle/ ← day/night cycle driver + ECS bridge
 │           │           ├── Input/         ← player input: raycast grab, grab/throw (`GrabAndThrow/`), release routing
+│           │           ├── Placement/     ← generic settle-check seam (ADR-0007): `AssignablePlace` + `PlacementController`
 │           │           ├── Scenes/        ← per-scene `*Flow` (init) + `*Installer` (DI wiring)
 │           │           └── Settings/      ← gameplay settings + `StateOverride` subclasses (`StateOverrides/`)
 │           └── `Infrastructure/`  ← framework services, subdomain-agnostic — ns `BarkingBird.Runtime.Infrastructure.*`
@@ -47,7 +50,7 @@ Bust and Build/
 │               ├── Commands/      ← `CommandDispatcher` + `ICommand` — imperative 1-to-1 requests
 │               ├── EventBus/      ← static `EventBus` + `IEvent` — 1-to-many notifications (root namespace)
 │               ├── Formulas/      ← `[Formula]` string parsing/evaluation (`FormulaParser`/`FormulaEvaluator`)
-│               ├── GameLoop/      ← `GameLoopManager` + `IGameListener` interfaces
+│               ├── GameLoop/      ← `GameLoopManager` + `IGameListener` / `IWorldInitializable` interfaces
 │               ├── Pooling/       ← `UiPool`/`UiPoolItem` — data-keyed UI list rows
 │               ├── Save/          ← persistence seam: `ISaveSystem`, `DummySaveSystem`, `ActiveSlot`
 │               ├── SceneWorkflow/ ← runtime scene-chain runner + `RunConfiguration`/`SceneChain` SOs
@@ -86,7 +89,7 @@ After completing work that produced non-obvious discoveries, offer to run `/know
 - Two assemblies: `Runtime` (everything under `Assets/!_Game/Runtime/`) and `Editor` (`Assets/!_Game/Editor/`).
 - All editor code: `namespace BarkingBird.Editor`.
 - Runtime code is split into two top-level branches under `BarkingBird.Runtime.*`:
-  - `Gameplay.{AI|Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Scenes|Settings}` — scene/gameplay-bound code.
+  - `Gameplay.{AI|Beacon|Camera|Cursor|Daylight|Input|Input.GrabAndThrow|Placement|Scenes|Settings}` — scene/gameplay-bound code.
   - `Infrastructure` (root for `InputManager`, `ReflexExtensions`, `StateOverride`, plus `EventBus/` which stays in the root namespace) + `Infrastructure.{Commands|GameLoop|SceneWorkflow|Settings|Utilities}` — framework-level services.
 - ECS Components & Systems are split: root-level files (`Components/*.cs`, `Systems/*.cs`) live in the **global namespace** (Unity-DOTS-friendly short names like `Health`, `Castle`, `ApplyDamageSystem`); the AI subfolders (`Components/AI/`, `Systems/AI/`) live in `BarkingBird.Runtime.Gameplay.AI`.
 

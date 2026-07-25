@@ -10,7 +10,7 @@ Project-specific discoveries saved across conversations. Use these as fast refer
 - [DI Architecture](di-architecture.md) — Reflex installers, container parent chain, listener auto-collection, registration order
 - [Game Loop & Listeners](game-loop-listeners.md) — `IGameListener` interfaces, `GameLoopManager` state machine, `DotsGameLoopBridge`
 - [Events & Services](events-and-services.md) — `EventBus` + `CommandDispatcher` (decision guide), `Log`, `LoadingService`, `RuntimeConstants`, config pipeline
-- [Config / Balance System](config-system.md) — `ConfigHub` (SO profiles + flat singletons), `BlobContainer` baker, enum-slot baking, Rebake, what's still JSON, deferred phases
+- [Config / Balance System](config-system.md) — `ConfigHub` (SO profiles + flat singletons), `BlobContainer` baker, enum-slot baking, Rebake, JSON fully retired (ADR-0004), pending editor wiring
 - [Logging System](logging-system.md) — `Log`/`TagLog`, `[HideInCallstack]` + strip toggle, Console Pro `CPIGNORE`, `[CallerFilePath]` class prefix, color-key overload resolution gotcha
 - [Scene Flow System](scene-flow-system.md) — `ISceneFlow`, `RunConfiguration`, `SceneChain`, editor toolbox, state overrides
 - [Currency & Saves](currency-and-saves.md) — `Wallet`/`CurrencyType`, `WorldSaveService` hydration, `ISaveSystem` dummy seam, save timing, `GameWorld` namespace gotcha

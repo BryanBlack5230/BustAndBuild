@@ -26,3 +26,13 @@ unit/structure stats — a live Rebake adds nothing to a wounded unit.
   behavior-preserving — so systems still run in scenes that never went through bootstrap.
 - The full system map (profile SOs, enum-slot baking contract, every migrated surface) lives in
   `Claude/learnings/config-system.md`.
+
+## Scope widened (2026-07-11)
+
+The blessing covers **all designer-authored definition assets**, not just balance tuning — the
+prototype's upcoming asset kinds (socket modules, Groups, throwables like the tar barrel,
+Digger/Shaman profiles) are ScriptableObjects too. JSON was re-weighed against modding, external
+balancing tools, and diff-friendly review and rejected on those axes as well: none appear anywhere
+in the design docs, so if modding ever becomes a 1.0+ goal it is a fresh decision then, not a hedge
+carried now. The JSON-era word "def" is retired with it — a definition asset is a **Profile**
+(per-type stat/identity block), **Config** (flat tunables group), or **Group** (squad preset).

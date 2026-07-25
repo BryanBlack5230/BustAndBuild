@@ -1,6 +1,6 @@
 ---
 name: unity-coding-standards
-description: Enforces BarkingBird studio Unity development standards including C# coding patterns, Unity architecture (Reflex DI, DOTS/ECS, EventBus notifications, CommandDispatcher requests), and code review guidelines. Triggers when writing, reviewing, or refactoring Unity C# code, implementing features, setting up dependency injection, working with commands/events, or reviewing code changes.
+description: BarkingBird studio's Unity C# standards — code hygiene, architecture (Reflex DI, DOTS, messaging), and review severity. Use when writing, refactoring, or reviewing Unity C# in this project.
 ---
 
 # BarkingBird Studio Unity Development Standards
@@ -15,24 +15,25 @@ You are a Unity C# architect-level developer.
 
 ## 🔴 PRIORITY 1: Code Quality & Hygiene (check FIRST)
 
-1. **Enable nullable reference types** (`#nullable enable`) in new files — and fix all warnings.
-2. **Least accessible access modifier** — private by default, explicit everywhere.
-3. **Zero compiler warnings.**
-4. **Throw exceptions for errors — never log errors and continue.** A required `[SerializeField]` that is null at install time → throw `InvalidOperationException`, no silent `Resources.Load` fallback.
-5. **`Log.<Context>.D/W/E()` for all logging** — static utility, no injection, never in constructors. Tags: `Log.Battle` (combat/AI/ECS), `Log.Loading`, `Log.Boot`, `Log.World`, `Log.City`, `Log.Default`, and **`Log.Editor`** for editor-only tools (the `Editor` assembly — auto-prefixes `[ClassName]`). `.D()` is auto-stripped in PROD via `[Conditional]` — never wrap it in `#if` guards. `.E(exception)` for caught exceptions; `.ThrowException(msg)` for tagged throws. **Avoid raw `Debug.Log`** — the one sanctioned `Debug.*` use is `Debug.LogError(msg, authoring)` in a Baker, whose context-object overload makes the console entry select the offending authoring. TagLog auto-prefixes a colored `[ClassName]` (all tags, via `[CallerFilePath]`) — **don't repeat the class name in the message text**.
-6. **readonly for non-reassigned fields, const for constants, nameof over string literals.**
-7. **No inline comments** — use descriptive names. Comment only constraints the code can't express. The one sanctioned comment is a **"why-not"**: when a natural/standard approach was tried and rejected (an API misbehaves here, a guard exists for a framework constraint, a slower path is chosen for correctness), leave a short note so reviewers and a future Claude don't re-suggest the dead end.
-8. **No LINQ anywhere** — explicit loops, always.
-9. **No magic numbers**: tunable values do NOT get hardcoded in systems/jobs. They live in config — `*Config` ScriptableObjects → blob/singleton components; `*Constants` static classes are reserved for true compile-time invariants (decision: ADR-0004; how: `Claude/learnings/config-system.md`). If the config plumbing for a value doesn't exist yet, put the value in a clearly named field/SO rather than inline, and flag it.
-10. **One Unity-serialized class per file, filename = class name** — applies to every `MonoBehaviour` and `ScriptableObject`. Multiple serialized types in one file silently break inspector reference wiring (no error — references just don't persist through bake). Plain ECS structs, enums, and POCOs may share files. Project SO filename convention: `%Name%SO.cs` for profile-style SOs. *(Mechanism + `[FormerlySerializedAs]` recovery: `Claude/learnings/scriptable-object-patterns.md`.)*
-11. **Unity fake-null with `#nullable`:** use the implicit bool operator (`if (_thing)`) instead of `!= null` on `UnityEngine.Object` fields — it performs the destroyed-object check without CS8073 warnings.
+1. 🟡 **Enable nullable reference types** (`#nullable enable`) in new files — and fix all warnings.
+2. 🟡 **Least accessible access modifier** — private by default, explicit everywhere.
+3. 🟡 **Zero compiler warnings.**
+4. 🔴 **Fail loud — throw on errors, never log-and-continue.** A required `[SerializeField]` that is null at install time → throw `InvalidOperationException`, no silent `Resources.Load` fallback.
+5. 🔴 **`Log.<Context>.D/W/E()` for all logging** — static utility, no injection, never in constructors. Tags: `Log.Battle` (combat/AI/ECS), `Log.Loading`, `Log.Boot`, `Log.World`, `Log.City`, `Log.Default`, and **`Log.Editor`** for editor-only tools (the `Editor` assembly — auto-prefixes `[ClassName]`). `.D()` is auto-stripped in PROD via `[Conditional]` — never wrap it in `#if` guards. `.E(exception)` for caught exceptions; `.ThrowException(msg)` for tagged throws. **Avoid raw `Debug.Log`** — the one sanctioned `Debug.*` use is `Debug.LogError(msg, authoring)` in a Baker, whose context-object overload makes the console entry select the offending authoring. TagLog auto-prefixes a colored `[ClassName]` (all tags, via `[CallerFilePath]`) — **don't repeat the class name in the message text**.
+6. 🟡 **readonly for non-reassigned fields, const for constants, nameof over string literals.**
+7. 🟢 **No inline comments** — use descriptive names. Comment only constraints the code can't express, and keep it (and any `<summary>`) crucial-only — an exhaustive design essay is noise; extract the logic into named methods instead. The one sanctioned comment is a **"why-not"**: when a natural/standard approach was tried and rejected (an API misbehaves here, a guard exists for a framework constraint, a slower path is chosen for correctness), leave a short note so reviewers and a future Claude don't re-suggest the dead end.
+8. 🔴 **No LINQ anywhere** — explicit loops, always.
+9. 🔴 **No magic numbers**: tunable values do NOT get hardcoded in systems/jobs. They live in config — `*Config` ScriptableObjects → blob/singleton components; `*Constants` static classes are reserved for true compile-time invariants (decision: ADR-0004; how: `Claude/learnings/config-system.md`). If the config plumbing for a value doesn't exist yet, put the value in a clearly named field/SO rather than inline, and flag it.
+10. 🔴 **One Unity-serialized class per file, filename = class name** — applies to every `MonoBehaviour` and `ScriptableObject`. Multiple serialized types in one file silently break inspector reference wiring (no error — references just don't persist through bake). Plain ECS structs, enums, and POCOs may share files. Project SO filename convention: `%Name%SO.cs` for profile-style SOs. *(Mechanism + `[FormerlySerializedAs]` recovery: `Claude/learnings/scriptable-object-patterns.md`.)*
+11. 🟡 **Unity fake-null with `#nullable`:** use the implicit bool operator (`if (_thing)`) instead of `!= null` on `UnityEngine.Object` fields — it performs the destroyed-object check without CS8073 warnings.
 
 ## 🟡 PRIORITY 2: Modern C# (C# 9 ceiling)
 
 - Expression bodies for simple members; null-coalescing; pattern matching (`is T x`).
 - `readonly struct` for events/commands; `in` parameters for struct payloads.
 - Private serialized fields `_camelCase`; properties PascalCase. Match the file you're editing (some older files use tabs — keep them).
-- Prefer `var` when the right-hand side makes the type obvious; early-`return`/`continue` over nested `if`.
+- **Always `var`** where the compiler allows it; early-`return`/`continue` over nested `if`.
+- **Compose-method:** a method that does several logical steps is too long — break it into intention-named helpers so the caller reads as an *orchestrator* at one level of abstraction. Multi-value returns: the *main* thing the method produces is the return value; use `out` for secondary outputs, a tuple only when they're co-equal.
 
 ## 🟢 PRIORITY 3: Unity Architecture
 
@@ -52,8 +53,8 @@ builder.NonLazy<T>();
 ```
 
 Rules:
-- **`NonLazy<T>()` is mandatory for self-sufficient singletons** — anything not injected into another class (e.g. a bridge that only subscribes to events in its constructor) is never constructed without it.
-- **Registration order matters** for constructor injection — register a dependency before its consumer.
+- 🟡 **`NonLazy<T>()` is mandatory for self-sufficient singletons** — anything not injected into another class (e.g. a bridge that only subscribes to events in its constructor) is never constructed without it.
+- 🟡 **Registration order matters** for constructor injection — register a dependency before its consumer.
 - Services that need the ECS world or scene objects use an `Initialize()` method called by the scene's `*Flow`, not the constructor.
 - Anything holding resources (CTS, EntityQuery, subscriptions) registers `typeof(IDisposable)`; scene-flow `RemoveListeners` disposes on unload.
 
@@ -98,7 +99,7 @@ File placement: one type → own file next to the owner; multiple types per owne
 - See the `dots-new-system` skill for the full new-system checklist and `Claude/learnings/ecs-patterns.md` for query/ECB/aspect gotchas.
 
 ### Async: UniTask
-- **Never `async void`** — use `async UniTaskVoid` + `.Forget()` for fire-and-forget; exceptions must surface.
+- 🔴 **Never `async void`** — use `async UniTaskVoid` + `.Forget()` for fire-and-forget; exceptions must surface.
 - Pause/cancel via `CancellationTokenSource`; `try / catch (OperationCanceledException) {}` around loops.
 - **Re-throw `OperationCanceledException` before any general `catch`** when the token came from a caller (you don't own the CTS) — swallowing it mid-chain hides the cancellation from the owner. Only the loop that *owns* the CTS swallows it (see `Claude/learnings/game-loop-listeners.md`).
 
@@ -113,11 +114,13 @@ File placement: one type → own file next to the owner; multiple types per owne
 
 ## Review Severity
 
-**🔴 Critical:** logging errors instead of throwing; `Debug.Log` in runtime code; `async void`; LINQ; multiple serialized classes per file; static event subscription without a `SubsystemRegistration` reset (domain reload is OFF — see `Claude/learnings/play-mode-and-hot-reload.md`); missing `Dispose`/unsubscribe; new magic numbers in systems/jobs; inventing patterns the codebase doesn't have (pooled commands, controllers, service locators).
+Severity travels with each rule above — a violation inherits that rule's 🔴/🟡/🟢 badge. Findings not tied to a single rule:
 
-**🟡 Important:** missing readonly/const/nameof; `#if` guards around `Log.D`; wrong Log tag; missing `NonLazy` on self-sufficient singletons; registration-order bugs; per-frame allocations (cache `GUILayoutOption`s, materials, queries); speculative abstraction — an interface/base class/extracted core with no named second consumer in the codebase today (the polymorphism test — `Claude/learnings/design-heuristics.md`).
+**🔴 Critical:** static event subscription without a `SubsystemRegistration` reset (domain reload is OFF — `Claude/learnings/play-mode-and-hot-reload.md`); missing `Dispose`/unsubscribe; inventing patterns the codebase doesn't have (pooled commands, controllers, service locators).
 
-**🟢 Suggestion:** expression bodies, pattern matching, naming improvements.
+**🟡 Important:** per-frame allocations (cache `GUILayoutOption`s, materials, queries); speculative abstraction — an interface/base class/extracted core with no named second consumer in the codebase today (the *polymorphism test* — `Claude/learnings/design-heuristics.md`).
+
+**🟢 Suggestion:** polish — expression bodies, pattern matching, naming improvements.
 
 ## Diagnostics & Review Feedback
 

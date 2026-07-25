@@ -4,7 +4,11 @@
       "Skill(code-review-unity)",
       "Skill(update-config)",
       "Read(//c/ClaudeBrain/**)",
-      "Read(//c/Users/523/.claude/**)"
+      "Read(//c/Users/523/.claude/**)",
+      "Bash(gh issue *)",
+      "Bash(python \"Claude/tools/scene_inspect.py\" \"Assets/!_Game/Runtime/Gameplay/Scenes/2.World.unity\" -o MainCamera --deep -f)",
+      "Bash(python \"Claude/tools/scene_inspect.py\" \"Assets/!_Game/Runtime/Gameplay/Scenes/2.World.unity\" -o WorldECS --deep -f)",
+      "Bash(python \"Claude/tools/scene_inspect.py\" \"Assets/!_Game/Runtime/Gameplay/Scenes/BattleGroundSceneECS.unity\" -d 2)"
     ]
   }
 }
