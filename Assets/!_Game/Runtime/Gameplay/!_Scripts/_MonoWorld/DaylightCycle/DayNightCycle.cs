@@ -12,7 +12,7 @@ using BarkingBird.Runtime.Infrastructure.Settings;
 
 namespace BarkingBird.Runtime.Gameplay.Daylight
 {
-    public sealed class DayNightCycle : IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener, IDisposable
+    public sealed class DayNightCycle : IGamePauseListener, IGameResumeListener, IGameFinishListener, IDisposable
     {
         private enum Phase { Idle, Day, Sundown }
 
@@ -52,7 +52,6 @@ namespace BarkingBird.Runtime.Gameplay.Daylight
         private void OnStartDayCommand(StartDayCommand _) => StartDay();
         private void OnForceFinishCommand(ForceFinishDayCommand _) => ForceFinishDay();
 
-        public void OnStartGame() => StartDay();
         public void OnFinishGame() { CancelLoop(); ResetState(); }
         public void OnPause() => CancelLoop();
         public void OnResume()

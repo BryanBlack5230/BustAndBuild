@@ -1,5 +1,6 @@
 using System;
 
+using BarkingBird.Runtime.Gameplay.Beacon;
 using BarkingBird.Runtime.Gameplay.Currency;
 using BarkingBird.Runtime.Gameplay.Daylight;
 using BarkingBird.Runtime.Infrastructure;
@@ -27,17 +28,22 @@ namespace BarkingBird.Runtime.Gameplay.GameWorld
         private readonly ISaveSystem _saveSystem;
         private readonly WorldSaveData _data;
         private readonly Wallet _wallet;
+        private readonly BeaconCoreState _beaconCoreState;
 
         private IDisposable _currencyChangedToken;
         private IDisposable _dayEndedToken;
         private bool _dirty;
 
-        public WorldSaveService(ISaveSystem saveSystem, ActiveSlot activeSlot, Wallet wallet)
+        public WorldSaveService(ISaveSystem saveSystem, ActiveSlot activeSlot, Wallet wallet, BeaconCoreState beaconCoreState)
         {
             _saveSystem = saveSystem;
             _wallet = wallet;
+            _beaconCoreState = beaconCoreState;
             _data = saveSystem.Load(activeSlot.WorldId);
             _wallet.Hydrate(_data.Currencies);
+
+            _beaconCoreState.FreeCountdownRemaining = _data.BeaconCoreFreeCountdown;
+            _beaconCoreState.Initialized = _data.BeaconCoreInitialized;
 
             _currencyChangedToken = EventBus.Subscribe<CurrencyChangedEvent>(OnCurrencyChanged);
             _dayEndedToken = EventBus.Subscribe<DayEndedEvent>(OnDayEnded);
@@ -47,13 +53,15 @@ namespace BarkingBird.Runtime.Gameplay.GameWorld
 
         private void OnCurrencyChanged(in CurrencyChangedEvent evt) => _dirty = true;
 
-        private void OnDayEnded(in DayEndedEvent evt) => Flush();
+        private void OnDayEnded(in DayEndedEvent evt) { _dirty = true; Flush(); }
 
         private void Flush()
         {
             if (!_dirty) return;
 
             _data.Currencies = _wallet.Snapshot();
+            _data.BeaconCoreFreeCountdown = _beaconCoreState.FreeCountdownRemaining;
+            _data.BeaconCoreInitialized = _beaconCoreState.Initialized;
             _data.LastPlayedUtc = DateTime.UtcNow;
             _saveSystem.Save(_data);
             _dirty = false;

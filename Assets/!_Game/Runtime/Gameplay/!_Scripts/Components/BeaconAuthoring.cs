@@ -25,6 +25,13 @@ public class BeaconAuthoring : MonoBehaviour
             AddComponent(entity, new Health {Max = health, Value = health });
             AddComponent(entity, new IsDead());
             SetComponentEnabled<IsDead>(entity, false);
+
+            // Load-bearing for the Day loop (ADR-0006): the HealthAspect tripwire clamps the Beacon
+            // to 1 HP instead of killing it; BeaconEcsBridge polls this rising edge to end the Day.
+            // Without it the Beacon dies (DeathSystem) instead of ending the Day. Don't strip it.
+            AddComponent(entity, new IsInvulnerable());
+            SetComponentEnabled<IsInvulnerable>(entity, false);
+
             AddBuffer<DamageBufferElement>();
         }
     }

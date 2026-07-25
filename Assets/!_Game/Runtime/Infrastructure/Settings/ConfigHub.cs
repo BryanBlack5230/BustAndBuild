@@ -71,6 +71,10 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public BeaconConfigSO BeaconConfig;
 
+        [Tooltip("Beacon Core insert tuning (cost, free timer, settle thresholds). Bound in DI at bootstrap and injected into BeaconCoreController.")]
+        [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
+        public BeaconCoreConfigSO BeaconCoreConfig;
+
         [Tooltip("Wall-section stats. Read by WallSectionAuthoring's baker at bake time (editing it re-bakes the subscene).")]
         [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
         public WallSectionConfigSO WallSectionConfig;
@@ -101,7 +105,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
                 return;
             }
 
-            _blobContainer.Initialize();
+            _blobContainer.Rebake();
             Log.Boot.D("[ConfigHub] Rebaked config into ECS.");
         }
 
@@ -115,6 +119,7 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             if (ThrowConfig == null) Log.Boot.W("[ConfigHub] Throw config is unassigned; throw tuning + gravity will fail to bind.");
             if (DaylightConfig == null) Log.Boot.W("[ConfigHub] Daylight config is unassigned; DayNightCycle will fail to bind.");
             if (BeaconConfig == null) Log.Boot.W("[ConfigHub] Beacon config is unassigned; beacons bake with the default health.");
+            if (BeaconCoreConfig == null) Log.Boot.W("[ConfigHub] Beacon Core config is unassigned; BeaconCoreController will fail to bind.");
             if (WallSectionConfig == null) Log.Boot.W("[ConfigHub] Wall section config is unassigned; walls bake with the default health.");
             if (PickupConfig == null) Log.Boot.W("[ConfigHub] Pickup config is unassigned; the pickup spawner bakes with the default tuning.");
 

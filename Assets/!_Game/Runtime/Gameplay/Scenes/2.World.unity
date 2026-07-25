@@ -922,8 +922,6 @@ MonoBehaviour:
   - {fileID: 675947598}
   _flyingPickupPrefab: {fileID: 3231858735087654457, guid: a5a200e1d20bc2c439785398db75bc6e, type: 3}
   _canvasRoot: {fileID: 22501299}
-  _magnetDuration: 0.4
-  _magnetEase: 8
 --- !u!1 &749255261
 GameObject:
   m_ObjectHideFlags: 3

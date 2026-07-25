@@ -6,19 +6,23 @@ using Unity.Mathematics;
 using UnityEngine;
 
 using BarkingBird.Runtime.Gameplay.AI;
+using BarkingBird.Runtime.Infrastructure.GameLoop;
 using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Infrastructure.Settings
 {
     /// <summary>
     /// Bakes the <see cref="ConfigHub"/> into ECS at bootstrap: per-unit-type targeting profiles into a
-    /// blob, flat tuning groups into singleton components. <see cref="Initialize"/> is idempotent so the
-    /// hub's Rebake button can re-run it live.
+    /// blob, flat tuning groups into singleton components. <see cref="Initialize"/> bakes once (driven by
+    /// BootstrapFlow with the EntityManager — ADR-0008); <see cref="Rebake"/> re-runs it live for the hub's
+    /// Rebake button. The bake is idempotent (reuses existing singletons).
     /// </summary>
-    public sealed class BlobContainer : IDisposable
+    public sealed class BlobContainer : IDisposable, IWorldInitializable
     {
         private readonly ConfigHub _hub;
 
+        private EntityManager _entityManager;
+        private bool _initialized;
         private BlobAssetReference<TargetProfilesBlob> _profilesBlob;
 
         public BlobContainer(ConfigHub hub)
@@ -26,21 +30,39 @@ namespace BarkingBird.Runtime.Infrastructure.Settings
             _hub = hub;
         }
 
-        public void Initialize()
+        public void Initialize(EntityManager em)
         {
-            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _entityManager = em;
+            _initialized = true;
+            Bake();
+        }
 
+        // ConfigHub's Rebake button re-bakes live. Reuse the EntityManager captured at Initialize (the single
+        // default world lives for the whole session) instead of re-tapping World.DefaultGameObjectInjectionWorld.
+        public void Rebake()
+        {
+            if (!_initialized)
+            {
+                Log.Boot.W("[BlobContainer] Rebake requested before Initialize — nothing baked yet.");
+                return;
+            }
+
+            Bake();
+        }
+
+        private void Bake()
+        {
             if (_profilesBlob.IsCreated) _profilesBlob.Dispose();
             _profilesBlob = CreateProfilesBlob();
 
-            SetSingleton(entityManager, new TargetProfiles { Blob = _profilesBlob }, "Global_Target_Profiles");
-            SetSingleton(entityManager, _hub.Bounce, "Config_Bounce");
-            SetSingleton(entityManager, _hub.Brain, "Config_BattleBrain");
-            SetSingleton(entityManager, _hub.Steering, "Config_Steering");
+            SetSingleton(_entityManager, new TargetProfiles { Blob = _profilesBlob }, "Global_Target_Profiles");
+            SetSingleton(_entityManager, _hub.Bounce, "Config_Bounce");
+            SetSingleton(_entityManager, _hub.Brain, "Config_BattleBrain");
+            SetSingleton(_entityManager, _hub.Steering, "Config_Steering");
 
             // Throw gravity is applied separately by ThrowDebugTracker (PhysicsStep loads with the battle subscene).
             if (_hub.ThrowConfig != null)
-                SetSingleton(entityManager, BuildThrowVelocitySettings(_hub.ThrowConfig), "Config_ThrowVelocity");
+                SetSingleton(_entityManager, BuildThrowVelocitySettings(_hub.ThrowConfig), "Config_ThrowVelocity");
             else
                 Log.Boot.W("[BlobContainer] ThrowConfig missing on hub; ThrowVelocitySettings not baked (systems use the BounceConfig fallback).");
         }

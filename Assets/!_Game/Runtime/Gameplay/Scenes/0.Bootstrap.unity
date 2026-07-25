@@ -284,6 +284,7 @@ MonoBehaviour:
   DaylightConfig: {fileID: 11400000, guid: f9ab00434a6b4ea4986f94ba0b681ddb, type: 2}
   TrajectoryPredictor: {fileID: 11400000, guid: 597a2c9ce7de27049bf10585929615af, type: 2}
   BeaconConfig: {fileID: 11400000, guid: 66ad6814b68c7824d8c2a5cf12ca289c, type: 2}
+  BeaconCoreConfig: {fileID: 11400000, guid: dce3f321e4d1e2f46a45cef24c41c05f, type: 2}
   WallSectionConfig: {fileID: 11400000, guid: 5a3cc203df6e21242a7afabde5f9a60a, type: 2}
   PickupConfig: {fileID: 11400000, guid: 12c2676f2da4813468f3d87e830b6bba, type: 2}
   PickupMagnetConfig: {fileID: 11400000, guid: 86572485032127349aae74a944b39bbc, type: 2}
