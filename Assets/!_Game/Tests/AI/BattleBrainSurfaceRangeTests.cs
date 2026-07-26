@@ -99,7 +99,7 @@ namespace BarkingBird.Tests
             em.AddComponentData(e, new Destination());
             em.AddComponentData(e, new FinalDestination());
             em.AddComponentData(e, new Target());
-            em.AddComponentData(e, new EmotionalState { Value = Emotion.Normal });
+            em.AddComponentData(e, new EmotionalState { Value = Emotion.Aware });
             em.AddComponentData(e, new AttackData { AttackRange = AttackRange });
             em.AddComponentData(e, new LocalToWorld { Value = float4x4.Translate(pos) });
 

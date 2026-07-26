@@ -44,7 +44,7 @@ namespace BarkingBird.Runtime.Gameplay.Scenes
         
             builder.AddSingleton(typeof(GrabbedEntityMover), typeof(GrabbedEntityMover), typeof(IWorldInitializable), typeof(IDisposable));
             builder.AddSingleton(typeof(OverlapResolver), typeof(OverlapResolver), typeof(IWorldInitializable), typeof(IDisposable));
-            builder.AddSingleton(typeof(TunnelTeleporter), typeof(TunnelTeleporter), typeof(IWorldInitializable), typeof(IDisposable));
+            builder.AddSingleton(typeof(OverlapEjector), typeof(OverlapEjector), typeof(IWorldInitializable), typeof(IDisposable));
             builder.AddSingleton(typeof(ReleaseCoordinator), typeof(ReleaseCoordinator), typeof(IWorldInitializable));
             builder.AddSingleton(typeof(ThrowTrajectoryPredictor), typeof(ThrowTrajectoryPredictor), typeof(IGameListener), typeof(IWorldInitializable), typeof(IDisposable));
             builder.AddSingleton(typeof(GrabbingInteractor), typeof(GrabbingInteractor), typeof(IGameListener), typeof(IWorldInitializable));

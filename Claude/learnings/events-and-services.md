@@ -118,7 +118,7 @@ Wraps `ILoadUnit.Load()` and `ILoadUnit<T>.Load(param)` with stopwatch timing + 
 Single static class collecting collider-geometry reads and PhysicsWorld overlap queries (previously split across `EntityPhysicsHelper` / `PhysicsOverlapHelper` / `PhysicsUtility` — merged because the dividing lines were too thin for 4 methods).
 - `GetRandomPointInsideCollider(em, entity, ref Random)` *(public)* — samples a random point inside the AABB of a `PhysicsCollider` (transformed to world). Used by `SpawningSystem` area spawner.
 - `GetEntityHalfExtentsXY(entity, em)` *(internal)* — returns `float2(hw, hh)` from one AABB read with rotation but zero translation; fallback `(0.5, 0.5)` if no `PhysicsCollider`. Used by grab-and-throw consumers (`GrabbedEntityMover`, `OverlapResolver`, `ThrowTrajectoryPredictor`).
-- `CollectHitBodies(in PhysicsWorldSingleton, Aabb, CollisionFilter, Entity selfEntity)` *(internal)* — runs `OverlapAabb`, skips self and uncreated colliders, returns a `NativeList<RigidBody>` (caller disposes). Used by `OverlapResolver` and `TunnelTeleporter`.
+- `CollectHitBodies(in PhysicsWorldSingleton, Aabb, CollisionFilter, Entity selfEntity)` *(internal)* — runs `OverlapAabb`, skips self and uncreated colliders, returns a `NativeList<RigidBody>` (caller disposes). Used by `OverlapResolver` and `OverlapEjector`.
 - `AabbsOverlapXY(Aabb, Aabb)` *(internal)* — XY-only overlap test; ignores Z because the game plane is XY.
 
 ## Config Pipeline

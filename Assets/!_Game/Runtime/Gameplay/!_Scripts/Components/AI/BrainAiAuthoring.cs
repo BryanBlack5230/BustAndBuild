@@ -20,7 +20,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
 
     public enum Emotion
     {
-        Normal,
+        Aware,
         Suspicious,
         Angry,
         Scared,

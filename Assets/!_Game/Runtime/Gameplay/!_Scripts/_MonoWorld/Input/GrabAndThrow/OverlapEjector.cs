@@ -13,13 +13,13 @@ using BarkingBird.Runtime.Infrastructure.Utilities;
 
 namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
 {
-    public sealed class TunnelTeleporter : IDisposable, IWorldInitializable
+    public sealed class OverlapEjector : IDisposable, IWorldInitializable
     {
         private EntityManager _entityManager;
         private EntityQuery _physicsWorldQuery;
         private readonly CollisionFilter _queryFilter;
 
-        public TunnelTeleporter()
+        public OverlapEjector()
         {
             var groundMask = (uint)(1 << LayerMask.NameToLayer(RuntimeConstants.PhysicLayers.Ground));
             _queryFilter = new CollisionFilter { BelongsTo = ~0u, CollidesWith = ~groundMask, GroupIndex = 0 };

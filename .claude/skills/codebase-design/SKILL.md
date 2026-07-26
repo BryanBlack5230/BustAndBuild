@@ -115,7 +115,7 @@ Good interfaces make testing natural:
 
    ```csharp
    // Testable — collaborators injected (Reflex resolves them)
-   public ReleaseCoordinator(IOverlapResolver resolver, ITunnelTeleporter teleporter) { … }
+   public ReleaseCoordinator(IOverlapResolver resolver, IOverlapEjector ejector) { … }
 
    // Hard to test — collaborator constructed inside
    public ReleaseCoordinator() { _resolver = new OverlapResolver(); }

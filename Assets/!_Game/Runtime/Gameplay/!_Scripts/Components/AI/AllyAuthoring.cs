@@ -64,7 +64,7 @@ namespace BarkingBird.Runtime.Gameplay.AI
                 AddBuffer<HitFeedbackBufferElement>(entity);
                 AddComponent(entity, new AttackData { Damage = stats.AttackDamage, CooldownTime = stats.AttackCooldown, AttackRange = stats.AttackRange});
                 AddComponent(entity, new BattleBrain{ CanAttack = false});
-                AddComponent(entity, new EmotionalState {Value = Emotion.Normal});
+                AddComponent(entity, new EmotionalState {Value = Emotion.Aware});
                 AddComponent(entity, new ActionState { Value = ActionType.Moving });
 
                 AddComponent(entity, new BounceDamage

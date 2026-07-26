@@ -111,7 +111,7 @@ _Avoid_: mode, status.
 A Unit's disposition, modifying how the brain weighs decisions. Values: **Aware** (default —
 calm, eyes track the cursor), **Suspicious** (Enemy-only — cautious after witnessing a Grab),
 **Scared** (flees toward its Base/home), **Angry** (enraged — faster, hits harder). Code's
-`Emotion.Normal` is the design term "Aware".
+`Emotion.Aware` matches the design term.
 _Avoid_: mood, Normal (say Aware); AI state (that is ActionState).
 
 **Grab / Throw**:
@@ -150,7 +150,7 @@ _Avoid_: healer, priest.
 
 **Tunnel**:
 The Digger's underground passage ferrying Enemy Units past the killing field; collapses when
-its Digger dies. (Unrelated to the `TunnelTeleporter` utility class — rename pending.)
+its Digger dies.
 _Avoid_: burrow, tube.
 
 ## Economy & loop

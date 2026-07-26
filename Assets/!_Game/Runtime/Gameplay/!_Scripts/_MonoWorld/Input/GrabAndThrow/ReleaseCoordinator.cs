@@ -16,14 +16,14 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
     public sealed class ReleaseCoordinator : IDisposable, IWorldInitializable
     {
         private readonly OverlapResolver _overlapResolver;
-        private readonly TunnelTeleporter _tunnelTeleporter;
+        private readonly OverlapEjector _overlapEjector;
         private EntityManager _entityManager;
         private readonly Dictionary<Entity, CancellationTokenSource> _inflight = new();
 
-        public ReleaseCoordinator(OverlapResolver overlapResolver, TunnelTeleporter tunnelTeleporter)
+        public ReleaseCoordinator(OverlapResolver overlapResolver, OverlapEjector overlapEjector)
         {
             _overlapResolver = overlapResolver;
-            _tunnelTeleporter = tunnelTeleporter;
+            _overlapEjector = overlapEjector;
         }
 
         public void Initialize(EntityManager em) => _entityManager = em;
@@ -51,7 +51,7 @@ namespace BarkingBird.Runtime.Gameplay.Input.GrabAndThrow
                 var throwDir = math.lengthsq(impulse) > math.EPSILON
                     ? math.normalize(new float3(impulse.x, impulse.y, 0f))
                     : math.up();
-                var destinationClear = _tunnelTeleporter.Teleport(entity, throwDir);
+                var destinationClear = _overlapEjector.Teleport(entity, throwDir);
                 Log.Battle.D($"Entity {entity} fast-thrown through collider");
 
                 if (!destinationClear)

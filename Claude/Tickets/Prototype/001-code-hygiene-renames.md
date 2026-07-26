@@ -3,7 +3,7 @@ id: 001
 title: Code-hygiene renames
 band: Prefactor
 status: open
-assignee:
+assignee: Claude
 blocked-by: []
 ---
 
@@ -13,9 +13,9 @@ Codebase vocabulary matches DesignDoc before new systems build on it: `Emotion.N
 
 ## Acceptance criteria
 
-- [ ] No reference to `Emotion.Normal` or `TunnelTeleporter` remains anywhere (code, configs, OVDF, docs that claim to describe current code)
-- [ ] Project compiles, existing tests green
-- [ ] CONTEXT.md / learnings updated if they name the old identifiers
+- [x] No reference to `Emotion.Normal` or `TunnelTeleporter` remains anywhere (code, configs, OVDF, docs that claim to describe current code)
+- [ ] Project compiles, existing tests green (unverified — no Unity CLI/editor available this session; grep sweep confirms no leftover identifiers, need in-editor confirm)
+- [x] CONTEXT.md / learnings updated if they name the old identifiers
 
 ## Blocked by
 

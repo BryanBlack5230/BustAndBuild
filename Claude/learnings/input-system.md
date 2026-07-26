@@ -17,7 +17,7 @@
 ## ReleaseCoordinator — Overlap Strategies
 - `isFastSpeed = rawPower > ThrowThreshold` (default 100).
 - **Slow speed + overlapping** → `OverlapResolver.ResolveAsync` (displacement push step, max 0.5s).
-- **Fast speed + overlapping** → `TunnelTeleporter.Teleport` (computes AABB exit distance along throw dir, teleports past the obstruction). If destination still overlapping → fallback to displacement.
+- **Fast speed + overlapping** → `OverlapEjector.Teleport` (computes AABB exit distance along throw dir, teleports past the obstruction). If destination still overlapping → fallback to displacement.
 - **Not overlapping** → `ClampToViewportAndGround` then `RestorePhysicsWithImpulse`.
 
 `_inflight` dictionary tracks per-entity `CancellationTokenSource`; releasing the same entity twice cancels the previous resolve task.
@@ -91,5 +91,5 @@ Scroll up/down → `CommandDispatcher.Send(new ChangeSceneCommand(bool switchUp)
 ## Mixed Coordinate Conventions Across the Codebase
 **Finding:** Two conventions coexist:
 - **Unit gameplay (XZ ground plane, Y up):** `UnitMoverJob` writes `PhysicsVelocity.Linear` as `(x, preservedY, z)`; pearls spawn at the dying enemy's XZ on the ground. This is the *real* world for ECS-side gameplay.
-- **Legacy grab/overlap (XY screen plane, Z depth):** `OverlapResolver` / `TunnelTeleporter` use `PhysicsUtility.AabbsOverlapXY` (Z ignored); `awayDir.z = 0f` in displacement; `MousePositionProvider` Z-plane projection assumes you're moving entities on screen-X/Y. These predate the XZ migration.
+- **Legacy grab/overlap (XY screen plane, Z depth):** `OverlapResolver` / `OverlapEjector` use `PhysicsUtility.AabbsOverlapXY` (Z ignored); `awayDir.z = 0f` in displacement; `MousePositionProvider` Z-plane projection assumes you're moving entities on screen-X/Y. These predate the XZ migration.
 **Why it matters:** Don't assume one convention when extending. New ground-plane logic (movement, pickup, AI destinations) is XZ. Existing grab-and-drag code is still XY. If you call into `worldMousePosition` from new code, you're inheriting the XY assumption — project to ground manually instead.
